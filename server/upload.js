@@ -50,6 +50,24 @@ app.use((req, res, next) => {
   next()
 })
 
+// Backup KYC to Genspark AI-Drive
+async function backupToAIDrive(userName, filePath, originalName) {
+  try {
+    const { execSync } = await import('child_process')
+    const driveDate = new Date().toISOString().slice(0,10)
+    const uploadPath = `/Retbaa_Circle/KYC/${userName}_${driveDate}_${originalName}`
+    execSync(`gsk drive upload --file_url "${filePath}" --upload_path "${uploadPath}"`, {
+      timeout: 30000,
+      stdio: 'pipe'
+    })
+    console.log(`✅ KYC sauvegardé sur AI-Drive : ${uploadPath}`)
+    return true
+  } catch (err) {
+    console.error('AI-Drive backup error:', err.message)
+    return false
+  }
+}
+
 // Email notification to Massata
 async function notifyMassata(userName, originalName) {
   try {
@@ -85,6 +103,11 @@ app.post('/kyc', upload.single('document'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Aucun fichier reçu' })
   const userName = req.body.userName || 'Inconnu'
   console.log(`📄 KYC reçu de ${userName} : ${req.file.filename}`)
+
+  // Backup sur AI-Drive (indépendant du VM)
+  await backupToAIDrive(userName, req.file.path, req.file.originalname)
+
+  // Notifier Massata par email
   await notifyMassata(userName, req.file.originalname)
   res.json({ success: true, message: 'Document reçu avec succès' })
 })
