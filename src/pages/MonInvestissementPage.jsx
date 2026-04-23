@@ -139,9 +139,14 @@ export default function MonInvestissementPage({ userName, setActivePage }) {
                 RÉPARTITION DU CAPITAL
               </div>
               {[
-                { label: 'Massata NIANG (Fondateur)', pct: '86.96%', color: '#1A3A6B' },
-                { label: `${userName} (vous)`, pct: `${data.pct}%`, color: '#EFC0D4' },
-                { label: 'Autres investisseurs Circle', pct: `${(100 - 86.96 - data.pct).toFixed(2)}%`, color: '#E8E8E8' },
+                ...(data.role === 'founder' ? [
+                  { label: 'Massata NIANG — vous (Fondateur)', pct: '86.96%', color: '#1A3A6B' },
+                  { label: 'Investisseurs Circle (Tranche 1)', pct: '13.04%', color: '#EFC0D4' },
+                ] : [
+                  { label: 'Massata NIANG (Fondateur)', pct: '86.96%', color: '#1A3A6B' },
+                  { label: `${userName} (vous)`, pct: `${data.pct}%`, color: '#EFC0D4' },
+                  { label: 'Autres investisseurs Circle', pct: `${(100 - 86.96 - data.pct).toFixed(2)}%`, color: '#E8E8E8' },
+                ]),
               ].map(r => (
                 <div key={r.label} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
                   <div style={{ width: '12px', height: '12px', background: r.color, borderRadius: '2px', flexShrink: 0 }} />
