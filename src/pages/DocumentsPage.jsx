@@ -253,12 +253,25 @@ function DocumentRow({ doc, lang, onAction, locked }) {
   )
 }
 
-export default function DocumentsPage({ observateur = false }) {
+export default function DocumentsPage({ observateur = false, userName = '' }) {
   const { i18n } = useTranslation()
   const lang = 'fr' // toujours français
   const [activeFilter, setActiveFilter] = useState('all')
   const [dragOver, setDragOver] = useState(false)
+  const [uploadStatus, setUploadStatus] = useState(null) // null | 'uploading' | 'success' | 'error'
+  const [kycUploaded, setKycUploaded] = useState(false)
+  const [selectedDocId, setSelectedDocId] = useState(null)
   const fileInputRef = useRef(null)
+
+  // Check if KYC already uploaded on mount
+  useState(() => {
+    if (userName) {
+      fetch(`/api/kyc/status?userName=${encodeURIComponent(userName)}`)
+        .then(r => r.json())
+        .then(data => { if (data.uploaded) setKycUploaded(true) })
+        .catch(() => {})
+    }
+  }, [userName])
 
   const filtered = activeFilter === 'all' ? allDocs : allDocs.filter(d => d.status === activeFilter)
 
@@ -271,20 +284,46 @@ export default function DocumentsPage({ observateur = false }) {
 
   const handleAction = (doc) => {
     if (doc.status === 'upload') {
-      // Trigger file input for upload
+      setSelectedDocId(doc.id)
       fileInputRef.current?.click()
     } else {
       console.log('Action on doc:', doc.title, doc.status)
     }
   }
 
-  const handleFileChange = (e) => {
-    const files = e.target.files
-    if (files && files.length > 0) {
-      console.log('Files selected:', files)
-      // TODO: Implement actual upload logic here
-      alert(`${files.length} fichier(s) sélectionné(s). Upload simulé (à implémenter).`)
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploadStatus('uploading')
+
+    const formData = new FormData()
+    formData.append('document', file)
+    formData.append('userName', userName || 'Investisseur')
+    formData.append('docId', selectedDocId || 'kyc')
+
+    try {
+      const res = await fetch('/api/kyc', {
+        method: 'POST',
+        body: formData,
+      })
+      const data = await res.json()
+      if (data.success) {
+        setUploadStatus('success')
+        setKycUploaded(true)
+        setTimeout(() => setUploadStatus(null), 4000)
+      } else {
+        setUploadStatus('error')
+        setTimeout(() => setUploadStatus(null), 4000)
+      }
+    } catch (err) {
+      console.error('Upload error:', err)
+      setUploadStatus('error')
+      setTimeout(() => setUploadStatus(null), 4000)
     }
+
+    // Reset input
+    e.target.value = ''
   }
 
   return (
@@ -481,6 +520,25 @@ export default function DocumentsPage({ observateur = false }) {
           padding: '32px',
           boxShadow: '0px 2px 12px rgba(0,27,63,0.04)',
         }}>
+          {/* Upload status banner */}
+          {uploadStatus === 'uploading' && (
+            <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '4px', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: '16px', height: '16px', border: '2px solid #1A3A6B', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+              <span style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px', color: '#1A3A6B' }}>Envoi en cours...</span>
+            </div>
+          )}
+          {uploadStatus === 'success' && (
+            <div style={{ background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: '4px', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ color: '#16A34A', fontSize: '18px' }}>✓</span>
+              <span style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px', color: '#15803D', fontWeight: 600 }}>Document reçu avec succès. L'équipe Retbaa Circle en a été notifiée.</span>
+            </div>
+          )}
+          {uploadStatus === 'error' && (
+            <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '4px', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ color: '#E11D48', fontSize: '18px' }}>✕</span>
+              <span style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px', color: '#BE123C' }}>Erreur lors de l'envoi. Veuillez réessayer.</span>
+            </div>
+          )}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
             <div style={{ width: '2px', height: '16px', background: '#EFC0D4' }} />
             <h2 style={{
