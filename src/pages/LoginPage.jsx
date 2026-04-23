@@ -154,23 +154,14 @@ export default function LoginPage({ onLogin }) {
 
           {/* Logo area */}
           <div style={{ position: 'relative', zIndex: 10 }}>
-            <img
-              src="/retbaa-logo-white.png"
-              alt="Retbaa Circle"
-              style={{ height: '34px', width: 'auto', marginBottom: '10px' }}
-              onError={(e) => {
-                e.target.style.display = 'none'
-                e.target.nextSibling.style.display = 'block'
-              }}
-            />
             <div
               style={{
-                display: 'none',
                 fontFamily: 'Newsreader, serif',
                 fontSize: '26px',
                 fontWeight: 700,
                 letterSpacing: '-0.02em',
                 color: '#ffffff',
+                marginBottom: '10px',
               }}
             >
               Retbaa Circle
