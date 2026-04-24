@@ -1,0 +1,13 @@
+# Désactiver le cache LiteSpeed pour forcer le rechargement des assets
+<IfModule mod_headers.c>
+    <FilesMatch "\.(js|css)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+</IfModule>
+
+# LiteSpeed — pas de cache
+<IfModule LiteSpeed>
+    CacheLookup off
+</IfModule>
