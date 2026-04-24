@@ -27,10 +27,21 @@ const clerkAppearance = {
   },
   elements: {
     card: {
-      boxShadow: 'none',
-      border: 'none',
-      padding: '0',
-      backgroundColor: 'transparent',
+      boxShadow: 'none !important',
+      border: 'none !important',
+      padding: '0 !important',
+      backgroundColor: 'transparent !important',
+      width: '100% !important',
+    },
+    rootBox: {
+      width: '100% !important',
+      boxShadow: 'none !important',
+    },
+    cardBox: {
+      boxShadow: 'none !important',
+      border: 'none !important',
+      backgroundColor: 'transparent !important',
+      width: '100% !important',
     },
     headerTitle: {
       fontFamily: 'Newsreader, serif',
@@ -320,6 +331,22 @@ export default function LoginPage() {
       </footer>
 
       <style>{`
+        /* Clerk — suppression box/ombre */
+        .cl-card, .cl-cardBox, .cl-rootBox {
+          box-shadow: none !important;
+          border: none !important;
+          background: transparent !important;
+          width: 100% !important;
+        }
+        .cl-internal-b3fm6y {
+          box-shadow: none !important;
+          border: none !important;
+        }
+        /* Fix label coupé */
+        .cl-formFieldLabel {
+          overflow: visible !important;
+          white-space: nowrap !important;
+        }
         @media (max-width: 768px) {
           .login-grid {
             grid-template-columns: 1fr !important;
