@@ -126,7 +126,7 @@ function ContactModal({ userName, onClose }) {
   )
 }
 
-export default function Sidebar({ activePage, setActivePage, userName, onLogout, observateur }) {
+export default function Sidebar({ activePage, setActivePage, userName, onLogout, observateur, isAdmin }) {
   const [showContact, setShowContact] = useState(false)
   const initials = userName
     ? userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
@@ -151,7 +151,7 @@ export default function Sidebar({ activePage, setActivePage, userName, onLogout,
         { id: 'tranche2',           icon: 'trending_up',     label: 'Tranche 2'          },
         { id: 'podcast',            icon: 'mic',             label: 'Podcast'            },
         { id: 'mon-investissement', icon: 'person',          label: 'Mon Investissement' },
-        ...(userName === 'Massata' ? [{ id: 'analytics', icon: 'bar_chart', label: 'Analytics' }] : []),
+        ...(userName === 'Massata' || isAdmin ? [{ id: 'analytics', icon: 'bar_chart', label: 'Analytics' }] : []),
       ]
 
   return (

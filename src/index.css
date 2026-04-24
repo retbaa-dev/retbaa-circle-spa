@@ -283,3 +283,20 @@ body {
     padding-right: 20px !important;
   }
 }
+
+/* ── Masquer la bannière Clerk Development mode ── */
+.cl-development-mode-banner,
+[data-testid="development-mode-banner"],
+.cl-footer__actionText,
+.cl-footerPages,
+.cl-footerPagesLink,
+.cl-internal-b3fm6y,
+.cl-internal-button,
+#clerk-dev-mode-banner,
+[data-clerk-dev-badge] {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}

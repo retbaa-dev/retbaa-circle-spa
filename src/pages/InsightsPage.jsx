@@ -5,6 +5,259 @@ import { useState } from 'react'
 // ─── DONNÉES ARTICLES ──────────────────────────────────────────
 const articles = [
   {
+    id: 8,
+    tag: 'Veille Marché',
+    title: 'LVMH Q1 2026 : Le Luxe Silencieux Gagne la Bataille',
+    subtitle: 'Loro Piana +2 chiffres pendant que Fashion & Leather recule — ce que ça signifie pour Retbaa',
+    summary: 'LVMH publie une croissance de seulement +1% au T1 2026, freinée par la guerre en Iran. Mais dans l\'ombre, Loro Piana — sans publicité, sans logo — affiche une croissance à deux chiffres. Le signal est clair : le luxe de sens surperforme le luxe de statut.',
+    date: '24 Avril 2026',
+    author: 'Kemia · Chief of Staff IA',
+    source: 'CNBC, Reuters, Business of Fashion — 13 Avril 2026',
+    sourceUrl: 'https://www.cnbc.com/2026/04/13/lvmh-earnings-q1-2026-sales-luxury-iran-war-middle-east.html',
+    pdf: null,
+    img: '/retbaa-photos/retbaa_01.jpg',
+    featured: true,
+    category: 'Veille Marché',
+    content: `
+## Les Faits
+
+LVMH publie ses résultats Q1 2026 : **+1% de croissance organique**, sous les attentes des analystes (+1,5%). Le groupe impute 1 point de croissance perdu à la guerre en Iran et la fermeture du Détroit d'Ormuz.
+
+**Division Fashion & Leather Goods (Louis Vuitton, Dior, Fendi) : -2%.**
+
+Pourtant, en creusant les chiffres, un actif du groupe surperforme massivement : **Loro Piana**, la maison de cachemire ultra-discrète du Val d'Ossola. Croissance à deux chiffres. Zéro publicité. Zéro défilé. Zéro logo visible.
+
+Même signal chez **Brunello Cucinelli** (pair de Loro Piana, pas dans LVMH) : +14% en devises constantes au T1 2026, battant toutes les attentes.
+
+## L'Analyse
+
+Ce n'est pas une anomalie. C'est une confirmation.
+
+Desde 2022, le luxe de masse — celui qui se voit, se porte comme badge social, et se revend sur Vestiaire — est sous pression. La clientèle aspirationnelle s'est retirée après des années de hausses de prix agressives. Ce qui reste, ce sont les clients qui achètent pour eux-mêmes, pas pour les autres.
+
+Loro Piana vend du cachemire à 3 000€ la veste. Ses clients ne cherchent pas à être reconnus. Ils cherchent à *ressentir*. La qualité du fil, le poids exact du tissu, la façon dont le vêtement vieillit. C'est une consommation **intime**, pas **performative**.
+
+Hermès, Richemont (Cartier, Van Cleef), Brunello Cucinelli : toutes les marques qui surperforment partagent ce trait. Elles vendent des objets qui justifient leur prix par ce qu'ils *font ressentir*, pas par ce qu'ils *font voir*.
+
+## Ce que ça signifie pour Retbaa
+
+**Retbaa est structurellement positionné dans la catégorie gagnante.**
+
+Kemia — le médaillon sensoriel en céramique — n'est pas un objet qu'on exhibe. C'est un objet qu'on porte contre soi, qu'on active quand on veut, qui libère un parfum qui n'appartient qu'à son porteur. C'est la définition du luxe intime.
+
+Points d'action :
+- **Narrative produit :** insister sur l'expérience sensorielle privée, pas sur la visibilité sociale
+- **Pricing :** ne pas avoir peur d'un prix premium — c'est ce que le marché récompense actuellement
+- **Cible :** les acheteurs Loro Piana / Brunello Cucinelli sont vos pairs — même philosophie, même segment
+    `,
+  },
+  {
+    id: 9,
+    tag: 'Veille Marché',
+    title: 'Le "Cognitive Luxury" : Quand l\'Ultra-Riche Optimise sa Biologie',
+    subtitle: 'Du biohacking en altitude à la montre à $437K qui suit le soleil — le nouveau luxe ne se voit pas',
+    summary: 'Les UHNWI (Ultra-High-Net-Worth Individuals) redéfinissent la dépense premium : biohacking, longévité, objets de sens. Wellness résidentiel certifié à +25% de prime. Rolex cache son centenaire sur une couronne. Patek Philippe grave le lever du soleil sur un cadran à $437K. Le luxe devient cognitif.',
+    date: '24 Avril 2026',
+    author: 'Kemia · Chief of Staff IA',
+    source: '2Luxury2.com — Luxury Pulse April 2026, 21 Avril 2026',
+    sourceUrl: 'https://www.2luxury2.com/luxury-pulse-april-2026-lvmh-richemont-kering-watches-wellness-wealth-trends/',
+    pdf: null,
+    img: '/retbaa-photos/retbaa_03.jpg',
+    featured: false,
+    category: 'Veille Marché',
+    content: `
+## Les Faits
+
+**Watches & Wonders 2026 — Genève :**
+
+Rolex célèbre le centenaire de son boîtier Oyster avec un "100" gravé… sur la couronne. La pièce de métal que vous touchez pour remonter la montre. Invisible sauf si vous la cherchez. Pensé pour le porteur, pas pour le spectateur.
+
+Patek Philippe lance la **Celestial Ref. 6105G-001 à $437 000** — une montre qui affiche le lever et le coucher du soleil calibrés sur la latitude de son propriétaire. Votre soleil. Votre ville. Votre temps.
+
+**Wellness & Real Estate :**
+
+Les propriétés résidentielles "wellness-certifiées" (purification d'air avancée, éclairage circadien, espaces de recovery biohacking) commandent un **premium de 25%** dans les marchés de luxe. L'Alpina Gstaad rapporte des réservations record pour ses programmes de biohacking. Les clients ne viennent pas se reposer. Ils viennent s'optimiser.
+
+## L'Analyse
+
+Le terme "Cognitive Luxury" désigne une rupture nette avec le luxe ostentatoire. La clientèle UHNW ne cherche plus à signaler sa richesse — elle cherche à l'*utiliser* pour devenir meilleure : plus performante cognitivement, biologiquement plus résiliente, dotée d'objets dont la valeur est intrinsèque et non sociale.
+
+La logique est cohérente avec ce que font Loro Piana et Hermès : **les objets les plus chers sont ceux qui s'adressent à leur propriétaire, pas au regard des autres.**
+
+Un lever de soleil sur un cadran à $437K, c'est un objet qui dit quelque chose à celui qui le porte. Quelque chose que personne d'autre ne peut lire exactement comme lui.
+
+## Ce que ça signifie pour Retbaa
+
+Kemia est, par conception, un objet de "Cognitive Luxury" :
+- Il s'active par le porteur, pour le porteur
+- La diffusion olfactive est invisible pour les autres
+- Il crée un état (focus, calme, présence) — une **optimisation** de l'expérience intérieure
+- Il est calibrable — chaque combinaison de spray est unique
+
+**Points d'action :**
+- **Langage marketing :** adopter le vocabulaire du "sensory optimization", du "personal ritual"
+- **Séquençage produit :** développer des collections "états" (clarté mentale, ancrage, énergie) — un pont direct vers le wellness
+- **Distribution :** les spas et cliniques de biohacking premium sont des points de vente logiques
+    `,
+  },
+  {
+    id: 10,
+    tag: 'Afrique',
+    title: 'Afrique du Sud : Le Hub Beauty Premium que Tout le Monde Cherchait',
+    subtitle: 'Le niche fragrance store Skins y réalise son meilleur chiffre mondial — les consommateurs collectionnent les parfums et les exposent chez eux',
+    summary: 'BeautyMatter analyse pourquoi l\'Afrique du Sud s\'impose comme point d\'entrée obligatoire pour les marques luxury beauty sur le continent. Infrastructure retail mature, consommateurs sophistiqués, 1 000+ malls. Le magasin Skins à Sandton est le plus rentable au monde. Marché cosmétiques africain : $4,42B en 2026 → $7,51B en 2034.',
+    date: '24 Avril 2026',
+    author: 'Kemia · Chief of Staff IA',
+    source: 'BeautyMatter — "South Africa\'s Race to Become Africa\'s Beauty Powerhouse", Avril 2026',
+    sourceUrl: 'https://beautymatter.com/articles/south-africas-race-to-become-africas-beauty-powerhouse',
+    pdf: null,
+    img: '/retbaa-photos/retbaa_07.jpg',
+    featured: false,
+    category: 'Afrique',
+    content: `
+## Les Faits
+
+BeautyMatter publie une analyse approfondie sur l'Afrique du Sud comme marché prioritaire pour le beauty premium mondial.
+
+**Chiffres clés :**
+- Marché beauty SA : **$4,3 milliards** (l'un des plus grands d'Afrique)
+- Plus de **1 000 malls** — l'une des densités per capita les plus élevées au monde
+- Retail e-commerce : ~**10% du total retail** et en progression
+- Marché cosmétiques Afrique : **$4,42B (2026) → $7,51B (2034)**, CAGR +7,5%
+
+**Signal fort : Skins Fragrance**
+
+Le niche fragrance store néerlandais Skins a ouvert à Sandton City Mall, Johannesburg. Résultat : **c'est désormais leur magasin le plus rentable au monde**, battant tous les magasins européens.
+
+Citation du fondateur Philip Hillege : *"Many SA customers display their perfume collection in their living rooms to show it to their friends and talk about it."*
+
+## L'Analyse
+
+Ce que BeautyMatter documente, c'est la convergence de trois facteurs rares en Afrique sub-saharienne :
+
+1. **Infrastructure prête** : retail organisé, logistique fiable, paiements digitaux matures
+2. **Consommateur sophistiqué** : éduqué aux ingrédients, amateur de niche, qui collectionne
+3. **Stabilité** : accès aux devises étrangères, cadre réglementaire prévisible
+
+Les autres marchés africains (Nigeria, Kenya, Ghana) ont la croissance, le potentiel démographique, et parfois le pouvoir d'achat. Mais l'Afrique du Sud a l'**infrastructure d'exécution** qui permet à une marque de premium de se déployer sans friction.
+
+## Ce que ça signifie pour Retbaa
+
+L'Afrique du Sud était déjà dans votre roadmap Q3 2026. Cette analyse la confirme et précise la stratégie :
+
+**Points d'action :**
+- **Canal prioritaire :** Sandton City Mall (Johannesburg) et V&A Waterfront (Cape Town) — les deux zones où le consommateur premium se concentre
+- **Positioning local :** "Made in Africa, for Africa" résonne particulièrement fort dans un marché qui consomme du luxe africain avec fierté
+- **Partenariat retail :** approcher des multi-marques niche (Skins model) plutôt que des grands distributeurs — le consommateur SA est sophistiqué et cherche la découverte
+- **Moment :** In-Cosmetics Global s'est tenu à Paris les 14-16 Avril — suivi à prévoir pour les contacts professionnels africains présents
+    `,
+  },
+  {
+    id: 11,
+    tag: 'Veille Marché',
+    title: 'ReconKering : Quand un Géant Admet qu\'il a Perdu la Désirabilité',
+    subtitle: 'Kering annonce un plan multi-années pour rendre Gucci "incontournable à nouveau" — une leçon stratégique pour les marques en construction',
+    summary: 'Kering publie sa stratégie "ReconKering" pour reconstruire la désirabilité de Gucci et ses maisons. Un aveu rare dans l\'industrie du luxe : la désirabilité se perd quand on privilégie le volume sur le sens. Pour Retbaa, une leçon à intégrer dès le départ.',
+    date: '24 Avril 2026',
+    author: 'Kemia · Chief of Staff IA',
+    source: 'Yahoo Finance, Reuters — 16 Avril 2026',
+    sourceUrl: 'https://finance.yahoo.com/markets/stocks/articles/luxury-giant-kering-chart-path-024810005.html',
+    pdf: null,
+    img: '/retbaa-photos/retbaa_09.jpg',
+    featured: false,
+    category: 'Veille Marché',
+    content: `
+## Les Faits
+
+Kering (Gucci, Saint Laurent, Bottega Veneta, Balenciaga) annonce **"ReconKering"** — un plan stratégique multi-années visant à "rendre Gucci incontournable à nouveau" et reconstruire la désirabilité de l'ensemble du portefeuille.
+
+L'aveu est rare dans une industrie qui communique presque uniquement depuis des positions de force : **Gucci a perdu son statut désirable** et il faut le reconstruire.
+
+Causes identifiées :
+- Excès de distribution (trop de points de vente, accessibilité dégradée)
+- Excès de volume (collections trop nombreuses, signal dilué)
+- Manque de cohérence narrative (direction artistique instable)
+- Prix élevés sans justification de valeur claire pour la nouvelle génération
+
+Kering affiche également un partenariat tech avec Google sur les lunettes connectées — tentative d'extension de la catégorie accessoires vers la tech grand public.
+
+## L'Analyse
+
+La désirabilité dans le luxe est un capital. Comme tout capital, il se construit lentement et se dilapide vite.
+
+Gucci a choisi la croissance agressive entre 2015 et 2022. Résultat : le chiffre d'affaires a explosé, et la marque a attiré une clientèle aspirationnelle massive. Mais cette même clientèle — réactive aux tendances — est repartie aussi vite qu'elle était venue, quand les logos GG sont devenus "trop vus".
+
+Ce que Kering documente aujourd'hui, c'est le **coût de la débasement** : quand une marque de luxe cherche à conquérir le plus grand nombre, elle risque de perdre ceux qui lui donnaient sa valeur.
+
+La solution — retourner aux fondamentaux, réduire la distribution, retrouver le sens — est plus simple à énoncer qu'à exécuter avec 40 000 employés et des objectifs de croissance trimestrielle.
+
+## Ce que ça signifie pour Retbaa
+
+**Vous n'avez pas ce problème. Gardez-le ainsi.**
+
+Retbaa démarre avec le luxe de la cohérence : une seule vision, une seule marque, un seul positionnement. Les choix que Kering doit défaire (sur-distribution, sur-volume), vous n'avez pas à les faire.
+
+**Points d'action :**
+- **Distribution sélective dès le premier jour** : choisir ses points de vente comme on choisit ses amis — avec soin et sur le long terme
+- **Limite de production assumée** : la rareté n'est pas une contrainte, c'est un signal de valeur
+- **Cohérence narrative** : chaque prise de parole (Instagram, press kit, portail investisseur) doit renforcer la même histoire — jamais la diluer
+- **Pas de partenariat tech dilutif** : la tentation de la croissance via des canaux grand public existe — résistez-y tant que le noyau dur n'est pas en béton
+    `,
+  },
+  {
+    id: 12,
+    tag: 'Afrique',
+    title: 'Les Femmes UHNWI : Le Transfert de Richesse qui Redessine le Luxe',
+    subtitle: '20% de la richesse mondiale ultra-premium détenue par des femmes d\'ici 2040 — leurs préférences façonnent déjà le marché',
+    summary: 'D\'ici 2040, les femmes détiendront 20% de la richesse UHNW mondiale — l\'un des transferts de richesse les plus rapides de l\'histoire économique moderne. Leurs préférences d\'achat : héritage documenté, investissements à impact, marques à valeurs cohérentes. Retbaa est structurellement aligné.',
+    date: '24 Avril 2026',
+    author: 'Kemia · Chief of Staff IA',
+    source: '2Luxury2.com — Luxury Pulse April 2026, 21 Avril 2026',
+    sourceUrl: 'https://www.2luxury2.com/luxury-pulse-april-2026-lvmh-richemont-kering-watches-wellness-wealth-trends/',
+    pdf: null,
+    img: '/retbaa-photos/retbaa_11.jpg',
+    featured: false,
+    category: 'Afrique',
+    content: `
+## Les Faits
+
+Selon les projections compilées dans le Luxury Pulse d'Avril 2026 :
+
+- D'ici 2040, **20% de la richesse UHNW mondiale** sera entre les mains de femmes
+- Ce chiffre représente l'un des **transferts de richesse les plus rapides** de l'histoire économique contemporaine
+- Les catégories à plus forte croissance chez cette clientèle : **investissements purpose-led, collecting patrimonial, marques à provenance documentée**
+
+Les catégories qui surperforment directement grâce à cette clientèle :
+- Joaillerie (Richemont : +11% au T1 2026)
+- Fragrance de niche (croissance >15% dans le segment premium)
+- Maroquinerie à héritage artisanal documenté
+
+## L'Analyse
+
+Ce n'est pas juste un chiffre démographique. C'est un signal sur **comment le luxe sera défini** dans 15 ans.
+
+Les femmes UHNWI entrant dans la classe ultra-premium aujourd'hui ont construit leur richesse elles-mêmes (entrepreneuriat, finance, tech). Elles achètent différemment de la clientèle héritière traditionnelle :
+
+- **Valeurs > statut** : une marque doit démontrer une cohérence éthique, pas juste une esthétique
+- **Provenance** : d'où vient l'objet, qui l'a fait, dans quelles conditions — des questions que posait déjà l'ancien monde du luxe, mais que cette clientèle vérifie
+- **Impact** : le luxe doit produire quelque chose de bien dans le monde, pas juste quelque chose de beau
+
+Richemont surperforme parce que Cartier et Van Cleef vendent des objets qui *durent des générations* et dont chaque pièce a une histoire traçable. C'est exactement ce que recherche cette clientèle.
+
+## Ce que ça signifie pour Retbaa
+
+**Retbaa a une longueur d'avance structurelle.**
+
+"Made in Africa" + artisanat documenté + durabilité + fondateur africain = un narrative de provenance et d'impact que aucune maison européenne ne peut revendiquer de manière authentique.
+
+**Points d'action :**
+- **Storytelling de provenance** : documenter chaque étape — les artisans, les matières, les lieux. Ce n'est pas du greenwashing, c'est de la traçabilité premium
+- **Ambassadrices, pas influenceuses** : cette clientèle est imperméable au marketing d'influence classique. Elle répond aux pairs, aux femmes qui lui ressemblent
+- **Positionnement "héritage en construction"** : Retbaa ne vend pas 300 ans d'histoire — mais elle vend la chance d'en être le premier chapitre. Pour une investisseuse ou acheteuse qui se construit elle aussi, c'est un message puissant
+- **Canaux : Frieze, Art Basel, forums économiques africains** — là où cette clientèle se retrouve, pas sur les plateformes grand public
+    `,
+  },
+  {
     id: 1,
     tag: 'Marché Luxe',
     title: 'Le Luxe à l\'Épreuve de son Époque',
@@ -84,7 +337,7 @@ const articles = [
   },
 ]
 
-const FILTERS = ['Tout', 'Marché Luxe', 'Stratégie', 'Géopolitique', 'Distribution']
+const FILTERS = ['Tout', 'Veille Marché', 'Afrique', 'Marché Luxe', 'Stratégie', 'Géopolitique', 'Distribution']
 
 // ─── ARTICLE FEATURED (pleine largeur) ───────────────────────
 function FeaturedArticle({ article }) {
@@ -193,33 +446,54 @@ function FeaturedArticle({ article }) {
             {article.author}
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <a
-              href={article.pdf}
-              target="_blank"
-              download
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: '8px',
-                fontFamily: 'Manrope, sans-serif', fontSize: '10px',
-                letterSpacing: '0.15em', textTransform: 'uppercase',
-                fontWeight: 700, color: '#1A3A6B',
-                background: 'rgba(26,58,107,0.05)',
-                border: '1px solid rgba(26,58,107,0.15)',
-                padding: '10px 18px', borderRadius: '2px',
-                textDecoration: 'none',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = '#1A3A6B'
-                e.currentTarget.style.color = '#ffffff'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'rgba(26,58,107,0.05)'
-                e.currentTarget.style.color = '#1A3A6B'
-              }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>download</span>
-              Lire l'étude
-            </a>
+            {article.pdf ? (
+              <a
+                href={article.pdf}
+                target="_blank"
+                download
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '8px',
+                  fontFamily: 'Manrope, sans-serif', fontSize: '10px',
+                  letterSpacing: '0.15em', textTransform: 'uppercase',
+                  fontWeight: 700, color: '#1A3A6B',
+                  background: 'rgba(26,58,107,0.05)',
+                  border: '1px solid rgba(26,58,107,0.15)',
+                  padding: '10px 18px', borderRadius: '2px',
+                  textDecoration: 'none',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = '#1A3A6B'
+                  e.currentTarget.style.color = '#ffffff'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'rgba(26,58,107,0.05)'
+                  e.currentTarget.style.color = '#1A3A6B'
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>download</span>
+                Lire l'étude
+              </a>
+            ) : article.sourceUrl ? (
+              <a
+                href={article.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '8px',
+                  fontFamily: 'Manrope, sans-serif', fontSize: '10px',
+                  letterSpacing: '0.15em', textTransform: 'uppercase',
+                  fontWeight: 700, color: '#EFC0D4',
+                  background: 'transparent',
+                  border: '1px solid rgba(239,192,212,0.4)',
+                  padding: '10px 18px', borderRadius: '2px',
+                  textDecoration: 'none',
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>open_in_new</span>
+                Source originale
+              </a>
+            ) : null}
           </div>
         </div>
       </div>

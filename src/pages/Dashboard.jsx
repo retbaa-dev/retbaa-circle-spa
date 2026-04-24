@@ -25,6 +25,7 @@ const docs = [
   { id: 4, title: 'Bulletin de souscription', type: 'Souscription', date: 'Fév. 2026', status: 'sign', pdf: '/docs/governance/bulletin-souscription.pdf' },
   { id: 5, title: 'Décision du Président', type: 'Corporate', date: 'Fév. 2026', status: 'sign', pdf: '/docs/governance/decision-president.pdf' },
   { id: 6, title: "Pièce d'identité", type: 'KYC', date: '—', status: 'upload', pdf: null },
+  { id: 7, title: 'Justificatif de domicile', type: 'KYC', date: '—', status: 'upload', pdf: null },
 ]
 
 // ─── ACTUALITÉS ──────────────────────────────────────────────
@@ -547,12 +548,16 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage }) 
                         padding: '3px 8px', borderRadius: '2px',
                         fontSize: '8px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
                         fontFamily: 'Manrope, sans-serif',
-                        background: doc.status === 'sign' ? 'rgba(186,26,26,0.06)' : 'rgba(239,192,212,0.15)',
-                        color: doc.status === 'sign' ? '#ba1a1a' : '#795465',
+                        background: doc.status === 'sign' ? 'rgba(186,26,26,0.06)' : doc.status === 'upload' ? 'rgba(239,192,212,0.15)' : 'rgba(34,197,94,0.08)',
+                        color: doc.status === 'sign' ? '#ba1a1a' : doc.status === 'upload' ? '#795465' : '#166534',
                         border: doc.status === 'sign' ? '1px solid rgba(186,26,26,0.15)' : 'none',
                         whiteSpace: 'nowrap',
                       }}>
-                        {doc.status === 'sign' ? (lang === 'fr' ? 'À signer' : 'To sign') : (lang === 'fr' ? 'Signé' : 'Signed')}
+                        {doc.status === 'sign' 
+                          ? (lang === 'fr' ? 'À signer' : 'To sign') 
+                          : doc.status === 'upload'
+                            ? (lang === 'fr' ? 'À fournir' : 'To upload')
+                            : (lang === 'fr' ? 'Signé' : 'Signed')}
                       </span>
                       {doc.pdf ? (
                         <a href={doc.pdf} target="_blank" rel="noopener noreferrer" style={{ color: '#1A3A6B', display: 'flex', alignItems: 'center' }}
