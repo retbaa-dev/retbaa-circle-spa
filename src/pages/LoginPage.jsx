@@ -1,159 +1,61 @@
-// pages/LoginPage.jsx — Clerk SignIn (Option B) — Retbaa Circle
-import { SignIn } from '@clerk/clerk-react'
+// pages/LoginPage.jsx — Retbaa Circle — formulaire custom + Google OAuth
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-
-const clerkAppearance = {
-  layout: {
-    logoPlacement: 'none',
-    showOptionalFields: false,
-    socialButtonsPlacement: 'top',
-    socialButtonsVariant: 'blockButton',
-  },
-  variables: {
-    colorPrimary: '#EFC0D4',
-    colorPrimaryForeground: '#1A3A6B',
-    colorBackground: '#ffffff',
-    colorInputBackground: '#ffffff',
-    colorInputText: '#1A1C1C',
-    colorText: '#1A3A6B',
-    colorTextSecondary: '#43474F',
-    colorNeutral: '#c4c6d0',
-    colorDanger: '#EFC0D4',
-    borderRadius: '4px',
-    fontFamily: 'Manrope, sans-serif',
-    fontSize: '14px',
-    fontWeight: { normal: 400, medium: 600, bold: 700 },
-    spacingUnit: '18px',
-  },
-  elements: {
-    card: {
-      boxShadow: 'none !important',
-      border: 'none !important',
-      padding: '0 !important',
-      backgroundColor: 'transparent !important',
-      width: '100% !important',
-    },
-    rootBox: {
-      width: '100% !important',
-      boxShadow: 'none !important',
-    },
-    cardBox: {
-      boxShadow: 'none !important',
-      border: 'none !important',
-      backgroundColor: 'transparent !important',
-      width: '100% !important',
-    },
-    headerTitle: {
-      fontFamily: 'Newsreader, serif',
-      fontSize: '32px',
-      fontStyle: 'italic',
-      fontWeight: 300,
-      color: '#1A3A6B',
-    },
-    headerSubtitle: {
-      fontFamily: 'Manrope, sans-serif',
-      fontSize: '13px',
-      color: '#43474F',
-      letterSpacing: '0.03em',
-    },
-    socialButtonsBlockButton: {
-      border: '1px solid rgba(196,198,208,0.7)',
-      backgroundColor: 'transparent',
-      color: '#1A3A6B',
-      fontFamily: 'Manrope, sans-serif',
-      fontSize: '13px',
-      fontWeight: 600,
-      letterSpacing: '0.05em',
-      borderRadius: '4px',
-      '&:hover': {
-        backgroundColor: 'rgba(239,192,212,0.08)',
-        borderColor: '#EFC0D4',
-      },
-    },
-    dividerLine: { backgroundColor: 'rgba(196,198,208,0.3)' },
-    dividerText: {
-      color: '#c4c6d0',
-      fontSize: '10px',
-      letterSpacing: '0.2em',
-      textTransform: 'uppercase',
-    },
-    formFieldLabel: {
-      fontSize: '10px',
-      fontFamily: 'Manrope, sans-serif',
-      letterSpacing: '0.2em',
-      textTransform: 'uppercase',
-      color: '#1A3A6B',
-      fontWeight: 700,
-    },
-    formFieldInput: {
-      border: 'none',
-      borderBottom: '1px solid rgba(196,198,208,0.7)',
-      borderRadius: '0',
-      backgroundColor: 'transparent',
-      padding: '12px 0',
-      fontSize: '14px',
-      fontFamily: 'Manrope, sans-serif',
-      color: '#1A1C1C',
-      boxShadow: 'none',
-      '&:focus': {
-        borderBottom: '2px solid #EFC0D4',
-        boxShadow: 'none',
-        outline: 'none',
-      },
-    },
-    formButtonPrimary: {
-      backgroundColor: '#EFC0D4',
-      color: '#1A3A6B',
-      fontFamily: 'Manrope, sans-serif',
-      fontSize: '11px',
-      letterSpacing: '0.28em',
-      textTransform: 'uppercase',
-      fontWeight: 700,
-      borderRadius: '4px',
-      boxShadow: '0px 8px 24px rgba(239,192,212,0.35)',
-      '&:hover': {
-        backgroundColor: '#E5B4CA',
-        boxShadow: '0px 12px 32px rgba(239,192,212,0.45)',
-      },
-    },
-    footerActionLink: {
-      color: '#EFC0D4',
-      fontFamily: 'Manrope, sans-serif',
-      fontSize: '12px',
-      '&:hover': { color: '#E5B4CA' },
-    },
-    footerActionText: {
-      color: '#c4c6d0',
-      fontFamily: 'Manrope, sans-serif',
-      fontSize: '12px',
-    },
-    identityPreviewText: { color: '#1A3A6B' },
-    identityPreviewEditButton: { color: '#EFC0D4' },
-    formFieldAction: {
-      color: '#c4c6d0',
-      fontSize: '10px',
-      letterSpacing: '0.1em',
-      textTransform: 'uppercase',
-      '&:hover': { color: '#EFC0D4' },
-    },
-    alertText: { color: '#1A3A6B', fontSize: '12px' },
-    formResendCodeLink: { color: '#EFC0D4' },
-  },
-}
+import { useClerk } from '@clerk/clerk-react'
 
 export default function LoginPage() {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const clerk = useClerk()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [emailFocus, setEmailFocus] = useState(false)
+  const [passwordFocus, setPasswordFocus] = useState(false)
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    if (!clerk.loaded) return
+    setSubmitting(true)
+    try {
+      const result = await clerk.client.signIn.create({
+        identifier: email.trim(),
+        password,
+      })
+      if (result.status === 'complete') {
+        await clerk.setActive({ session: result.createdSessionId })
+      } else {
+        setError(t('login.error', 'Identifiants incorrects. Vérifiez votre email et mot de passe.'))
+      }
+    } catch (err) {
+      const msg = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message
+      setError(msg || t('login.error', 'Identifiants incorrects. Vérifiez votre email et mot de passe.'))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleGoogle = async () => {
+    if (!clerk.loaded) return
+    try {
+      await clerk.client.signIn.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: window.location.origin + '/sso-callback',
+        redirectUrlComplete: '/',
+      })
+    } catch (err) {
+      const msg = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message
+      setError(msg || 'Erreur Google OAuth')
+    }
+  }
 
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center overflow-hidden"
-      style={{
-        backgroundColor: '#f9f9f9',
-        fontFamily: 'Manrope, sans-serif',
-        position: 'relative',
-      }}
+      style={{ backgroundColor: '#f9f9f9', fontFamily: 'Manrope, sans-serif', position: 'relative' }}
     >
-      {/* ── Background Geometry ── */}
+      {/* Background Geometry */}
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
         <div style={{
           position: 'absolute', top: 0, right: 0,
@@ -168,51 +70,37 @@ export default function LoginPage() {
         }} />
       </div>
 
-      {/* ── Top Nav ── */}
+      {/* Top Nav */}
       <nav style={{
         position: 'fixed', top: 0, left: 0, right: 0,
         height: '64px', padding: '0 48px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        zIndex: 50,
-        backdropFilter: 'blur(8px)',
+        zIndex: 50, backdropFilter: 'blur(8px)',
       }}>
         <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
           {['en', 'fr'].map((lang) => (
-            <button
-              key={lang}
-              onClick={() => i18n.changeLanguage(lang)}
-              style={{
-                fontSize: '10px',
-                fontFamily: 'Manrope, sans-serif',
-                letterSpacing: '0.2em',
-                textTransform: 'uppercase',
-                fontWeight: i18n.language === lang ? '700' : '400',
-                color: i18n.language === lang ? '#1A3A6B' : '#c4c6d0',
-                borderBottom: i18n.language === lang ? '2px solid #EFC0D4' : '2px solid transparent',
-                paddingBottom: '4px',
-                background: 'none',
-                border: 'none',
-                borderBottom: i18n.language === lang ? '2px solid #EFC0D4' : '2px solid transparent',
-                cursor: 'pointer',
-                transition: 'color 0.2s',
-              }}
-            >
+            <button key={lang} onClick={() => i18n.changeLanguage(lang)} style={{
+              fontSize: '10px', fontFamily: 'Manrope, sans-serif',
+              letterSpacing: '0.2em', textTransform: 'uppercase',
+              fontWeight: i18n.language === lang ? '700' : '400',
+              color: i18n.language === lang ? '#1A3A6B' : '#c4c6d0',
+              background: 'none', border: 'none',
+              borderBottom: i18n.language === lang ? '2px solid #EFC0D4' : '2px solid transparent',
+              paddingBottom: '4px', cursor: 'pointer', transition: 'color 0.2s',
+            }}>
               {lang.toUpperCase()}
             </button>
           ))}
         </div>
         <span style={{
-          fontSize: '10px',
-          fontFamily: 'Newsreader, serif',
-          letterSpacing: '0.2em',
-          color: '#9CA3AF',
-          fontStyle: 'italic',
+          fontSize: '10px', fontFamily: 'Newsreader, serif',
+          letterSpacing: '0.2em', color: '#9CA3AF', fontStyle: 'italic',
         }} className="hidden md:block">
           Portail Investisseurs · Retbaa Circle
         </span>
       </nav>
 
-      {/* ── Main Split Layout ── */}
+      {/* Main Split Card */}
       <main style={{
         position: 'relative', zIndex: 10,
         width: '100%', maxWidth: '1200px',
@@ -226,7 +114,7 @@ export default function LoginPage() {
         overflow: 'hidden',
       }} className="login-grid">
 
-        {/* ══ LEFT — Branding ══ */}
+        {/* LEFT — Branding */}
         <div style={{
           position: 'relative', overflow: 'hidden',
           backgroundColor: '#1A3A6B',
@@ -235,11 +123,8 @@ export default function LoginPage() {
           padding: '56px 56px 48px',
         }}>
           <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-            <img
-              src="/retbaa-photos/retbaa_01.jpg"
-              alt="Retbaa — Sensory Odyssey"
-              style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
-            />
+            <img src="/retbaa-photos/retbaa_01.jpg" alt="Retbaa"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
             <div style={{ position: 'absolute', inset: 0, backgroundColor: '#1A3A6B', opacity: 0.78 }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(160deg, rgba(239,192,212,0.12) 0%, transparent 50%)' }} />
             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '200px', background: 'linear-gradient(to top, rgba(13,31,60,0.85), transparent)' }} />
@@ -258,12 +143,12 @@ export default function LoginPage() {
             <h2 style={{ fontFamily: 'Newsreader, serif', fontSize: '46px', fontStyle: 'italic', fontWeight: 300, color: '#ffffff', lineHeight: 1.1, letterSpacing: '-0.01em', margin: 0 }}>
               Sensory<br />Odyssey.
             </h2>
-            <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '11px', color: 'rgba(239,192,212,0.6)', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '8px 0 0', fontStyle: 'normal' }}>
+            <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '11px', color: 'rgba(239,192,212,0.6)', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '8px 0 0' }}>
               Un voyage sensoriel
             </p>
             <div style={{ width: '56px', height: '2px', backgroundColor: '#EFC0D4', marginTop: '28px' }} />
             <p style={{ marginTop: '24px', fontFamily: 'Manrope, sans-serif', fontSize: '13px', color: 'rgba(171,199,255,0.85)', maxWidth: '280px', lineHeight: 1.75, letterSpacing: '0.04em' }}>
-              Les grandes maisons ont toujours été bâties par quelques-uns qui ont vu juste trop tôt. Vous êtes ici parce que vous faites partie de ceux-là.
+              {t('login.left_desc', 'Les grandes maisons ont toujours été bâties par quelques-uns qui ont vu juste trop tôt. Vous êtes ici parce que vous faites partie de ceux-là.')}
             </p>
           </div>
 
@@ -277,24 +162,145 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* ══ RIGHT — Clerk SignIn ══ */}
+        {/* RIGHT — Form */}
         <div style={{
-          display: 'flex', flexDirection: 'column',
-          justifyContent: 'center', alignItems: 'center',
-          padding: '64px 80px',
-          backgroundColor: '#ffffff',
+          display: 'flex', flexDirection: 'column', justifyContent: 'center',
+          padding: '64px 80px', backgroundColor: '#ffffff',
         }} className="login-form-col">
-          <div style={{ width: '100%', maxWidth: '400px' }}>
-            <SignIn
-              appearance={clerkAppearance}
-              routing="hash"
-              signUpUrl="/invite"
-              afterSignInUrl="/"
-            />
+
+          {/* Heading */}
+          <div style={{ marginBottom: '40px' }}>
+            <h3 style={{ fontFamily: 'Newsreader, serif', fontSize: '32px', fontStyle: 'italic', fontWeight: 300, color: '#1A3A6B', marginBottom: '8px', lineHeight: 1.2 }}>
+              {t('login.welcome', 'Bienvenue')}
+            </h3>
+            <p style={{ fontSize: '13px', fontFamily: 'Manrope, sans-serif', color: '#43474F', letterSpacing: '0.03em', lineHeight: 1.6 }}>
+              {t('login.subtitle', 'Connectez-vous pour accéder à votre espace privé.')}
+            </p>
           </div>
 
+          {/* Google Button */}
+          <button
+            type="button"
+            onClick={handleGoogle}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px',
+              padding: '14px 24px', marginBottom: '28px',
+              border: '1px solid rgba(196,198,208,0.7)',
+              borderRadius: '4px', backgroundColor: '#ffffff',
+              cursor: 'pointer', transition: 'all 0.2s',
+              fontFamily: 'Manrope, sans-serif', fontSize: '13px', fontWeight: 600,
+              color: '#1A3A6B', letterSpacing: '0.05em',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#EFC0D4'; e.currentTarget.style.backgroundColor = 'rgba(239,192,212,0.05)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(196,198,208,0.7)'; e.currentTarget.style.backgroundColor = '#ffffff' }}
+          >
+            {/* Google SVG */}
+            <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+              <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+              <path d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/>
+              <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z" fill="#EA4335"/>
+            </svg>
+            {t('login.google', 'Continuer avec Google')}
+          </button>
+
+          {/* Divider */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '28px' }}>
+            <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(196,198,208,0.4)' }} />
+            <span style={{ fontSize: '10px', fontFamily: 'Manrope, sans-serif', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#c4c6d0' }}>ou</span>
+            <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(196,198,208,0.4)' }} />
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+
+            {/* Email */}
+            <div>
+              <label style={{ display: 'block', fontSize: '10px', fontFamily: 'Manrope, sans-serif', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#1A3A6B', fontWeight: 700, marginBottom: '10px' }}>
+                {t('login.email', 'Adresse email')}
+              </label>
+              <input
+                type="email" value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onFocus={() => setEmailFocus(true)}
+                onBlur={() => setEmailFocus(false)}
+                required
+                style={{
+                  width: '100%', background: 'transparent', border: 'none',
+                  borderBottom: emailFocus ? '2px solid #EFC0D4' : '1px solid rgba(196,198,208,0.7)',
+                  outline: 'none', padding: '12px 0', fontSize: '14px',
+                  fontFamily: 'Manrope, sans-serif', color: '#1A1C1C', transition: 'border-color 0.25s',
+                }}
+              />
+            </div>
+
+            {/* Password */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <label style={{ fontSize: '10px', fontFamily: 'Manrope, sans-serif', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#1A3A6B', fontWeight: 700 }}>
+                  {t('login.password', "Clé d'accès (mot de passe)")}
+                </label>
+                <a href="#" style={{ fontSize: '10px', fontFamily: 'Manrope, sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#c4c6d0', textDecoration: 'none', transition: 'color 0.2s' }}
+                  onMouseEnter={(e) => e.target.style.color = '#EFC0D4'}
+                  onMouseLeave={(e) => e.target.style.color = '#c4c6d0'}
+                >
+                  {t('login.forgot', 'Mot de passe oublié ?')}
+                </a>
+              </div>
+              <input
+                type="password" value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onFocus={() => setPasswordFocus(true)}
+                onBlur={() => setPasswordFocus(false)}
+                required
+                style={{
+                  width: '100%', background: 'transparent', border: 'none',
+                  borderBottom: passwordFocus ? '2px solid #EFC0D4' : '1px solid rgba(196,198,208,0.7)',
+                  outline: 'none', padding: '12px 0', fontSize: '14px',
+                  fontFamily: 'Manrope, sans-serif', color: '#1A1C1C', transition: 'border-color 0.25s',
+                }}
+              />
+            </div>
+
+            {/* Buttons */}
+            <div style={{ paddingTop: '8px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {error && (
+                <div style={{ padding: '10px 14px', background: 'rgba(239,192,212,0.15)', borderLeft: '2px solid #EFC0D4', fontFamily: 'Manrope, sans-serif', fontSize: '12px', color: '#1A3A6B' }}>
+                  {error}
+                </div>
+              )}
+              <button type="submit" disabled={submitting} style={{
+                width: '100%', backgroundColor: '#EFC0D4', color: '#1A3A6B',
+                padding: '18px 32px', fontSize: '11px', fontFamily: 'Manrope, sans-serif',
+                letterSpacing: '0.28em', textTransform: 'uppercase', fontWeight: 700,
+                border: 'none', borderRadius: '4px', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                boxShadow: '0px 8px 24px rgba(239,192,212,0.35)', transition: 'all 0.25s ease',
+                opacity: submitting ? 0.7 : 1,
+              }}
+                onMouseEnter={(e) => { if (!submitting) { e.currentTarget.style.backgroundColor = '#E5B4CA'; e.currentTarget.style.transform = 'translateY(-1px)' }}}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#EFC0D4'; e.currentTarget.style.transform = 'translateY(0)' }}
+              >
+                {submitting ? '...' : t('login.submit', 'Accéder à mon espace')}
+                {!submitting && <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>arrow_forward</span>}
+              </button>
+
+              <button type="button" style={{
+                width: '100%', backgroundColor: 'transparent', color: '#1A3A6B',
+                padding: '18px 32px', fontSize: '11px', fontFamily: 'Manrope, sans-serif',
+                letterSpacing: '0.28em', textTransform: 'uppercase', fontWeight: 700,
+                border: '1px solid #EFC0D4', borderRadius: '4px', cursor: 'pointer', transition: 'all 0.25s ease',
+              }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(239,192,212,0.08)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
+              >
+                {t('login.request', 'Demander un accès investisseur')}
+              </button>
+            </div>
+          </form>
+
           {/* Trust Block */}
-          <div style={{ width: '100%', maxWidth: '400px', marginTop: '40px', paddingTop: '28px', borderTop: '1px solid rgba(196,198,208,0.25)' }}>
+          <div style={{ marginTop: '48px', paddingTop: '28px', borderTop: '1px solid rgba(196,198,208,0.25)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
               <div style={{ width: '44px', height: '44px', overflow: 'hidden', border: '1px solid rgba(239,192,212,0.3)', flexShrink: 0, borderRadius: '2px' }}>
                 <img src="/retbaa-photos/retbaa_01.jpg" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)', opacity: 0.45 }} />
@@ -308,17 +314,14 @@ export default function LoginPage() {
         </div>
       </main>
 
-      {/* ── Footer ── */}
+      {/* Footer */}
       <footer style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
-        padding: '20px 48px',
-        display: 'flex', flexDirection: 'row',
-        justifyContent: 'space-between', alignItems: 'center',
-        zIndex: 50, gap: '16px',
+        padding: '20px 48px', display: 'flex', flexDirection: 'row',
+        justifyContent: 'space-between', alignItems: 'center', zIndex: 50, gap: '16px',
       }} className="login-footer">
         <p style={{ fontSize: '10px', fontFamily: 'Manrope, sans-serif', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#c4c6d0', margin: 0 }}>
-          © 2026 Retbaa Circle.{' '}
-          <span style={{ color: '#EFC0D4', fontWeight: 700 }}>Espace Privé.</span>
+          © 2026 Retbaa Circle.{' '}<span style={{ color: '#EFC0D4', fontWeight: 700 }}>Espace Privé.</span>
         </p>
         <div style={{ display: 'flex', gap: '28px' }}>
           {['Confidentialité', 'Gouvernance', 'Réglementaire'].map((link) => (
@@ -331,22 +334,6 @@ export default function LoginPage() {
       </footer>
 
       <style>{`
-        /* Clerk — suppression box/ombre */
-        .cl-card, .cl-cardBox, .cl-rootBox {
-          box-shadow: none !important;
-          border: none !important;
-          background: transparent !important;
-          width: 100% !important;
-        }
-        .cl-internal-b3fm6y {
-          box-shadow: none !important;
-          border: none !important;
-        }
-        /* Fix label coupé */
-        .cl-formFieldLabel {
-          overflow: visible !important;
-          white-space: nowrap !important;
-        }
         @media (max-width: 768px) {
           .login-grid {
             grid-template-columns: 1fr !important;
@@ -356,11 +343,9 @@ export default function LoginPage() {
             border-radius: 0 !important;
             background: transparent !important;
           }
-          .login-grid > *:first-child {
-            display: none !important;
-          }
+          .login-grid > *:first-child { display: none !important; }
           .login-form-col {
-            padding: 40px 24px !important;
+            padding: 40px 32px !important;
             background: transparent !important;
             box-shadow: none !important;
           }
@@ -377,9 +362,7 @@ export default function LoginPage() {
           }
         }
         @media (max-width: 480px) {
-          .login-form-col {
-            padding: 32px 16px !important;
-          }
+          .login-form-col { padding: 32px 24px !important; }
         }
       `}</style>
     </div>
