@@ -335,7 +335,7 @@ export default function LoginPage({ onLogin }) {
                   color: '#1A3A6B',
                   fontWeight: 700,
                 }}>
-                  {t('login.password', "Mot de passe")}
+                  {t('login.password', "Clé d'accès (mot de passe)")}
                 </label>
                 <a href="#" style={{
                   fontSize: '10px',
@@ -554,14 +554,35 @@ export default function LoginPage({ onLogin }) {
         @media (max-width: 768px) {
           .login-grid {
             grid-template-columns: 1fr !important;
+            margin: 64px 0 80px !important;
+            min-height: unset !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+          }
+          .login-grid > *:first-child {
+            display: none !important;
           }
           .login-form-col {
             padding: 40px 32px !important;
+            background: transparent !important;
+            box-shadow: none !important;
           }
           .login-footer {
             flex-direction: column !important;
             padding: 16px 24px !important;
             gap: 8px !important;
+            text-align: center !important;
+          }
+          .login-footer > div {
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            gap: 16px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .login-form-col {
+            padding: 32px 24px !important;
           }
         }
       `}</style>
