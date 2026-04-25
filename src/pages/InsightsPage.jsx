@@ -1,6 +1,87 @@
 // pages/InsightsPage.jsx — Retbaa Circle — Revue éditoriale investisseurs
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+
+// Rendu markdown simple (gras, italique, titres, listes)
+function renderMarkdown(text) {
+  if (!text) return []
+  const lines = text.split('\n')
+  const elements = []
+  let key = 0
+  for (const line of lines) {
+    const k = key++
+    if (line.startsWith('## ')) {
+      elements.push(<h3 key={k} style={{ fontFamily: 'Newsreader, serif', fontSize: '18px', color: '#1A3A6B', margin: '24px 0 8px', fontStyle: 'italic' }}>{line.slice(3)}</h3>)
+    } else if (line.startsWith('### ')) {
+      elements.push(<h4 key={k} style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px', fontWeight: 700, color: '#1A3A6B', margin: '16px 0 6px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>{line.slice(4)}</h4>)
+    } else if (line.startsWith('- ')) {
+      const html = line.slice(2).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>')
+      elements.push(<li key={k} style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px', color: '#374151', lineHeight: 1.7, marginBottom: '4px' }} dangerouslySetInnerHTML={{ __html: html }} />)
+    } else if (line.trim() === '') {
+      elements.push(<div key={k} style={{ height: '8px' }} />)
+    } else {
+      const html = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>')
+      elements.push(<p key={k} style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px', color: '#374151', lineHeight: 1.8, margin: '0 0 4px' }} dangerouslySetInnerHTML={{ __html: html }} />)
+    }
+  }
+  return elements
+}
+
+// Modal article complet
+function ArticleModal({ article, onClose }) {
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    const handler = (e) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', handler)
+    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', handler) }
+  }, [onClose])
+
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,40,0.7)', zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '40px 16px', overflowY: 'auto' }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: '6px', maxWidth: '720px', width: '100%', overflow: 'hidden', boxShadow: '0 40px 80px rgba(0,0,0,0.3)' }}>
+        {/* Image header */}
+        {article.img && (
+          <div style={{ position: 'relative', height: '240px', overflow: 'hidden' }}>
+            <img src={article.img} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(26,58,107,0.85))' }} />
+            <button onClick={onClose} style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%', width: '36px', height: '36px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', backdropFilter: 'blur(4px)' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
+            </button>
+            <div style={{ position: 'absolute', bottom: '16px', left: '24px', right: '24px' }}>
+              <span style={{ fontFamily: 'Manrope, sans-serif', fontSize: '9px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#EFC0D4' }}>{article.tag}</span>
+              <h2 style={{ fontFamily: 'Newsreader, serif', fontSize: '22px', color: '#fff', margin: '6px 0 4px', fontStyle: 'italic', lineHeight: 1.3 }}>{article.title}</h2>
+            </div>
+          </div>
+        )}
+        {/* Contenu */}
+        <div style={{ padding: '28px 32px 40px' }}>
+          {!article.img && (
+            <button onClick={onClose} style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}>
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          )}
+          <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '11px', color: '#9CA3AF', marginBottom: '16px' }}>
+            {article.date} · {article.author} · Source : {article.source}
+          </p>
+          <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '14px', color: '#4B5563', lineHeight: 1.7, marginBottom: '24px', borderLeft: '3px solid #EFC0D4', paddingLeft: '16px', fontStyle: 'italic' }}>
+            {article.summary}
+          </p>
+          <div style={{ borderTop: '1px solid #F3F4F6', paddingTop: '20px' }}>
+            {renderMarkdown(article.content)}
+          </div>
+          {article.sourceUrl && (
+            <div style={{ marginTop: '32px', paddingTop: '16px', borderTop: '1px solid #F3F4F6' }}>
+              <a href={article.sourceUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'Manrope, sans-serif', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1A3A6B', textDecoration: 'none' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>open_in_new</span>
+                Source originale
+              </a>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 // ─── DONNÉES ARTICLES ──────────────────────────────────────────
 const articles = [
@@ -340,7 +421,7 @@ Richemont surperforme parce que Cartier et Van Cleef vendent des objets qui *dur
 const FILTERS = ['Tout', 'Veille Marché', 'Afrique', 'Marché Luxe', 'Stratégie', 'Géopolitique', 'Distribution']
 
 // ─── ARTICLE FEATURED (pleine largeur) ───────────────────────
-function FeaturedArticle({ article }) {
+function FeaturedArticle({ article, onOpen }) {
   const [hovered, setHovered] = useState(false)
 
   return (
@@ -446,35 +527,26 @@ function FeaturedArticle({ article }) {
             {article.author}
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            {article.pdf ? (
-              <a
-                href={article.pdf}
-                target="_blank"
-                download
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '8px',
-                  fontFamily: 'Manrope, sans-serif', fontSize: '10px',
-                  letterSpacing: '0.15em', textTransform: 'uppercase',
-                  fontWeight: 700, color: '#1A3A6B',
-                  background: 'rgba(26,58,107,0.05)',
-                  border: '1px solid rgba(26,58,107,0.15)',
-                  padding: '10px 18px', borderRadius: '2px',
-                  textDecoration: 'none',
-                  transition: 'all 0.2s ease',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.background = '#1A3A6B'
-                  e.currentTarget.style.color = '#ffffff'
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background = 'rgba(26,58,107,0.05)'
-                  e.currentTarget.style.color = '#1A3A6B'
-                }}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>download</span>
-                Lire l'étude
-              </a>
-            ) : article.sourceUrl ? (
+            <button
+              onClick={onOpen}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                fontFamily: 'Manrope, sans-serif', fontSize: '10px',
+                letterSpacing: '0.15em', textTransform: 'uppercase',
+                fontWeight: 700, color: '#1A3A6B',
+                background: 'rgba(26,58,107,0.05)',
+                border: '1px solid rgba(26,58,107,0.15)',
+                padding: '10px 18px', borderRadius: '2px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#1A3A6B'; e.currentTarget.style.color = '#ffffff' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(26,58,107,0.05)'; e.currentTarget.style.color = '#1A3A6B' }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>article</span>
+              Lire l'analyse
+            </button>
+            {article.sourceUrl && (
               <a
                 href={article.sourceUrl}
                 target="_blank"
@@ -493,7 +565,7 @@ function FeaturedArticle({ article }) {
                 <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>open_in_new</span>
                 Source originale
               </a>
-            ) : null}
+            )}
           </div>
         </div>
       </div>
@@ -502,7 +574,7 @@ function FeaturedArticle({ article }) {
 }
 
 // ─── ARTICLE CARD (grille 3 colonnes) ────────────────────────
-function ArticleCard({ article }) {
+function ArticleCard({ article, onOpen }) {
   const [hovered, setHovered] = useState(false)
 
   return (
@@ -589,24 +661,22 @@ function ArticleCard({ article }) {
               {article.author}
             </div>
           </div>
-          <a
-            href={article.pdf}
-            target="_blank"
-            download
+          <button
+            onClick={onOpen}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '6px',
               fontFamily: 'Manrope, sans-serif', fontSize: '10px',
               letterSpacing: '0.12em', textTransform: 'uppercase',
               fontWeight: 700, color: '#795465',
-              textDecoration: 'none',
+              background: 'none', border: 'none', cursor: 'pointer', padding: 0,
               transition: 'color 0.2s',
             }}
             onMouseEnter={e => e.currentTarget.style.color = '#1A3A6B'}
             onMouseLeave={e => e.currentTarget.style.color = '#795465'}
           >
-            Lire l'étude
+            Lire l'analyse
             <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>arrow_forward</span>
-          </a>
+          </button>
         </div>
       </div>
     </div>
@@ -617,6 +687,7 @@ function ArticleCard({ article }) {
 export default function InsightsPage() {
   const { i18n } = useTranslation()
   const [activeFilter, setActiveFilter] = useState('Tout')
+  const [selectedArticle, setSelectedArticle] = useState(null)
 
   const filteredArticles = activeFilter === 'Tout'
     ? articles
@@ -635,6 +706,7 @@ export default function InsightsPage() {
   }))
 
   return (
+    <>
     <div style={{ background: '#F9F9F9', minHeight: '100vh' }}>
 
       {/* ─── HERO ──────────────────────────────────────────── */}
@@ -735,7 +807,7 @@ export default function InsightsPage() {
 
         {/* Article featured */}
         {featuredArticle && filteredArticles.length > 0 && (
-          <FeaturedArticle article={featuredArticle} />
+          <FeaturedArticle article={featuredArticle} onOpen={() => setSelectedArticle(featuredArticle)} />
         )}
 
         {/* Titre section grille */}
@@ -764,7 +836,7 @@ export default function InsightsPage() {
             marginBottom: '64px',
           }} className="insights-grid">
             {gridArticles.map(article => (
-              <ArticleCard key={article.id} article={article} />
+              <ArticleCard key={article.id} article={article} onOpen={() => setSelectedArticle(article)} />
             ))}
           </div>
         )}
@@ -899,5 +971,7 @@ export default function InsightsPage() {
         }
       `}</style>
     </div>
+    {selectedArticle && <ArticleModal article={selectedArticle} onClose={() => setSelectedArticle(null)} />}
+    </>
   )
 }
