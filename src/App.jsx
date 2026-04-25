@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useAuth, useUser, SignIn } from '@clerk/clerk-react'
+import { useAuth, useUser, useClerk, SignIn } from '@clerk/clerk-react'
 import './i18n/index.js'
 import InvitePage from './pages/InvitePage'
 import PendingPage from './pages/PendingPage'
@@ -351,6 +351,19 @@ function ClerkLoginPage() {
               Connectez-vous pour accéder à votre espace privé.
             </p>
           </div>
+          {/* CSS ciblé Clerk — sans toucher aux inputs */}
+          <style>{`
+            .cl-card, .cl-cardBox, .cl-rootBox {
+              background-image: none !important;
+              box-shadow: none !important;
+              border: none !important;
+            }
+            .cl-formButtonPrimary {
+              background-color: #EFC0D4 !important;
+              background-image: none !important;
+              color: #1A3A6B !important;
+            }
+          `}</style>
           <SignIn
             appearance={{
               layout: {
@@ -361,17 +374,31 @@ function ClerkLoginPage() {
                 colorPrimary: '#1A3A6B',
                 colorText: '#1A3A6B',
                 colorBackground: '#ffffff',
+                colorInputBackground: '#ffffff',
+                colorNeutral: '#1A3A6B',
+                borderRadius: '4px',
                 fontFamily: 'Manrope, sans-serif',
               },
+              cssOverrides: `
+                * { background-image: none !important; }
+                .cl-card, .cl-cardBox, .cl-rootBox, .cl-main, .cl-internal-b3fm57 {
+                  background: #ffffff !important;
+                  background-image: none !important;
+                  box-shadow: none !important;
+                  border: none !important;
+                }
+              `,
               elements: {
-                rootBox: { width: '100%', maxWidth: '380px' },
-                card: { boxShadow: 'none', border: 'none', padding: 0, backgroundColor: 'transparent', width: '100%', maxWidth: '100%' },
+                rootBox: { width: '100%', maxWidth: '380px', backgroundColor: 'transparent' },
+                card: { boxShadow: 'none', border: 'none', padding: 0, backgroundColor: '#ffffff', width: '100%', maxWidth: '100%', backgroundImage: 'none' },
+                cardBox: { boxShadow: 'none', border: 'none', backgroundColor: '#ffffff', backgroundImage: 'none' },
+                main: { backgroundColor: '#ffffff', backgroundImage: 'none' },
                 headerTitle: { display: 'none' },
                 headerSubtitle: { display: 'none' },
                 header: { display: 'none' },
                 formFieldLabel: { fontFamily: 'Manrope, sans-serif', fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#1A3A6B', fontWeight: 700 },
-                formFieldInput: { fontFamily: 'Manrope, sans-serif', fontSize: '14px', color: '#1A1C1C', border: 'none', borderBottom: '1px solid rgba(196,198,208,0.7)', borderRadius: 0, boxShadow: 'none', backgroundColor: 'transparent', padding: '12px 0' },
-                formButtonPrimary: { backgroundColor: '#EFC0D4', color: '#1A3A6B', fontFamily: 'Manrope, sans-serif', fontSize: '11px', letterSpacing: '0.28em', textTransform: 'uppercase', fontWeight: 700, borderRadius: '4px', boxShadow: '0px 8px 24px rgba(239,192,212,0.35)' },
+                formFieldInput: { fontFamily: 'Manrope, sans-serif', fontSize: '14px', color: '#1A1C1C', border: 'none', borderBottom: '1px solid rgba(196,198,208,0.7)', borderRadius: 0, boxShadow: 'none', backgroundColor: '#ffffff', padding: '12px 0', backgroundImage: 'none' },
+                formButtonPrimary: { backgroundColor: '#EFC0D4', color: '#1A3A6B', fontFamily: 'Manrope, sans-serif', fontSize: '11px', letterSpacing: '0.28em', textTransform: 'uppercase', fontWeight: 700, borderRadius: '4px', boxShadow: '0px 8px 24px rgba(239,192,212,0.35)', backgroundImage: 'none' },
                 footerActionLink: { color: '#1A3A6B', fontFamily: 'Manrope, sans-serif' },
                 identityPreviewText: { fontFamily: 'Manrope, sans-serif' },
                 formFieldInputShowPasswordButton: { color: '#1A3A6B' },
@@ -384,6 +411,8 @@ function ClerkLoginPage() {
                   fontSize: '12px',
                   color: '#1A3A6B',
                   fontWeight: 600,
+                  backgroundColor: '#ffffff',
+                  backgroundImage: 'none',
                 },
                 dividerRow: { display: 'flex' },
                 dividerText: { fontFamily: 'Manrope, sans-serif', fontSize: '11px', color: '#9CA3AF' },
@@ -413,6 +442,7 @@ function InvestisseurApp() {
   const previewUser = getPreviewUser()
   const { isSignedIn, isLoaded } = useAuth()
   const { user } = useUser()
+  const clerk = useClerk()
 
   // ── Tous les hooks AVANT tout return conditionnel (règle des hooks React) ──
   const [activePage, setActivePage] = useState('dashboard')
@@ -459,7 +489,12 @@ function InvestisseurApp() {
 
   const handleLogout = async () => {
     sessionStorage.removeItem('retbaa_prospect')
-    window.location.href = '/'
+    try {
+      await clerk.signOut()
+    } catch (e) {
+      // fallback
+      window.location.href = '/'
+    }
   }
 
   // ── Tracking : log chaque changement de page ──
@@ -519,7 +554,7 @@ function InvestisseurApp() {
           onMenuClick={() => setSidebarOpen(!sidebarOpen)}
         />
 
-        <main style={{ flex: 1, padding: '0', backgroundColor: '#F9F9F9' }}>
+        <main style={{ flex: 1, padding: '0', backgroundColor: '#F9F9F9', overflow: 'hidden', minWidth: 0 }}>
           {activePage === 'dashboard' && (
             isObservateur 
               ? <ObservateurDashboard />

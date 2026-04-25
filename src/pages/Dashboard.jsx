@@ -1,7 +1,7 @@
 // pages/Dashboard.jsx — Retbaa Circle — Stitch Design System v4
 // Complete redesign: Stitch-faithful + personalized hero + functional carousel
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Timeline from '../components/Timeline'
 import { CAP_TABLE as CAP_TABLE_DATA, COMPANY_INFO } from '../data/captable.js'
 
@@ -17,15 +17,14 @@ const CAP_TABLE = [
 // Prix de souscription officiel : 24 € / action (post-closing 5 fév 2026)
 const PRIX_SOUSCRIPTION = 24
 
-// ─── DOCUMENTS ───────────────────────────────────────────────
+// ─── DOCUMENTS (5 prioritaires affichés dans le dashboard) ───
 const docs = [
-  { id: 1, title: "Pacte d'actionnaires V2", type: 'Gouvernance', date: 'Fév. 2026', status: 'sign', pdf: '/docs/governance/pacte-actionnaires.pdf' },
-  { id: 2, title: 'Statuts post-augmentation', type: 'Corporate', date: 'Fév. 2026', status: 'sign', pdf: '/docs/governance/statuts.pdf' },
-  { id: 3, title: 'Registre des titres', type: 'Registres', date: 'Fév. 2026', status: 'sign', pdf: '/docs/governance/registre-titres.pdf' },
-  { id: 4, title: 'Bulletin de souscription', type: 'Souscription', date: 'Fév. 2026', status: 'sign', pdf: '/docs/governance/bulletin-souscription.pdf' },
-  { id: 5, title: 'Décision du Président', type: 'Corporate', date: 'Fév. 2026', status: 'sign', pdf: '/docs/governance/decision-president.pdf' },
-  { id: 6, title: "Pièce d'identité", type: 'KYC', date: '—', status: 'upload', pdf: null },
-  { id: 7, title: 'Justificatif de domicile', type: 'KYC', date: '—', status: 'upload', pdf: null },
+  { id: 1, title: "Pacte d'actionnaires V2", type: 'Gouvernance', date: 'Fév. 2026', status: 'sign', pdf: '/docs/legal/pacte-actionnaires-v2.pdf' },
+  { id: 2, title: 'Nouveaux statuts (post-augmentation)', type: 'Corporate', date: 'Fév. 2026', status: 'sign', pdf: '/docs/legal/statuts-final-2026.pdf' },
+  { id: 3, title: 'Décision de l\'associé unique', type: 'Corporate', date: 'Fév. 2026', status: 'sign', pdf: '/docs/legal/decision-associe-unique.pdf' },
+  { id: 4, title: 'Décision du Président — Augmentation capital', type: 'Corporate', date: 'Fév. 2026', status: 'sign', pdf: '/docs/legal/decision-president-augmentation-capital.pdf' },
+  { id: 12, title: "Pièce d'identité", type: 'KYC', date: '—', status: 'upload', pdf: null },
+  { id: 13, title: 'Justificatif de domicile', type: 'KYC', date: '—', status: 'upload', pdf: null },
 ]
 
 // ─── ACTUALITÉS ──────────────────────────────────────────────
@@ -121,7 +120,8 @@ function CarouselCard({ block, onClick }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        minWidth: '380px',
+        minWidth: 0,
+        width: '100%',
         flexShrink: 0,
         background: block.bg,
         borderRadius: '4px',
@@ -134,6 +134,7 @@ function CarouselCard({ block, onClick }) {
         transform: hovered ? 'scale(0.99)' : 'scale(1)',
         boxShadow: '0px 20px 40px rgba(0,27,63,0.06)',
         scrollSnapAlign: 'start',
+        boxSizing: 'border-box',
       }}
     >
       {/* Top row: icon + tag */}
@@ -260,6 +261,28 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage }) 
   const { t, i18n } = useTranslation()
   const lang = i18n.language?.startsWith('fr') ? 'fr' : 'fr' // toujours français par défaut
   const [footerModal, setFooterModal] = useState(null)
+  const [uploadStatus, setUploadStatus] = useState({}) // { docId: 'uploading'|'done'|'error' }
+  const fileInputRefs = useRef({})
+
+  const handleUpload = async (docId, docTitle, file) => {
+    if (!file) return
+    setUploadStatus(s => ({ ...s, [docId]: 'uploading' }))
+    try {
+      const formData = new FormData()
+      formData.append('document', file)
+      formData.append('userName', userName)
+      formData.append('docType', docTitle)
+      const res = await fetch('http://localhost:3001/kyc', { method: 'POST', body: formData })
+      const json = await res.json()
+      if (json.success) {
+        setUploadStatus(s => ({ ...s, [docId]: 'done' }))
+      } else {
+        setUploadStatus(s => ({ ...s, [docId]: 'error' }))
+      }
+    } catch {
+      setUploadStatus(s => ({ ...s, [docId]: 'error' }))
+    }
+  }
 
   // Greeting logic: Massata = Bonjour, others = Bienvenue
   const greeting = userName === 'Massata'
@@ -347,13 +370,9 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage }) 
         }} className="kpi-grid">
           <KpiCard
             label={lang === 'fr' ? 'Valorisation post-money' : 'Post-money valuation'}
-            value={isFounder
-              ? `3 M€`
-              : myRow?.invested ? `${(myRow.invested/1000).toFixed(0)} K€` : '—'
-            }
-            sub={isFounder ? lang === 'fr' ? 'Pre-money : 2,4 M€ · Tranche 1 : 360 K€' : 'Pre-money: €2.4M · Tranche 1: €360K' : 'Tranche 1'}
+            value="3 M€"
+            sub={lang === 'fr' ? 'Pre-money : 2,4 M€ · Tranche 1 : 360 K€' : 'Pre-money: €2.4M · Tranche 1: €360K'}
             icon="account_balance"
-            subIcon={isFounder ? null : "arrow_upward"}
             subColor="#9CA3AF"
           />
           <KpiCard
@@ -381,7 +400,7 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage }) 
         </div>
       </section>
 
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '48px 48px 64px' }} className="dashboard-main-padding">
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '48px 48px 64px', overflow: 'hidden' }} className="dashboard-main-padding">
 
         {/* ─── CAROUSEL — 3 blocs éditoriaux avec navigation ─── */}
         <section style={{ marginBottom: '56px' }}>
@@ -405,7 +424,7 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage }) 
             const prev = () => setCarIdx(i => (i - 1 + total) % total)
             const next = () => setCarIdx(i => (i + 1) % total)
             return (
-              <div style={{ position: 'relative', padding: '0 48px' }} className="carousel-container">
+              <div style={{ position: 'relative', padding: '0 48px', width: '100%', boxSizing: 'border-box' }} className="carousel-container">
                 {/* Flèche gauche */}
                 <button onClick={prev} className="carousel-arrow carousel-arrow-left" style={{
                   position: 'absolute', left: '0', top: '50%',
@@ -543,7 +562,7 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage }) 
                     </div>
 
                     {/* Badge statut + action */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                       <span style={{
                         padding: '3px 8px', borderRadius: '2px',
                         fontSize: '8px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
@@ -560,12 +579,53 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage }) 
                             : (lang === 'fr' ? 'Signé' : 'Signed')}
                       </span>
                       {doc.pdf ? (
-                        <a href={doc.pdf} target="_blank" rel="noopener noreferrer" style={{ color: '#1A3A6B', display: 'flex', alignItems: 'center' }}
-                          onMouseEnter={e => e.currentTarget.style.color = '#EFC0D4'}
-                          onMouseLeave={e => e.currentTarget.style.color = '#1A3A6B'}
+                        <a href={doc.pdf} target="_blank" rel="noopener noreferrer"
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: '4px',
+                            padding: '6px 12px', borderRadius: '4px',
+                            background: doc.status === 'sign' ? 'rgba(186,26,26,0.08)' : 'rgba(26,58,107,0.07)',
+                            border: doc.status === 'sign' ? '1px solid rgba(186,26,26,0.2)' : '1px solid rgba(26,58,107,0.15)',
+                            color: doc.status === 'sign' ? '#ba1a1a' : '#1A3A6B',
+                            textDecoration: 'none', fontSize: '10px', fontWeight: 700,
+                            fontFamily: 'Manrope, sans-serif', letterSpacing: '0.05em',
+                            whiteSpace: 'nowrap',
+                          }}
                         >
-                          <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>open_in_new</span>
+                          <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>
+                            {doc.status === 'sign' ? 'draw' : 'open_in_new'}
+                          </span>
+                          {doc.status === 'sign' ? 'Ouvrir' : 'Voir'}
                         </a>
+                      ) : doc.status === 'upload' ? (
+                        <>
+                          <input
+                            type="file"
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            style={{ display: 'none' }}
+                            ref={el => fileInputRefs.current[doc.id] = el}
+                            onChange={e => handleUpload(doc.id, doc.title, e.target.files[0])}
+                          />
+                          <button
+                            onClick={() => fileInputRefs.current[doc.id]?.click()}
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: '4px',
+                              background: uploadStatus[doc.id] === 'done' ? 'rgba(74,222,128,0.12)' : 'rgba(239,192,212,0.15)',
+                              border: '1px solid rgba(239,192,212,0.4)',
+                              borderRadius: '4px', cursor: 'pointer',
+                              padding: '5px 10px',
+                              transition: 'all 0.2s',
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,192,212,0.3)'}
+                            onMouseLeave={e => e.currentTarget.style.background = uploadStatus[doc.id] === 'done' ? 'rgba(74,222,128,0.12)' : 'rgba(239,192,212,0.15)'}
+                          >
+                            <span className="material-symbols-outlined" style={{ fontSize: '16px', color: uploadStatus[doc.id] === 'done' ? '#16a34a' : '#795465' }}>
+                              {uploadStatus[doc.id] === 'uploading' ? 'hourglass_empty' : uploadStatus[doc.id] === 'done' ? 'check_circle' : 'upload_file'}
+                            </span>
+                            <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: uploadStatus[doc.id] === 'done' ? '#16a34a' : '#795465' }}>
+                              {uploadStatus[doc.id] === 'uploading' ? '...' : uploadStatus[doc.id] === 'done' ? 'Envoyé' : 'Uploader'}
+                            </span>
+                          </button>
+                        </>
                       ) : (
                         <span style={{ color: '#E0E0E0', display: 'flex', alignItems: 'center' }}>
                           <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>lock</span>
@@ -946,6 +1006,7 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage }) 
           .carousel-container { padding: 0 32px !important; }
           .carousel-arrow { width: 36px !important; height: 36px !important; }
           .news-grid { grid-template-columns: 1fr !important; }
+          .dashboard-main-padding { padding: 32px 24px 48px !important; }
         }
 
         /* Mobile breakpoint */

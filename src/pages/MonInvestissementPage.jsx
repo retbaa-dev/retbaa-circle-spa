@@ -51,9 +51,13 @@ function DonutChart({ pct, color }) {
 }
 
 export default function MonInvestissementPage({ userName, setActivePage }) {
-  const data = INVESTOR_DATA[userName] || INVESTOR_DATA['Barthélemy']
+  // Match par prénom ou nom complet (ex: "Massata Niang" → "Massata")
+  const shortName = userName ? Object.keys(INVESTOR_DATA).find(k => userName.startsWith(k) || userName.includes(k)) : null
+  const data = INVESTOR_DATA[shortName] || INVESTOR_DATA[userName] || Object.values(INVESTOR_DATA)[0]
 
-  const estimatedValue = data.amount ? Math.round(data.amount * 1.138) : null
+  // Valorisation post-money actuelle (Tranche 1)
+  const POST_MONEY_T1 = 3_000_000
+  const estimatedValue = data.pct ? Math.round((data.pct / 100) * POST_MONEY_T1) : null
 
   const docs = [
     { title: "Pacte d'actionnaires V2", sub: 'Fév. 2026', status: 'sign', pdf: '/docs/governance/pacte-actionnaires.pdf' },
@@ -86,15 +90,18 @@ export default function MonInvestissementPage({ userName, setActivePage }) {
             </h1>
           </div>
           {estimatedValue && (
-            <div style={{ textAlign: 'right' }}>
+            <div style={{ textAlign: 'right', maxWidth: '280px' }}>
               <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#9CA3AF', marginBottom: '6px' }}>
-                VALEUR ESTIMÉE
+                VALEUR THÉORIQUE DES PARTS
               </div>
-              <div style={{ fontFamily: 'Newsreader, serif', fontSize: '36px', color: '#1A3A6B' }}>
-                €{estimatedValue.toLocaleString('fr-FR')}
+              <div style={{ fontFamily: 'Newsreader, serif', fontSize: '36px', color: '#1A3A6B', marginBottom: '4px' }}>
+                {estimatedValue.toLocaleString('fr-FR')} €
               </div>
-              <div style={{ fontSize: '11px', fontWeight: 700, color: '#EFC0D4', letterSpacing: '0.05em' }}>
-                +13.8% performance
+              <div style={{ fontSize: '10px', color: '#EFC0D4', fontWeight: 700, letterSpacing: '0.05em', marginBottom: '8px' }}>
+                {data.pct}% × 3 000 000 € (post-money T1)
+              </div>
+              <div style={{ fontSize: '10px', color: '#9CA3AF', lineHeight: 1.6, fontStyle: 'italic' }}>
+                Valeur indicative basée sur la valorisation post-money Tranche 1. Non contractuelle. Évolue à chaque levée de fonds.
               </div>
             </div>
           )}
@@ -122,6 +129,116 @@ export default function MonInvestissementPage({ userName, setActivePage }) {
               <div style={{ fontSize: '11px', color: '#9CA3AF' }}>{k.sub}</div>
             </div>
           ))}
+        </div>
+
+        {/* ── Projections par série ── */}
+        <div style={{
+          background: 'linear-gradient(135deg, #1A3A6B 0%, #0d1f3c 100%)',
+          borderRadius: '4px', padding: '48px',
+          boxShadow: '0px 24px 60px rgba(26,58,107,0.2)',
+          marginBottom: '32px',
+          position: 'relative', overflow: 'hidden',
+        }}>
+          {/* Déco fond */}
+          <div style={{ position: 'absolute', top: -60, right: -60, width: 240, height: 240, borderRadius: '50%', border: '1px solid rgba(239,192,212,0.1)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: -20, right: -20, width: 140, height: 140, borderRadius: '50%', border: '1px solid rgba(239,192,212,0.08)', pointerEvents: 'none' }} />
+
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '12px' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.3em', textTransform: 'uppercase', color: '#EFC0D4' }}>
+                  VOTRE PATRIMOINE AU FIL DES LEVÉES
+                </div>
+                <span style={{
+                  fontSize: '9px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase',
+                  background: 'rgba(239,192,212,0.15)', color: '#EFC0D4', padding: '3px 10px', borderRadius: '2px',
+                  border: '1px solid rgba(239,192,212,0.3)',
+                }}>
+                  PROJECTION
+                </span>
+              </div>
+              <h2 style={{ fontFamily: 'Newsreader, serif', fontStyle: 'italic', fontWeight: 300, fontSize: '36px', color: '#ffffff', margin: 0, lineHeight: 1.1 }}>
+                De 2,6 M€ à 130 M€ de valeur théorique
+              </h2>
+            </div>
+          </div>
+          <p style={{ fontSize: '11px', color: 'rgba(171,199,255,0.7)', lineHeight: 1.8, marginBottom: '36px', maxWidth: '640px' }}>
+            Ces projections illustrent l'évolution théorique de vos parts selon les valorisations lors de futures levées.
+            Elles sont <span style={{ color: '#EFC0D4', fontWeight: 700 }}>hypothétiques et non contractuelles</span> — la dilution future n'est pas prise en compte.
+            La valorisation confirmée sera mise à jour à chaque clôture officielle.
+          </p>
+
+          {/* Lignes */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            {[
+              { stage: 'Tranche 1', sub: 'Actuel · Confirmé', valuation: 3_000_000, status: 'confirmed' },
+              { stage: 'Série A — Conservateur', sub: 'Scénario hypothétique', valuation: 10_000_000, status: 'projection' },
+              { stage: 'Série A — Optimiste', sub: 'Scénario hypothétique', valuation: 20_000_000, status: 'projection' },
+              { stage: 'Série B', sub: 'Scénario hypothétique', valuation: 50_000_000, status: 'projection' },
+              { stage: 'Série C', sub: 'Scénario hypothétique', valuation: 150_000_000, status: 'projection' },
+            ].map((row, i) => {
+              const theoreticalValue = Math.round((data.pct / 100) * row.valuation)
+              const isConfirmed = row.status === 'confirmed'
+              const barWidth = Math.min((row.valuation / 150_000_000) * 100, 100)
+              return (
+                <div key={i} style={{
+                  display: 'grid', gridTemplateColumns: '220px 80px 1fr 200px 90px',
+                  alignItems: 'center', gap: '16px',
+                  padding: '20px 24px',
+                  borderRadius: '4px',
+                  background: isConfirmed ? 'rgba(239,192,212,0.12)' : 'rgba(255,255,255,0.03)',
+                  border: isConfirmed ? '1px solid rgba(239,192,212,0.25)' : '1px solid rgba(255,255,255,0.05)',
+                  marginBottom: '4px',
+                }} className="proj-row">
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: isConfirmed ? '#ffffff' : 'rgba(255,255,255,0.6)', marginBottom: '2px' }}>
+                      {row.stage}
+                    </div>
+                    <div style={{ fontSize: '10px', color: isConfirmed ? '#EFC0D4' : 'rgba(171,199,255,0.4)', letterSpacing: '0.05em' }}>
+                      {row.sub}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '13px', color: isConfirmed ? 'rgba(239,192,212,0.9)' : 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
+                    {(row.valuation / 1_000_000).toLocaleString('fr-FR')} M€
+                  </div>
+                  {/* Barre de progression */}
+                  <div style={{ height: '4px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px', overflow: 'hidden' }}>
+                    <div style={{
+                      height: '100%', width: `${barWidth}%`,
+                      background: isConfirmed ? '#EFC0D4' : 'rgba(239,192,212,0.25)',
+                      borderRadius: '2px', transition: 'width 0.6s ease',
+                    }} />
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{
+                      fontFamily: 'Newsreader, serif',
+                      fontSize: isConfirmed ? '28px' : '22px',
+                      color: isConfirmed ? '#ffffff' : 'rgba(255,255,255,0.4)',
+                      fontStyle: isConfirmed ? 'normal' : 'italic',
+                    }}>
+                      {theoreticalValue.toLocaleString('fr-FR')} €
+                    </span>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{
+                      fontSize: '9px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase',
+                      padding: '5px 12px', borderRadius: '2px',
+                      background: isConfirmed ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.06)',
+                      color: isConfirmed ? '#4ade80' : 'rgba(255,255,255,0.3)',
+                      border: isConfirmed ? '1px solid rgba(74,222,128,0.3)' : '1px solid rgba(255,255,255,0.08)',
+                    }}>
+                      {isConfirmed ? 'Confirmé' : 'Projection'}
+                    </span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          <p style={{ fontSize: '10px', color: 'rgba(171,199,255,0.35)', marginTop: '24px', lineHeight: 1.7, fontStyle: 'italic' }}>
+            * {data.pct}% correspond à votre participation actuelle (Tranche 1, avant dilution). Le pourcentage sera ajusté lors de chaque levée. Les valorisations des séries A, B et C sont purement illustratives.
+          </p>
         </div>
 
         {/* ── Donut + Répartition ── */}
@@ -276,6 +393,10 @@ export default function MonInvestissementPage({ userName, setActivePage }) {
           }
           .timeline-grid { grid-template-columns: 1fr !important; }
           .mon-invest-padding { padding: 24px 16px !important; }
+          .proj-row {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 8px !important;
+          }
         }
       `}</style>
     </div>
