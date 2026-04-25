@@ -53,7 +53,18 @@ function DonutChart({ pct, color }) {
 export default function MonInvestissementPage({ userName, setActivePage, isAssistant = false }) {
   // Match par prénom ou nom complet (ex: "Massata Niang" → "Massata")
   const shortName = userName ? Object.keys(INVESTOR_DATA).find(k => userName.startsWith(k) || userName.includes(k)) : null
-  const data = INVESTOR_DATA[shortName] || INVESTOR_DATA[userName] || Object.values(INVESTOR_DATA)[0]
+  const data = INVESTOR_DATA[shortName] || INVESTOR_DATA[userName] || null
+
+  // Les assistants n'ont pas de données d'investissement — page non applicable
+  if (isAssistant || !data) {
+    return (
+      <div style={{ padding: '60px 24px', textAlign: 'center', color: '#1A3A6B' }}>
+        <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔒</div>
+        <h2 style={{ fontFamily: 'Manrope', fontSize: '20px', marginBottom: '8px' }}>Section réservée aux investisseurs</h2>
+        <p style={{ fontFamily: 'Manrope', fontSize: '14px', color: '#666' }}>Cette page n'est pas accessible avec votre profil.</p>
+      </div>
+    )
+  }
 
   // Valorisation post-money actuelle (Tranche 1) — masquée pour les assistants
   const POST_MONEY_T1 = 3_000_000
