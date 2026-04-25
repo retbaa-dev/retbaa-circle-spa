@@ -54,7 +54,8 @@ function PlaceholderPage({ title, subtitle, onBack }) {
   )
 }
 
-// Preview bypass: ?preview=massata (ou autre shortName investisseur)
+// Preview bypass: ?preview=massata — DÉSACTIVÉ EN PRODUCTION
+// Uniquement actif sur localhost ou avec token secret
 const PREVIEW_USERS = {
   massata: 'Massata',
   barthelemy: 'Barthélemy',
@@ -63,10 +64,16 @@ const PREVIEW_USERS = {
   raphael: 'Raphaël',
 }
 
+const PREVIEW_SECRET = 'retbaa-dev-2026' // token requis: ?preview=massata&token=retbaa-dev-2026
+
 function getPreviewUser() {
   try {
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     const params = new URLSearchParams(window.location.search)
     const key = params.get('preview')?.toLowerCase()
+    const token = params.get('token')
+    // En production : token secret requis
+    if (!isLocalhost && token !== PREVIEW_SECRET) return null
     return key ? (PREVIEW_USERS[key] || null) : null
   } catch {
     return null
