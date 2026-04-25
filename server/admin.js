@@ -175,7 +175,19 @@ app.post('/admin/invite/:token/use', async (req, res) => {
       `gsk email send --to "massata@retbaa.com" --subject "🔔 Nouveau compte Retbaa Circle — ${inv.name}" --body ${JSON.stringify(htmlBody)} --body_type html --from_account massata@retbaa.com`,
       { stdio: 'inherit' }
     )
-    console.log(`🔔 Notification envoyée à massata@retbaa.com`)
+    console.log(`🔔 Notification email envoyée à massata@retbaa.com`)
+
+    // WhatsApp
+    try {
+      const date = new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })
+      const waMsg = `🌿 *Retbaa Circle*\n\n🔔 Nouveau compte créé !\n\n👤 *${inv.name}*\n🏷️ Réf. ${inv.ref}\n🕐 ${date}\n\n_Valide l'accès sur circle.retbaa.com_`
+      execSync(`openclaw message send --channel whatsapp --to "+33767410184" --message "${waMsg.replace(/"/g, '\\"')}"`, {
+        timeout: 15000, stdio: 'pipe'
+      })
+      console.log('✅ WhatsApp envoyé à Massata')
+    } catch (waErr) {
+      console.error('WhatsApp error:', waErr.message)
+    }
   } catch (e) {
     console.error('Email notification error:', e.message)
   }

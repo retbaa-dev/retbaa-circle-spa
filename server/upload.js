@@ -101,11 +101,25 @@ async function sendEmail(to, subject, body) {
   }
 }
 
-// Notification Massata
+// Notification Massata — email + WhatsApp
 async function notifyMassata(userName, originalName, investorEmail) {
   const date = new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })
+
+  // Email
   const body = `Nouveau document KYC reçu sur Retbaa Circle\n\nInvestisseur : ${userName}\nFichier : ${originalName}\nDate : ${date}\nEmail : ${investorEmail || 'inconnu'}\n\nRetbaa Circle — Portail Investisseurs`
   await sendEmail('massata@retbaa.com', `[Retbaa Circle] KYC reçu — ${userName}`, body)
+
+  // WhatsApp via OpenClaw gateway
+  try {
+    const { execSync } = await import('child_process')
+    const msg = `🌿 *Retbaa Circle*\n\nNouveau document KYC reçu !\n\n👤 *${userName}*\n📄 ${originalName}\n🕐 ${date}\n\n_Connecte-toi sur circle.retbaa.com pour consulter._`
+    execSync(`openclaw message send --channel whatsapp --to "+33767410184" --message "${msg.replace(/"/g, '\\"')}"`, {
+      timeout: 15000, stdio: 'pipe'
+    })
+    console.log('✅ WhatsApp envoyé à Massata')
+  } catch (err) {
+    console.error('WhatsApp error:', err.message)
+  }
 }
 
 // Confirmation à l'investisseur
