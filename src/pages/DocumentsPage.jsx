@@ -1,5 +1,5 @@
 // pages/DocumentsPage.jsx — Retbaa Circle — Stitch Design System v3
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FileText, Download, Pen, Upload, CheckCircle, Clock, AlertCircle, ChevronRight, X } from 'lucide-react'
 
@@ -413,7 +413,7 @@ function DocumentRow({ doc, lang, onAction, locked }) {
   )
 }
 
-export default function DocumentsPage({ observateur = false, userName = '' }) {
+export default function DocumentsPage({ observateur = false, userName = '', isAssistant = false }) {
   const { i18n } = useTranslation()
   const lang = i18n.language?.startsWith('fr') ? 'fr' : 'en'
   const [activeFilter, setActiveFilter] = useState('all')
@@ -456,7 +456,7 @@ export default function DocumentsPage({ observateur = false, userName = '' }) {
   })
 
   // Check if KYC already uploaded on mount
-  useState(() => {
+  useEffect(() => {
     if (userName) {
       fetch(`/api/kyc/status?userName=${encodeURIComponent(userName)}`)
         .then(r => r.json())
@@ -475,6 +475,8 @@ export default function DocumentsPage({ observateur = false, userName = '' }) {
   }
 
   const handleAction = (doc) => {
+    // Lecture seule pour les assistants — bloque toute action
+    if (isAssistant) return
     if (doc.status === 'upload') {
       setSelectedDocId(doc.id)
       fileInputRef.current?.click()

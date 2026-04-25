@@ -361,11 +361,20 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage, on
   const isFounder = userName === 'Massata'
   // Trouver le profil de l'utilisateur connecté par shortName
   // Match robuste : shortName exact, ou userName contient le shortName (ex: "Pape Amadou Ngom" → "Pape Amadou")
-  const myRow = CAP_TABLE.find(r =>
-    r.shortName === userName ||
-    userName?.includes(r.shortName) ||
-    r.shortName?.includes(userName?.split(' ')[0])
-  ) || CAP_TABLE[0]
+  // Guard : userName vide ne doit PAS fallback sur Massata ('' .includes('') === true)
+  const myRow = (userName && userName.trim())
+    ? CAP_TABLE.find(r => {
+        const firstToken = userName.split(' ')[0]
+        return (
+          r.shortName === userName ||
+          userName.includes(r.shortName) ||
+          (firstToken && r.shortName?.includes(firstToken))
+        )
+      }) || null
+    : null
+
+  const myShares = myRow?.shares ?? 0
+  const myPct = myRow?.pct ?? 0
 
   const navigate = (page) => {
     if (setActivePage) setActivePage(page)

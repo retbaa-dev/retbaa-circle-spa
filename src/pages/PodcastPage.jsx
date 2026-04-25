@@ -60,7 +60,7 @@ const episodes = [
   },
 ]
 
-function AudioPlayer({ src, title }) {
+function AudioPlayer({ src, title, userName = '' }) {
   const audioRef = useRef(null)
   const [playing, setPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -337,7 +337,7 @@ export default function PodcastPage({ userName }) {
 
               {/* Player */}
               <div style={{ padding: '0 36px 36px' }}>
-                <AudioPlayer src={activeEp.src} title={activeEp.title} />
+                <AudioPlayer src={activeEp.src} title={activeEp.title} userName={userName} />
               </div>
             </div>
 

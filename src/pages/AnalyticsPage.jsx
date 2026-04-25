@@ -1,5 +1,5 @@
 // pages/AnalyticsPage.jsx — Dashboard admin Retbaa Circle
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 
 const TOKEN = 'retbaa2026'
 const INVESTOR_LABELS = {
@@ -127,13 +127,12 @@ export default function AnalyticsPage() {
               <tbody>
                 {invList.map(inv => {
                   const label = INVESTOR_LABELS[inv.name] || inv.name
-                  const totalPages = Object.values(inv.pages).reduce((s, n) => s + n, 0)
-                  const totalPodcasts = Object.values(inv.podcasts).reduce((s, n) => s + n, 0)
+                  const totalPages = Object.values(inv.pages || {}).reduce((s, n) => s + n, 0)
+                  const totalPodcasts = Object.values(inv.podcasts || {}).reduce((s, n) => s + n, 0)
                   const isActive = activeInv === inv.name
                   return (
-                    <>
+                    <Fragment key={inv.name}>
                       <tr
-                        key={inv.name}
                         onClick={() => setActiveInv(isActive ? null : inv.name)}
                         style={{ cursor: 'pointer', background: isActive ? 'rgba(239,192,212,0.08)' : '#ffffff', borderBottom: '1px solid #F3F3F4', transition: 'background 0.15s' }}
                       >
@@ -185,7 +184,7 @@ export default function AnalyticsPage() {
                           </td>
                         </tr>
                       )}
-                    </>
+                    </Fragment>
                   )
                 })}
                 {invList.length === 0 && (

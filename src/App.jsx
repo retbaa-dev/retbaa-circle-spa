@@ -174,17 +174,19 @@ function PreviewApp({ userName }) {
           userName={userName}
           activePage={activePage}
           isMobile={isMobile}
-          onMenuToggle={() => setSidebarOpen(o => !o)}
+          onMenuClick={() => setSidebarOpen(o => !o)}
         />
         <main style={{ flex: 1, padding: isMobile ? '80px 0 0' : '80px 0 0' }}>
           {activePage === 'dashboard' && <Dashboard userName={userName} setActivePage={handleSetActivePage} />}
           {activePage === 'documents' && <DocumentsPage userName={userName} />}
           {activePage === 'insights' && <InsightsPage />}
           {activePage === 'catalogue' && <CataloguePage />}
-          {activePage === 'investissement' && <MonInvestissementPage userName={userName} />}
+          {activePage === 'investissement' && (
+            <MonInvestissementPage userName={userName} setActivePage={handleSetActivePage} />
+          )}
           {activePage === 'tranche2' && <Tranche2Page />}
           {activePage === 'inner-circle' && <InnerCirclePage />}
-          {activePage === 'podcast' && <PodcastPage />}
+          {activePage === 'podcast' && <PodcastPage userName={userName} />}
           {activePage === 'roadmap' && <PlaceholderPage title="Roadmap" subtitle="Feuille de route produit" onBack={() => handleSetActivePage('dashboard')} />}
         </main>
         <Footer />
@@ -598,7 +600,7 @@ function InvestisseurApp() {
               setActivePage={handleSetActivePage}
             />
           )}
-          {activePage === 'podcast' && <PodcastPage />}
+          {activePage === 'podcast' && <PodcastPage userName={isAssistant ? linkedUserName : userName} />}
           {activePage === 'analytics' && (isAdmin ? <AnalyticsPage /> : <PlaceholderPage title="Accès restreint" subtitle="Cette section est réservée à l'administration" onBack={goToDashboard} />)}
           {activePage === 'roadmap' && <PlaceholderPage title="Roadmap" subtitle="Feuille de route produit" onBack={goToDashboard} />}
           {activePage === 'calendar' && <PlaceholderPage title="Calendrier" subtitle="Événements & jalons" onBack={goToDashboard} />}
