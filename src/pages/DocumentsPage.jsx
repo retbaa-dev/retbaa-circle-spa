@@ -35,7 +35,7 @@ const allDocs = [
     format: 'PDF',
     date: 'Fév. 2026',
     size: '1,0 Mo',
-    status: 'sign',
+    status: 'validated',
     pdf: '/docs/legal/decision-associe-unique.pdf',
   },
   {
@@ -45,7 +45,7 @@ const allDocs = [
     format: 'PDF',
     date: 'Fév. 2026',
     size: '0,2 Mo',
-    status: 'sign',
+    status: 'validated',
     pdf: '/docs/legal/decision-president-augmentation-capital.pdf',
   },
   // ── À CONSULTER ───────────────────────────────────────────
@@ -56,7 +56,7 @@ const allDocs = [
     format: 'PDF',
     date: 'Fév. 2026',
     size: '0,8 Mo',
-    status: 'signed',
+    status: 'validated',
     pdf: '/docs/legal/closing-binder-final.pdf',
   },
   {
@@ -66,7 +66,7 @@ const allDocs = [
     format: 'PDF',
     date: 'Fév. 2026',
     size: '2,4 Mo',
-    status: 'signed',
+    status: 'validated',
     pdf: '/docs/legal/cap-table-officielle.pdf',
   },
   {
@@ -76,7 +76,7 @@ const allDocs = [
     format: 'PDF',
     date: 'Fév. 2026',
     size: '0,2 Mo',
-    status: 'signed',
+    status: 'validated',
     pdf: '/docs/legal/registre-mouvements-titres.pdf',
   },
   {
@@ -86,7 +86,7 @@ const allDocs = [
     format: 'PDF',
     date: 'Fév. 2026',
     size: '0,3 Mo',
-    status: 'signed',
+    status: 'validated',
     pdf: '/docs/legal/note-reconciliation-flux.pdf',
   },
   {
@@ -96,7 +96,7 @@ const allDocs = [
     format: 'PDF',
     date: 'Fév. 2026',
     size: '2,4 Mo',
-    status: 'signed',
+    status: 'validated',
     pdf: '/docs/legal/attestation-reception-fonds.pdf',
   },
   {
@@ -106,7 +106,7 @@ const allDocs = [
     format: 'PDF',
     date: 'Fév. 2026',
     size: '1,4 Mo',
-    status: 'signed',
+    status: 'validated',
     pdf: '/docs/legal/declaration-beneficiaires.pdf',
   },
   {
@@ -116,7 +116,7 @@ const allDocs = [
     format: 'PDF',
     date: 'Fév. 2026',
     size: '0,2 Mo',
-    status: 'signed',
+    status: 'validated',
     pdf: '/docs/legal/memo-alignement-juridique.pdf',
   },
   // ── STATUTS HISTORIQUES ───────────────────────────────────
@@ -127,7 +127,7 @@ const allDocs = [
     format: 'PDF',
     date: 'Fév. 2023',
     size: '0,4 Mo',
-    status: 'signed',
+    status: 'validated',
     pdf: '/docs/legal/statuts-originaux-2023.pdf',
   },
   // ── COMPTES INDIVIDUELS DES ASSOCIÉS ─────────────────────
@@ -138,7 +138,7 @@ const allDocs = [
     format: 'PDF',
     date: 'Fév. 2026',
     size: '1,3 Mo',
-    status: 'signed',
+    status: 'validated',
     pdf: '/docs/legal/comptes-associes/compte-massata-niang.pdf',
   },
   {
@@ -148,7 +148,7 @@ const allDocs = [
     format: 'PDF',
     date: 'Fév. 2026',
     size: '1,2 Mo',
-    status: 'signed',
+    status: 'validated',
     pdf: '/docs/legal/comptes-associes/compte-barthelemy-faye.pdf',
   },
   {
@@ -158,7 +158,7 @@ const allDocs = [
     format: 'PDF',
     date: 'Fév. 2026',
     size: '1,2 Mo',
-    status: 'signed',
+    status: 'validated',
     pdf: '/docs/legal/comptes-associes/compte-pape-amadou-ngom.pdf',
   },
   {
@@ -168,7 +168,7 @@ const allDocs = [
     format: 'PDF',
     date: 'Fév. 2026',
     size: '1,9 Mo',
-    status: 'signed',
+    status: 'validated',
     pdf: '/docs/legal/comptes-associes/compte-cathy-muiza.pdf',
   },
   {
@@ -178,7 +178,7 @@ const allDocs = [
     format: 'PDF',
     date: 'Fév. 2026',
     size: '1,4 Mo',
-    status: 'signed',
+    status: 'validated',
     pdf: '/docs/legal/comptes-associes/compte-raphael-perdrix.pdf',
   },
   // ── KYC — À FOURNIR ──────────────────────────────────────
@@ -423,14 +423,11 @@ export default function DocumentsPage({ observateur = false, userName = '' }) {
   const [selectedDocId, setSelectedDocId] = useState(null)
   const fileInputRef = useRef(null)
 
-  // Massata (fondateur) est dispensé des docs KYC avec founderExempt: true
+  // Massata (fondateur) voit tous les docs mais est dispensé des obligations KYC founderExempt
   const isFounder = userName?.toLowerCase().includes('massata')
 
-  // Filtrer les docs selon le profil : le fondateur ne voit pas les docs founderExempt
-  const visibleDocs = allDocs.filter(doc => {
-    if (doc.founderExempt && isFounder) return false
-    return true
-  })
+  // Tous les docs sont visibles (y compris founderExempt pour le fondateur)
+  const visibleDocs = allDocs
 
   // Check if KYC already uploaded on mount
   useState(() => {
@@ -663,8 +660,8 @@ export default function DocumentsPage({ observateur = false, userName = '' }) {
             </div>
           </div>
 
-          {/* Bandeau KYC — visible pour les investisseurs non-fondateurs */}
-          {!isFounder && (
+          {/* Bandeau KYC */}
+          {!isFounder ? (
             <div style={{
               margin: '0 0 16px',
               padding: '14px 18px',
@@ -680,11 +677,26 @@ export default function DocumentsPage({ observateur = false, userName = '' }) {
                   OBLIGATIONS KYC — CONFORMITÉ RÉGLEMENTAIRE
                 </div>
                 <div style={{ fontFamily: 'Manrope, sans-serif', fontSize: '12px', color: '#4B5563', lineHeight: 1.6 }}>
-                  En tant qu'investisseur de Retbaa Circle, vous avez l'obligation légale de fournir les documents KYC (Know Your Customer) marqués "À fournir" ci-dessous.
-                  Ces documents sont requis par la réglementation française LCB-FT et doivent être transmis à Massata Niang avant la signature des documents juridiques.
-                  <br/>
-                  <span style={{ fontStyle: 'italic', color: '#6B7280' }}>Pour toute question : massata@retbaa.com</span>
+                  En tant qu'investisseur de Retbaa Circle, vous avez l'obligation légale de fournir les documents KYC marqués "À fournir" ci-dessous.
+                  Ces documents sont requis par la réglementation française LCB-FT et doivent être transmis avant la signature des documents juridiques.
+                  <br/><span style={{ fontStyle: 'italic', color: '#6B7280' }}>Pour toute question : massata@retbaa.com</span>
                 </div>
+              </div>
+            </div>
+          ) : (
+            <div style={{
+              margin: '0 0 16px',
+              padding: '12px 18px',
+              background: 'rgba(26,58,107,0.04)',
+              border: '1px solid rgba(26,58,107,0.12)',
+              borderLeft: '3px solid #1A3A6B',
+              borderRadius: '4px',
+              display: 'flex', gap: '12px', alignItems: 'center',
+            }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#1A3A6B', flexShrink: 0 }}>verified_user</span>
+              <div style={{ fontFamily: 'Manrope, sans-serif', fontSize: '12px', color: '#4B5563', lineHeight: 1.6 }}>
+                <span style={{ fontWeight: 700, color: '#1A3A6B' }}>Fondateur — dispensé des obligations KYC.</span>
+                {' '}Les documents KYC sont affichés à titre de vérification du contenu envoyé aux investisseurs.
               </div>
             </div>
           )}
