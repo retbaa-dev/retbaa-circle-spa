@@ -4,7 +4,6 @@ import multer from 'multer'
 import path from 'path'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
-import { createTransport } from 'nodemailer'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -68,34 +67,53 @@ async function backupToAIDrive(userName, filePath, originalName) {
   }
 }
 
-// Email notification to Massata
-async function notifyMassata(userName, originalName) {
+// Mapping userName → email investisseur
+const INVESTOR_EMAILS = {
+  barthelemy: { name: 'Barthélemy Faye',  email: 'bfaye@cgsh.com' },
+  pape:       { name: 'Pape Amadou Ngom', email: 'angom@sqorus.com' },
+  cathy:      { name: 'Cathy Muiza',      email: 'cathy@r2coop.com' },
+  raphael:    { name: 'Raphaël Perdrix',  email: 'Raphael.Perdrix@gmail.com' },
+}
+
+function getInvestorEmail(userName) {
+  if (!userName) return null
+  const key = userName.toLowerCase()
+  for (const [k, v] of Object.entries(INVESTOR_EMAILS)) {
+    if (key.includes(k) || k.includes(key.split(' ')[0]?.toLowerCase())) return v
+  }
+  return null
+}
+
+// Envoie un email via gsk (Gmail OAuth)
+async function sendEmail(to, subject, body) {
   try {
-    const transporter = createTransport({
-      sendmail: true,
-      newline: 'unix',
-      path: '/usr/sbin/sendmail'
+    const { execSync } = await import('child_process')
+    // Échapper les guillemets dans le body
+    const safeBody = body.replace(/"/g, '\\"').replace(/\n/g, '\\n')
+    execSync(`gsk email send "${to}" -s "${subject}" -b "${safeBody}"`, {
+      timeout: 30000, stdio: 'pipe'
     })
-    await transporter.sendMail({
-      from: 'kycretbaa@investisseurs.retbaa.com',
-      to: 'massata@retbaa.com',
-      subject: `[Retbaa Circle] KYC reçu — ${userName}`,
-      html: `
-        <div style="font-family:sans-serif;max-width:500px;margin:auto">
-          <h2 style="color:#1A3A6B">Nouveau document KYC reçu</h2>
-          <table style="width:100%;border-collapse:collapse">
-            <tr><td style="padding:8px;color:#888">Investisseur</td><td style="padding:8px;font-weight:bold">${userName}</td></tr>
-            <tr><td style="padding:8px;color:#888">Fichier</td><td style="padding:8px">${originalName}</td></tr>
-            <tr><td style="padding:8px;color:#888">Date</td><td style="padding:8px">${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}</td></tr>
-          </table>
-          <p style="color:#888;font-size:12px;margin-top:24px">Retbaa Circle — Portail Investisseurs</p>
-        </div>
-      `
-    })
-    console.log(`✅ Email envoyé pour ${userName}`)
+    console.log(`✅ Email envoyé à ${to}`)
+    return true
   } catch (err) {
     console.error('Email error:', err.message)
+    return false
   }
+}
+
+// Notification Massata
+async function notifyMassata(userName, originalName, investorEmail) {
+  const date = new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })
+  const body = `Nouveau document KYC reçu sur Retbaa Circle\n\nInvestisseur : ${userName}\nFichier : ${originalName}\nDate : ${date}\nEmail : ${investorEmail || 'inconnu'}\n\nRetbaa Circle — Portail Investisseurs`
+  await sendEmail('massata@retbaa.com', `[Retbaa Circle] KYC reçu — ${userName}`, body)
+}
+
+// Confirmation à l'investisseur
+async function confirmToInvestor(investorInfo, originalName) {
+  if (!investorInfo?.email) return
+  const date = new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })
+  const body = `Bonjour ${investorInfo.name},\n\nNous avons bien reçu votre document KYC sur le portail Retbaa Circle.\n\nFichier reçu : ${originalName}\nDate de réception : ${date}\n\nVotre document sera examiné par l'équipe Retbaa dans les meilleurs délais. Vous serez informé(e) par email de la validation.\n\nPour toute question : massata@retbaa.com\n\nCordialement,\nMassata Niang\nRetbaa Circle`
+  await sendEmail(investorInfo.email, `[Retbaa Circle] Document KYC bien reçu`, body)
 }
 
 // KYC upload route
@@ -107,8 +125,15 @@ app.post('/kyc', upload.single('document'), async (req, res) => {
   // Backup sur AI-Drive (indépendant du VM)
   await backupToAIDrive(userName, req.file.path, req.file.originalname)
 
+  // Lookup email investisseur
+  const investorInfo = getInvestorEmail(userName)
+
   // Notifier Massata par email
-  await notifyMassata(userName, req.file.originalname)
+  await notifyMassata(userName, req.file.originalname, investorInfo?.email)
+
+  // Confirmer à l'investisseur
+  await confirmToInvestor(investorInfo, req.file.originalname)
+
   res.json({ success: true, message: 'Document reçu avec succès' })
 })
 
