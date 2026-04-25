@@ -6,13 +6,33 @@ import cors from 'cors'
 import crypto from 'crypto'
 import clerkBackend from '@clerk/backend'
 
-const { Clerk } = clerkBackend
+const { Clerk, verifyToken } = clerkBackend
 
 const app = express()
 app.use(express.json())
 app.use(cors({ origin: ['https://circle.retbaa.com', 'http://localhost:5173'] }))
 
 const clerk = Clerk({ secretKey: process.env.CLERK_SECRET_KEY })
+
+const ADMIN_EMAILS = ['massata@retbaa.com', 'massata+1@retbaa.com']
+
+// Middleware auth admin — vérifie le token Clerk JWT
+async function requireAdmin(req, res, next) {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '')
+    if (!token) return res.status(401).json({ error: 'Token manquant' })
+    const payload = await verifyToken(token, { secretKey: process.env.CLERK_SECRET_KEY })
+    // Vérifier le rôle admin ou email autorisé
+    const user = await clerk.users.getUser(payload.sub)
+    const email = user.emailAddresses?.[0]?.emailAddress
+    const isAdmin = user.publicMetadata?.role === 'admin' || ADMIN_EMAILS.includes(email)
+    if (!isAdmin) return res.status(403).json({ error: 'Accès refusé' })
+    req.clerkUserId = payload.sub
+    next()
+  } catch (e) {
+    res.status(401).json({ error: 'Non autorisé', detail: e.message })
+  }
+}
 
 // Données investisseurs (pré-chargées — liées au token d'invitation)
 const INVESTOR_DATA = {
@@ -42,12 +62,8 @@ function saveInvites(data) {
 
 // ── POST /admin/invite ──────────────────────────────────────────────────────
 // Génère un lien d'invitation unique pour un investisseur
-// Body: { investorKey: 'barthelemy', adminSecret: '...' }
-app.post('/admin/invite', async (req, res) => {
-  const { investorKey, adminSecret } = req.body
-  if (adminSecret !== process.env.ADMIN_SECRET) {
-    return res.status(401).json({ error: 'Non autorisé' })
-  }
+// Body: { investorKey: 'barthelemy': '...' }
+app.post('/admin/invite', requireAdmin, async (req, res) => {
   if (!INVESTOR_DATA[investorKey]) {
     return res.status(400).json({ error: 'Investisseur inconnu' })
   }
@@ -197,11 +213,7 @@ app.post('/admin/invite/:token/use', async (req, res) => {
 
 // ── GET /admin/users/pending ────────────────────────────────────────────────
 // Liste les investisseurs en attente de validation
-app.get('/admin/users/pending', async (req, res) => {
-  const { adminSecret } = req.query
-  if (adminSecret !== process.env.ADMIN_SECRET) {
-    return res.status(401).json({ error: 'Non autorisé' })
-  }
+app.get('/admin/users/pending', requireAdmin, async (req, res) => {
   try {
     const users = await clerk.users.getUserList({ limit: 100 })
     const list = Array.isArray(users) ? users : (users.data || [])
@@ -220,11 +232,7 @@ app.get('/admin/users/pending', async (req, res) => {
 
 // ── POST /admin/users/:userId/approve ──────────────────────────────────────
 // Valide un investisseur → status: active
-app.post('/admin/users/:userId/approve', async (req, res) => {
-  const { adminSecret } = req.body
-  if (adminSecret !== process.env.ADMIN_SECRET) {
-    return res.status(401).json({ error: 'Non autorisé' })
-  }
+app.post('/admin/users/:userId/approve', requireAdmin, async (req, res) => {
   try {
     const user = await clerk.users.getUser(req.params.userId)
     await clerk.users.updateUserMetadata(req.params.userId, {
@@ -242,11 +250,7 @@ app.post('/admin/users/:userId/approve', async (req, res) => {
 
 // ── POST /admin/users/:userId/suspend ──────────────────────────────────────
 // Suspend un investisseur
-app.post('/admin/users/:userId/suspend', async (req, res) => {
-  const { adminSecret } = req.body
-  if (adminSecret !== process.env.ADMIN_SECRET) {
-    return res.status(401).json({ error: 'Non autorisé' })
-  }
+app.post('/admin/users/:userId/suspend', requireAdmin, async (req, res) => {
   try {
     const user = await clerk.users.getUser(req.params.userId)
     await clerk.users.updateUserMetadata(req.params.userId, {
