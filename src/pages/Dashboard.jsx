@@ -361,7 +361,7 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage, on
                 fontFamily: 'Manrope, sans-serif', fontSize: '11px',
                 color: '#1A3A6B', letterSpacing: '0.08em', fontWeight: 600,
               }}>
-                Closing Tranche 1 · Clôturé
+                Tranche 1 — Closing Finalisé ✓
               </span>
             </div>
           </div>
