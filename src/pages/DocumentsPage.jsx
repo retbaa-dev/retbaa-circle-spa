@@ -191,6 +191,7 @@ const allDocs = [
     size: '—',
     status: 'upload',
     pdf: null,
+    founderExempt: false,
   },
   {
     id: 13,
@@ -201,6 +202,40 @@ const allDocs = [
     size: '—',
     status: 'upload',
     pdf: null,
+    founderExempt: false,
+  },
+  {
+    id: 15,
+    title: "Déclaration d'origine des fonds",
+    type: 'KYC',
+    format: 'PDF',
+    date: '—',
+    size: '0,3 Mo',
+    status: 'upload',
+    pdf: '/docs/legal/kyc-declaration-origine-fonds.pdf',
+    founderExempt: true,
+  },
+  {
+    id: 16,
+    title: 'Déclaration statut PPE (Personne Politiquement Exposée)',
+    type: 'KYC',
+    format: 'PDF',
+    date: '—',
+    size: '0,3 Mo',
+    status: 'upload',
+    pdf: '/docs/legal/kyc-declaration-statut-pep.pdf',
+    founderExempt: true,
+  },
+  {
+    id: 17,
+    title: 'Attestation fiscale et résidence fiscale',
+    type: 'KYC',
+    format: 'PDF',
+    date: '—',
+    size: '0,3 Mo',
+    status: 'upload',
+    pdf: '/docs/legal/kyc-attestation-fiscale.pdf',
+    founderExempt: true,
   },
 ]
 
@@ -380,13 +415,22 @@ function DocumentRow({ doc, lang, onAction, locked }) {
 
 export default function DocumentsPage({ observateur = false, userName = '' }) {
   const { i18n } = useTranslation()
-  const lang = 'fr' // toujours français
+  const lang = 'fr'
   const [activeFilter, setActiveFilter] = useState('all')
   const [dragOver, setDragOver] = useState(false)
-  const [uploadStatus, setUploadStatus] = useState(null) // null | 'uploading' | 'success' | 'error'
+  const [uploadStatus, setUploadStatus] = useState(null)
   const [kycUploaded, setKycUploaded] = useState(false)
   const [selectedDocId, setSelectedDocId] = useState(null)
   const fileInputRef = useRef(null)
+
+  // Massata (fondateur) est dispensé des docs KYC avec founderExempt: true
+  const isFounder = userName?.toLowerCase().includes('massata')
+
+  // Filtrer les docs selon le profil : le fondateur ne voit pas les docs founderExempt
+  const visibleDocs = allDocs.filter(doc => {
+    if (doc.founderExempt && isFounder) return false
+    return true
+  })
 
   // Check if KYC already uploaded on mount
   useState(() => {
@@ -398,13 +442,13 @@ export default function DocumentsPage({ observateur = false, userName = '' }) {
     }
   }, [userName])
 
-  const filtered = activeFilter === 'all' ? allDocs : allDocs.filter(d => d.status === activeFilter)
+  const filtered = activeFilter === 'all' ? visibleDocs : visibleDocs.filter(d => d.status === activeFilter)
 
   const counts = {
-    all: allDocs.length,
-    sign: allDocs.filter(d => d.status === 'sign').length,
-    validated: allDocs.filter(d => d.status === 'validated').length,
-    upload: allDocs.filter(d => d.status === 'upload').length,
+    all: visibleDocs.length,
+    sign: visibleDocs.filter(d => d.status === 'sign').length,
+    validated: visibleDocs.filter(d => d.status === 'validated').length,
+    upload: visibleDocs.filter(d => d.status === 'upload').length,
   }
 
   const handleAction = (doc) => {
@@ -618,6 +662,32 @@ export default function DocumentsPage({ observateur = false, userName = '' }) {
               Document
             </div>
           </div>
+
+          {/* Bandeau KYC — visible pour les investisseurs non-fondateurs */}
+          {!isFounder && (
+            <div style={{
+              margin: '0 0 16px',
+              padding: '14px 18px',
+              background: 'rgba(239,192,212,0.12)',
+              border: '1px solid rgba(239,192,212,0.5)',
+              borderLeft: '3px solid #EFC0D4',
+              borderRadius: '4px',
+              display: 'flex', gap: '12px', alignItems: 'flex-start',
+            }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#EFC0D4', flexShrink: 0, marginTop: '1px' }}>info</span>
+              <div>
+                <div style={{ fontFamily: 'Manrope, sans-serif', fontSize: '11px', fontWeight: 700, color: '#1A3A6B', letterSpacing: '0.05em', marginBottom: '4px' }}>
+                  OBLIGATIONS KYC — CONFORMITÉ RÉGLEMENTAIRE
+                </div>
+                <div style={{ fontFamily: 'Manrope, sans-serif', fontSize: '12px', color: '#4B5563', lineHeight: 1.6 }}>
+                  En tant qu'investisseur de Retbaa Circle, vous avez l'obligation légale de fournir les documents KYC (Know Your Customer) marqués "À fournir" ci-dessous.
+                  Ces documents sont requis par la réglementation française LCB-FT et doivent être transmis à Massata Niang avant la signature des documents juridiques.
+                  <br/>
+                  <span style={{ fontStyle: 'italic', color: '#6B7280' }}>Pour toute question : massata@retbaa.com</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Document rows */}
           {filtered.length > 0 ? (
