@@ -257,7 +257,7 @@ function KpiCard({ label, value, sub, icon, subIcon, subColor }) {
   )
 }
 
-export default function Dashboard({ userName = 'Investisseur', setActivePage }) {
+export default function Dashboard({ userName = 'Investisseur', setActivePage, onNavigate }) {
   const { t, i18n } = useTranslation()
   const lang = i18n.language?.startsWith('fr') ? 'fr' : 'fr' // toujours français par défaut
   const [footerModal, setFooterModal] = useState(null)
@@ -296,6 +296,7 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage }) 
 
   const navigate = (page) => {
     if (setActivePage) setActivePage(page)
+    else if (onNavigate) onNavigate(page)
   }
 
   return (
