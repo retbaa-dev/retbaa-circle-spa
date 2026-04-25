@@ -53,7 +53,7 @@ function DonutChart({ pct, color }) {
 export default function MonInvestissementPage({ userName, setActivePage, isAssistant = false }) {
   // Match par prénom ou nom complet (ex: "Massata Niang" → "Massata")
   const shortName = userName ? Object.keys(INVESTOR_DATA).find(k => userName.startsWith(k) || userName.includes(k)) : null
-  const data = INVESTOR_DATA[shortName] || INVESTOR_DATA[userName] || null
+  const data = INVESTOR_DATA[shortName] || INVESTOR_DATA[userName] || (isAssistant ? null : Object.values(INVESTOR_DATA)[0])
 
   // Les assistants n'ont pas de données d'investissement — page non applicable
   if (isAssistant || !data) {
