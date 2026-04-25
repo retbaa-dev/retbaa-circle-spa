@@ -259,7 +259,7 @@ function KpiCard({ label, value, sub, icon, subIcon, subColor }) {
 
 export default function Dashboard({ userName = 'Investisseur', setActivePage, onNavigate }) {
   const { t, i18n } = useTranslation()
-  const lang = i18n.language?.startsWith('fr') ? 'fr' : 'fr' // toujours français par défaut
+  const lang = i18n.language?.startsWith('fr') ? 'fr' : 'en'
   const [footerModal, setFooterModal] = useState(null)
   const [uploadStatus, setUploadStatus] = useState({}) // { docId: 'uploading'|'done'|'error' }
   const fileInputRefs = useRef({})

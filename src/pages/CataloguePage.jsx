@@ -236,7 +236,7 @@ function CollectionBlock({ collection, lang, activeFilter }) {
 
 export default function CataloguePage() {
   const { i18n } = useTranslation()
-  const lang = 'fr' // toujours français
+  const lang = i18n.language?.startsWith('fr') ? 'fr' : 'en'
   const [activeFilter, setActiveFilter] = useState('all')
 
   const allProducts = collections.flatMap(c =>

@@ -415,7 +415,7 @@ function DocumentRow({ doc, lang, onAction, locked }) {
 
 export default function DocumentsPage({ observateur = false, userName = '' }) {
   const { i18n } = useTranslation()
-  const lang = 'fr'
+  const lang = i18n.language?.startsWith('fr') ? 'fr' : 'en'
   const [activeFilter, setActiveFilter] = useState('all')
   const [dragOver, setDragOver] = useState(false)
   const [uploadStatus, setUploadStatus] = useState(null)
