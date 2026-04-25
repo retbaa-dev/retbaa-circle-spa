@@ -423,11 +423,37 @@ export default function DocumentsPage({ observateur = false, userName = '' }) {
   const [selectedDocId, setSelectedDocId] = useState(null)
   const fileInputRef = useRef(null)
 
-  // Massata (fondateur) voit tous les docs mais est dispensé des obligations KYC founderExempt
+  // Mapping shortName → identifiant dans le nom de fichier/titre
+  const COMPTE_MAP = {
+    'massata':    'Massata NIANG',
+    'barthélemy': 'Barthélemy FAYE',
+    'barthelemy': 'Barthélemy FAYE',
+    'pape':       'Pape Amadou NGOM',
+    'cathy':      'Cathy MUIZA',
+    'raphaël':    'Raphaël PERDRIX',
+    'raphael':    'Raphaël PERDRIX',
+  }
+
   const isFounder = userName?.toLowerCase().includes('massata')
 
+  const myCompteName = (() => {
+    if (!userName) return null
+    const lower = userName.toLowerCase()
+    for (const [key, val] of Object.entries(COMPTE_MAP)) {
+      if (lower.includes(key)) return val
+    }
+    return null
+  })()
+
   // Tous les docs sont visibles (y compris founderExempt pour le fondateur)
-  const visibleDocs = allDocs
+  // Mais les comptes individuels sont filtrés : chacun voit le sien, Massata voit tout
+  const visibleDocs = allDocs.filter(doc => {
+    if (doc.type === 'Associés') {
+      if (isFounder) return true // Massata voit tous les comptes
+      return myCompteName ? doc.title.includes(myCompteName) : false
+    }
+    return true
+  })
 
   // Check if KYC already uploaded on mount
   useState(() => {

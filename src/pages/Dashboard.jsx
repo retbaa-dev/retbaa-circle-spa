@@ -292,7 +292,12 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage, on
   // Cap table data for current user (founder sees all)
   const isFounder = userName === 'Massata'
   // Trouver le profil de l'utilisateur connecté par shortName
-  const myRow = CAP_TABLE.find(r => r.shortName === userName) || CAP_TABLE[0]
+  // Match robuste : shortName exact, ou userName contient le shortName (ex: "Pape Amadou Ngom" → "Pape Amadou")
+  const myRow = CAP_TABLE.find(r =>
+    r.shortName === userName ||
+    userName?.includes(r.shortName) ||
+    r.shortName?.includes(userName?.split(' ')[0])
+  ) || CAP_TABLE[0]
 
   const navigate = (page) => {
     if (setActivePage) setActivePage(page)
