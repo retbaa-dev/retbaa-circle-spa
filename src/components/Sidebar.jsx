@@ -151,7 +151,7 @@ export default function Sidebar({ activePage, setActivePage, userName, onLogout,
         { id: 'tranche2',           icon: 'trending_up',     label: 'Tranche 2'          },
         { id: 'podcast',            icon: 'mic',             label: 'Podcast'            },
         { id: 'mon-investissement', icon: 'person',          label: 'Mon Investissement' },
-        ...(userName === 'Massata' || isAdmin ? [{ id: 'analytics', icon: 'bar_chart', label: 'Analytics' }] : []),
+        ...(userName?.toLowerCase().includes('massata') || isAdmin ? [{ id: 'analytics', icon: 'bar_chart', label: 'Analytics' }] : []),
       ]
 
   return (
