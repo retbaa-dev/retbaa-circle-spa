@@ -205,6 +205,74 @@ function CarouselCard({ block, onClick }) {
   )
 }
 
+// ─── CAROUSEL — composant dédié, useState au top-level (Rules of Hooks) ─────
+function Carousel({ blocks, onNavigate }) {
+  const [carIdx, setCarIdx] = useState(0)
+  const total = blocks.length
+  const prev = () => setCarIdx(i => (i - 1 + total) % total)
+  const next = () => setCarIdx(i => (i + 1) % total)
+
+  return (
+    <div style={{ position: 'relative', padding: '0 48px', width: '100%', boxSizing: 'border-box' }} className="carousel-container">
+      <button onClick={prev} className="carousel-arrow carousel-arrow-left" style={{
+        position: 'absolute', left: '0', top: '50%',
+        transform: 'translateY(-50%)', zIndex: 10,
+        width: '40px', height: '40px', borderRadius: '50%',
+        background: '#ffffff', border: '1px solid rgba(239,192,212,0.4)',
+        boxShadow: '0 2px 12px rgba(0,27,63,0.1)',
+        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'all 0.2s',
+      }}
+        onMouseEnter={e => e.currentTarget.style.background = '#EFC0D4'}
+        onMouseLeave={e => e.currentTarget.style.background = '#ffffff'}
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#1A3A6B' }}>chevron_left</span>
+      </button>
+
+      <div style={{ overflow: 'hidden', borderRadius: '4px' }}>
+        <div style={{
+          display: 'flex',
+          transform: `translateX(-${carIdx * 100}%)`,
+          transition: 'transform 0.35s cubic-bezier(0.4,0,0.2,1)',
+        }} className="carousel-row">
+          {blocks.map(block => (
+            <div key={block.id} style={{ minWidth: '100%', flexShrink: 0 }}>
+              <CarouselCard block={block} onClick={() => onNavigate(block.id)} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <button onClick={next} className="carousel-arrow carousel-arrow-right" style={{
+        position: 'absolute', right: '0', top: '50%',
+        transform: 'translateY(-50%)', zIndex: 10,
+        width: '40px', height: '40px', borderRadius: '50%',
+        background: '#ffffff', border: '1px solid rgba(239,192,212,0.4)',
+        boxShadow: '0 2px 12px rgba(0,27,63,0.1)',
+        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'all 0.2s',
+      }}
+        onMouseEnter={e => e.currentTarget.style.background = '#EFC0D4'}
+        onMouseLeave={e => e.currentTarget.style.background = '#ffffff'}
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#1A3A6B' }}>chevron_right</span>
+      </button>
+
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '16px' }}>
+        {blocks.map((_, i) => (
+          <button key={i} onClick={() => setCarIdx(i)} style={{
+            width: i === carIdx ? '24px' : '8px',
+            height: '8px', borderRadius: '4px',
+            background: i === carIdx ? '#EFC0D4' : 'rgba(239,192,212,0.3)',
+            border: 'none', cursor: 'pointer', padding: 0,
+            transition: 'all 0.25s ease',
+          }} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ─── KPI CARD (Stitch bento style) ───────────────────────────
 function KpiCard({ label, value, sub, icon, subIcon, subColor }) {
   return (
@@ -423,77 +491,8 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage, on
             </span>
           </div>
 
-          {/* Carrousel avec flèches + dots */}
-          {(() => {
-            const [carIdx, setCarIdx] = useState(0)
-            const total = carouselBlocks.length
-            const prev = () => setCarIdx(i => (i - 1 + total) % total)
-            const next = () => setCarIdx(i => (i + 1) % total)
-            return (
-              <div style={{ position: 'relative', padding: '0 48px', width: '100%', boxSizing: 'border-box' }} className="carousel-container">
-                {/* Flèche gauche */}
-                <button onClick={prev} className="carousel-arrow carousel-arrow-left" style={{
-                  position: 'absolute', left: '0', top: '50%',
-                  transform: 'translateY(-50%)', zIndex: 10,
-                  width: '40px', height: '40px', borderRadius: '50%',
-                  background: '#ffffff', border: '1px solid rgba(239,192,212,0.4)',
-                  boxShadow: '0 2px 12px rgba(0,27,63,0.1)',
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'all 0.2s',
-                }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#EFC0D4'}
-                  onMouseLeave={e => e.currentTarget.style.background = '#ffffff'}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#1A3A6B' }}>chevron_left</span>
-                </button>
-
-                {/* Carte active */}
-                <div style={{ overflow: 'hidden', borderRadius: '4px' }}>
-                  <div style={{
-                    display: 'flex',
-                    transform: `translateX(-${carIdx * 100}%)`,
-                    transition: 'transform 0.35s cubic-bezier(0.4,0,0.2,1)',
-                  }} className="carousel-row">
-                    {carouselBlocks.map(block => (
-                      <div key={block.id} style={{ minWidth: '100%', flexShrink: 0 }}>
-                        <CarouselCard block={block} onClick={() => navigate(block.id)} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Flèche droite */}
-                <button onClick={next} className="carousel-arrow carousel-arrow-right" style={{
-                  position: 'absolute', right: '0', top: '50%',
-                  transform: 'translateY(-50%)', zIndex: 10,
-                  width: '40px', height: '40px', borderRadius: '50%',
-                  background: '#ffffff', border: '1px solid rgba(239,192,212,0.4)',
-                  boxShadow: '0 2px 12px rgba(0,27,63,0.1)',
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'all 0.2s',
-                }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#EFC0D4'}
-                  onMouseLeave={e => e.currentTarget.style.background = '#ffffff'}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#1A3A6B' }}>chevron_right</span>
-                </button>
-
-                {/* Dots */}
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '16px' }}>
-                  {carouselBlocks.map((_, i) => (
-                    <button key={i} onClick={() => setCarIdx(i)} style={{
-                      width: i === carIdx ? '24px' : '8px',
-                      height: '8px',
-                      borderRadius: '4px',
-                      background: i === carIdx ? '#EFC0D4' : 'rgba(239,192,212,0.3)',
-                      border: 'none', cursor: 'pointer', padding: 0,
-                      transition: 'all 0.25s ease',
-                    }} />
-                  ))}
-                </div>
-              </div>
-            )
-          })()}
+          {/* Carousel — composant dédié, useState au top-level (Rules of Hooks) */}
+          <Carousel blocks={carouselBlocks} onNavigate={navigate} />
         </section>
 
         {/* ─── CORPS : Gouvernance (Documents + Actualités) + Droite (Timeline + Mon investissement) ─── */}
