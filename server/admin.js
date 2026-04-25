@@ -258,6 +258,64 @@ app.post('/admin/users/:userId/suspend', async (req, res) => {
   }
 })
 
+// ── GET /api/stats ─────────────────────────────────────────────────────────
+// Analytics pour AnalyticsPage (token simple)
+app.get('/api/stats', async (req, res) => {
+  if (req.query.token !== 'retbaa2026') return res.status(401).json({ error: 'Non autorisé' })
+
+  const invites = loadInvites()
+
+  // Construire les stats par investisseur depuis les invites
+  const investors = {}
+  for (const [token, inv] of Object.entries(invites)) {
+    const key = inv.investorKey
+    if (!key) continue
+    investors[key] = {
+      name: inv.investorData?.name || key,
+      ref: inv.investorData?.ref || '',
+      invited_at: inv.createdAt || null,
+      joined_at: inv.usedAt || null,
+      status: inv.used ? 'active' : 'pending',
+      kyc_uploaded: false, // sera enrichi si on a les données kyc
+    }
+  }
+
+  // Compter les KYC uploadés par investisseur
+  const kycDir = join(__dirname, '../kyc-uploads')
+  if (existsSync(kycDir)) {
+    const { readdirSync } = await import('fs')
+    for (const userDir of readdirSync(kycDir)) {
+      const files = readdirSync(join(kycDir, userDir))
+      const key = userDir.toLowerCase()
+      for (const invKey of Object.keys(investors)) {
+        if (key.includes(invKey) || invKey.includes(key.split(' ')[0])) {
+          investors[invKey].kyc_uploaded = files.length > 0
+          investors[invKey].kyc_count = files.length
+        }
+      }
+    }
+  }
+
+  const totalInvited = Object.keys(invites).length
+  const totalJoined = Object.values(invites).filter(i => i.used).length
+
+  res.json({
+    investors,
+    summary: {
+      total_invited: totalInvited,
+      total_joined: totalJoined,
+      pending: totalInvited - totalJoined,
+    },
+    top_pages: [
+      { page: 'dashboard', visits: 0 },
+      { page: 'documents', visits: 0 },
+      { page: 'insights', visits: 0 },
+    ],
+    top_podcasts: [],
+    generated_at: new Date().toISOString(),
+  })
+})
+
 const PORT = process.env.ADMIN_PORT || 3002
 app.listen(PORT, '127.0.0.1', () => {
   console.log(`Admin server running on port ${PORT}`)
