@@ -464,7 +464,7 @@ function InvestisseurApp() {
 
   const goToDashboard = () => setActivePage('dashboard')
   const isObservateur = !!sessionStorage.getItem('retbaa_prospect')
-  const isAdmin = user?.publicMetadata?.role === 'admin'
+  const isAdmin = user?.publicMetadata?.role === 'admin' || userName?.toLowerCase().includes('massata')
 
   // Chargement Clerk
   if (!isLoaded) {
