@@ -325,7 +325,7 @@ function KpiCard({ label, value, sub, icon, subIcon, subColor }) {
   )
 }
 
-export default function Dashboard({ userName = 'Investisseur', setActivePage, onNavigate }) {
+export default function Dashboard({ userName = 'Investisseur', setActivePage, onNavigate, isAssistant = false }) {
   const { t, i18n } = useTranslation()
   const lang = i18n.language?.startsWith('fr') ? 'fr' : 'en'
   const [footerModal, setFooterModal] = useState(null)
@@ -440,21 +440,28 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage, on
       <section style={{ background: '#ffffff', boxShadow: '0px 20px 40px rgba(0,27,63,0.06)' }}>
         <div style={{
           maxWidth: '1400px', margin: '0 auto',
-          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+          display: 'grid',
+          // Assistant : 2 KPIs non-financiers seulement
+          gridTemplateColumns: isAssistant ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
         }} className="kpi-grid">
-          <KpiCard
-            label={lang === 'fr' ? 'Valorisation post-money' : 'Post-money valuation'}
-            value="3 M€"
-            sub={lang === 'fr' ? 'Pre-money : 2,4 M€ · Tranche 1 : 360 K€' : 'Pre-money: €2.4M · Tranche 1: €360K'}
-            icon="account_balance"
-            subColor="#9CA3AF"
-          />
-          <KpiCard
-            label={lang === 'fr' ? 'Participation' : 'Shareholding %'}
-            value={myRow?.pct ? `${myRow.pct.toFixed(2).replace('.', ',')} %` : '—'}
-            sub={lang === 'fr' ? 'Post-augmentation' : 'Post-raise'}
-            icon="pie_chart"
-          />
+          {/* Montant investi + participation masqués pour les assistants */}
+          {!isAssistant && (
+            <KpiCard
+              label={lang === 'fr' ? 'Valorisation post-money' : 'Post-money valuation'}
+              value="3 M€"
+              sub={lang === 'fr' ? 'Pre-money : 2,4 M€ · Tranche 1 : 360 K€' : 'Pre-money: €2.4M · Tranche 1: €360K'}
+              icon="account_balance"
+              subColor="#9CA3AF"
+            />
+          )}
+          {!isAssistant && (
+            <KpiCard
+              label={lang === 'fr' ? 'Participation' : 'Shareholding %'}
+              value={myRow?.pct ? `${myRow.pct.toFixed(2).replace('.', ',')} %` : '—'}
+              sub={lang === 'fr' ? 'Post-augmentation' : 'Post-raise'}
+              icon="pie_chart"
+            />
+          )}
           <KpiCard
             label={lang === 'fr' ? 'Documents' : 'Documents'}
             value="03"

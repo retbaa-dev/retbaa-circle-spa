@@ -126,32 +126,43 @@ function ContactModal({ userName, onClose }) {
   )
 }
 
-export default function Sidebar({ activePage, setActivePage, userName, onLogout, observateur, isAdmin }) {
+export default function Sidebar({ activePage, setActivePage, userName, onLogout, observateur, isAdmin, isAssistant }) {
   const [showContact, setShowContact] = useState(false)
   const initials = userName
     ? userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
     : 'RC'
 
+  // Items communs à tous les rôles connectés (hors observateur)
+  const baseItems = [
+    { id: 'dashboard',          icon: 'account_balance', label: 'Tableau de bord'   },
+    { id: 'insights',           icon: 'insights',        label: 'Insights'           },
+    { id: 'products',           icon: 'category',        label: 'Produits'           },
+    { id: 'documents',          icon: 'description',     label: 'Documents'          },
+    { id: 'tranche2',           icon: 'trending_up',     label: 'Tranche 2'          },
+    { id: 'podcast',            icon: 'mic',             label: 'Podcast'            },
+    { id: 'mon-investissement', icon: 'person',          label: 'Mon Investissement' },
+  ]
+
   const navItems = observateur
     ? [
-        { id: 'dashboard',    icon: 'account_balance', label: 'Tableau de bord' },
-        { id: 'insights',     icon: 'insights',        label: 'Insights'         },
-        { id: 'products',     icon: 'category',        label: 'Produits'         },
-        { id: 'documents',    icon: 'description',     label: 'Documents'        },
-        { id: 'tranche2',     icon: 'trending_up',     label: 'Tranche 2'        },
-        { id: 'podcast',      icon: 'mic',             label: 'Podcast'          },
-        // inner-circle et mon-investissement masqués
+        { id: 'dashboard', icon: 'account_balance', label: 'Tableau de bord' },
+        { id: 'insights',  icon: 'insights',        label: 'Insights'        },
+        { id: 'products',  icon: 'category',        label: 'Produits'        },
+        { id: 'documents', icon: 'description',     label: 'Documents'       },
+        { id: 'tranche2',  icon: 'trending_up',     label: 'Tranche 2'       },
+        { id: 'podcast',   icon: 'mic',             label: 'Podcast'         },
       ]
+    // Assistant : tous les items sauf Inner Circle
+    : isAssistant
+    ? baseItems
+    // Investisseur standard : Inner Circle + éventuellement Analytics
     : [
-        { id: 'dashboard',          icon: 'account_balance', label: 'Tableau de bord'   },
-        { id: 'insights',           icon: 'insights',        label: 'Insights'           },
-        { id: 'products',           icon: 'category',        label: 'Produits'           },
-        { id: 'documents',          icon: 'description',     label: 'Documents'          },
-        { id: 'inner-circle',       icon: 'diamond',         label: 'Inner Circle'       },
-        { id: 'tranche2',           icon: 'trending_up',     label: 'Tranche 2'          },
-        { id: 'podcast',            icon: 'mic',             label: 'Podcast'            },
-        { id: 'mon-investissement', icon: 'person',          label: 'Mon Investissement' },
-        ...(userName?.toLowerCase().includes('massata') || isAdmin ? [{ id: 'analytics', icon: 'bar_chart', label: 'Analytics' }] : []),
+        ...baseItems.slice(0, 4),                          // dashboard → documents
+        { id: 'inner-circle', icon: 'diamond', label: 'Inner Circle' },
+        ...baseItems.slice(4),                             // tranche2 → mon-investissement
+        ...(userName?.toLowerCase().includes('massata') || isAdmin
+          ? [{ id: 'analytics', icon: 'bar_chart', label: 'Analytics' }]
+          : []),
       ]
 
   return (

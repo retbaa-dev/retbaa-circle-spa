@@ -473,6 +473,14 @@ function InvestisseurApp() {
   const isObservateur = !!sessionStorage.getItem('retbaa_prospect')
   const isAdmin = user?.publicMetadata?.role === 'admin' || userName?.toLowerCase().includes('massata')
 
+  // Rôle assistant : accès délégué, lecture seule, sans données financières
+  const isAssistant = user?.publicMetadata?.role === 'assistant'
+  // linkedTo: 'cathy' → 'Cathy' pour le lookup dans les données investisseurs
+  const LINKED_NAMES = { cathy: 'Cathy', barthelemy: 'Barthélemy', pape: 'Pape Amadou', raphael: 'Raphaël', massata: 'Massata' }
+  const linkedUserName = isAssistant
+    ? (LINKED_NAMES[user?.publicMetadata?.linkedTo] ?? '')
+    : null
+
   // Chargement Clerk
   if (!isLoaded) {
     return (
@@ -541,6 +549,7 @@ function InvestisseurApp() {
           isMobile={isMobile}
           observateur={isObservateur}
           isAdmin={isAdmin}
+          isAssistant={isAssistant}
         />
       </div>
 
@@ -563,19 +572,34 @@ function InvestisseurApp() {
 
         <main style={{ flex: 1, padding: '0', backgroundColor: '#F9F9F9', overflow: 'hidden', minWidth: 0 }}>
           {activePage === 'dashboard' && (
-            isObservateur 
+            isObservateur
               ? <ObservateurDashboard />
-              : <Dashboard userName={userName} onNavigate={handleSetActivePage} />
+              : <Dashboard
+                  userName={isAssistant ? linkedUserName : userName}
+                  onNavigate={handleSetActivePage}
+                  isAssistant={isAssistant}
+                />
           )}
           {activePage === 'products' && <CataloguePage userName={userName} />}
-          {activePage === 'documents' && <DocumentsPage userName={userName} />}
+          {activePage === 'documents' && <DocumentsPage userName={isAssistant ? linkedUserName : userName} isAssistant={isAssistant} />}
           {activePage === 'insights' && <InsightsPage />}
-          {(activePage === 'innercircle' || activePage === 'inner-circle') && <InnerCirclePage />}
-          {activePage === 'tranche2' && <Tranche2Page userName={userName} />}
-          {(activePage === 'investissement' || activePage === 'mon-investissement') && <MonInvestissementPage userName={userName} />}
+          {/* Inner Circle : bloqué pour les assistants */}
+          {(activePage === 'innercircle' || activePage === 'inner-circle') && (
+            isAssistant
+              ? <PlaceholderPage title="Accès restreint" subtitle="Cette section est réservée aux investisseurs" onBack={goToDashboard} />
+              : <InnerCirclePage />
+          )}
+          {/* Tranche 2 : visible pour les assistants (incite l'investisseur à augmenter) */}
+          {activePage === 'tranche2' && <Tranche2Page userName={isAssistant ? linkedUserName : userName} />}
+          {(activePage === 'investissement' || activePage === 'mon-investissement') && (
+            <MonInvestissementPage
+              userName={isAssistant ? linkedUserName : userName}
+              isAssistant={isAssistant}
+              setActivePage={handleSetActivePage}
+            />
+          )}
           {activePage === 'podcast' && <PodcastPage />}
           {activePage === 'analytics' && (isAdmin ? <AnalyticsPage /> : <PlaceholderPage title="Accès restreint" subtitle="Cette section est réservée à l'administration" onBack={goToDashboard} />)}
-          {/* Placeholder pages for other nav items */}
           {activePage === 'roadmap' && <PlaceholderPage title="Roadmap" subtitle="Feuille de route produit" onBack={goToDashboard} />}
           {activePage === 'calendar' && <PlaceholderPage title="Calendrier" subtitle="Événements & jalons" onBack={goToDashboard} />}
         </main>

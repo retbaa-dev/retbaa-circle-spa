@@ -50,14 +50,14 @@ function DonutChart({ pct, color }) {
   )
 }
 
-export default function MonInvestissementPage({ userName, setActivePage }) {
+export default function MonInvestissementPage({ userName, setActivePage, isAssistant = false }) {
   // Match par prénom ou nom complet (ex: "Massata Niang" → "Massata")
   const shortName = userName ? Object.keys(INVESTOR_DATA).find(k => userName.startsWith(k) || userName.includes(k)) : null
   const data = INVESTOR_DATA[shortName] || INVESTOR_DATA[userName] || Object.values(INVESTOR_DATA)[0]
 
-  // Valorisation post-money actuelle (Tranche 1)
+  // Valorisation post-money actuelle (Tranche 1) — masquée pour les assistants
   const POST_MONEY_T1 = 3_000_000
-  const estimatedValue = data.pct ? Math.round((data.pct / 100) * POST_MONEY_T1) : null
+  const estimatedValue = (!isAssistant && data.pct) ? Math.round((data.pct / 100) * POST_MONEY_T1) : null
 
   const docs = [
     { title: "Pacte d'actionnaires V2", sub: 'Fév. 2026', status: 'sign', pdf: '/docs/governance/pacte-actionnaires.pdf' },
@@ -107,14 +107,14 @@ export default function MonInvestissementPage({ userName, setActivePage }) {
           )}
         </div>
 
-        {/* ── KPI cards ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '40px' }}>
+        {/* ── KPI cards — montant et % masqués pour les assistants ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${isAssistant ? 2 : 4}, 1fr)`, gap: '16px', marginBottom: '40px' }}>
           {[
-            { label: 'MONTANT INVESTI', value: data.role === 'founder' ? '1 000 €' : `€${data.amount.toLocaleString('fr-FR')}`, sub: `Transaction ID # ${data.id}` },
-            { label: 'ACTIONNARIAT', value: `${data.pct}%`, sub: `${data.shares.toLocaleString('fr-FR')} actions · Droits de vote actifs` },
+            !isAssistant && { label: 'MONTANT INVESTI', value: data.role === 'founder' ? '1 000 €' : `€${data.amount.toLocaleString('fr-FR')}`, sub: `Transaction ID # ${data.id}` },
+            !isAssistant && { label: 'ACTIONNARIAT', value: `${data.pct}%`, sub: `${data.shares.toLocaleString('fr-FR')} actions · Droits de vote actifs` },
             { label: "DATE D'ENTRÉE", value: data.entry, sub: 'Période de lock-up : 24 mois' },
-            { label: 'NUMÉROS D\'ACTIONS', value: `N° ${data.sharesRange}`, sub: 'Actions ordinaires · 0,01 € nominal' },
-          ].map(k => (
+            { label: "NUMÉROS D'ACTIONS", value: `N° ${data.sharesRange}`, sub: 'Actions ordinaires · 0,01 € nominal' },
+          ].filter(Boolean).map(k => (
             <div key={k.label} style={{
               background: '#ffffff', borderRadius: '4px', padding: '28px 32px',
               boxShadow: '0px 10px 30px rgba(0,27,63,0.04)',
@@ -351,6 +351,7 @@ export default function MonInvestissementPage({ userName, setActivePage }) {
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {/* Badges statut : toujours visibles */}
                   {doc.status === 'sign' && (
                     <span style={{ padding: '3px 10px', background: 'rgba(186,26,26,0.06)', color: '#ba1a1a', fontSize: '9px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', border: '1px solid rgba(186,26,26,0.15)' }}>
                       À SIGNER
@@ -361,11 +362,13 @@ export default function MonInvestissementPage({ userName, setActivePage }) {
                       SIGNATURE EN ATTENTE
                     </span>
                   )}
-                  {doc.pdf ? (
+                  {/* Boutons d'action : masqués en lecture seule (assistant) */}
+                  {!isAssistant && doc.pdf && (
                     <a href={doc.pdf} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', color: '#EFC0D4', textDecoration: 'none' }}>
                       <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>download</span>
                     </a>
-                  ) : (
+                  )}
+                  {!isAssistant && !doc.pdf && (
                     <button style={{ padding: '8px 16px', background: '#1A3A6B', color: '#ffffff', border: 'none', borderRadius: '4px', fontFamily: 'Manrope, sans-serif', fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer' }}>
                       SIGNER
                     </button>

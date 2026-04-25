@@ -41,6 +41,8 @@ const INVESTOR_DATA = {
   pape:       { name: 'Pape Amadou Ngom', email: 'angom@sqorus.com',          amount: 150000, shares: 6250,   shareClass: 'Série A',   ref: 'RC-0042' },
   cathy:      { name: 'Cathy Muiza',      email: 'cathy@r2coop.com',          amount: 30000,  shares: 1250,   shareClass: 'Série A',   ref: 'RC-0078' },
   raphael:    { name: 'Raphaël Perdrix',  email: 'Raphael.Perdrix@gmail.com', amount: 30000,  shares: 1250,   shareClass: 'Série A',   ref: 'RC-0093' },
+  // Assistants — accès délégué lecture seule, sans données financières
+  leah:       { name: 'Leah',             email: 'leah@r2coop.com',           amount: 0,      shares: 0,      shareClass: 'Assistant', ref: 'RC-0078-A', role: 'assistant', linkedTo: 'cathy' },
 }
 
 // Store des invitations (en prod → utiliser une DB ou fichier JSON persistant)
@@ -150,12 +152,16 @@ app.post('/admin/invite/:token/use', async (req, res) => {
 
   // Ajouter les métadonnées à l'utilisateur Clerk
   try {
+    const inv = invite.investorData
     await clerk.users.updateUserMetadata(clerkUserId, {
       publicMetadata: {
-        status: 'pending',          // pending | active | suspended
+        status: 'pending',
         investorKey: invite.investorKey,
-        investorRef: invite.investorData.ref,
-        investorName: invite.investorData.name,
+        investorRef: inv.ref,
+        investorName: inv.name,
+        // Propagés uniquement si présents (pour les assistants)
+        ...(inv.role     && { role: inv.role }),
+        ...(inv.linkedTo && { linkedTo: inv.linkedTo }),
       }
     })
   } catch (e) {
