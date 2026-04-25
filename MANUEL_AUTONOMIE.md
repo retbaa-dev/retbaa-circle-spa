@@ -367,3 +367,160 @@ Le site est restauré en 2 minutes depuis GitHub.
 ---
 
 *Ce manuel est maintenu dans le repo GitHub. Toute mise à jour du code doit s'accompagner d'une mise à jour de ce manuel si nécessaire.*
+
+---
+
+## 16. CLAUDE COWORK ET DISPATCH — Guide pour Massata
+
+> **Résumé :** Cowork = Claude Code avec une interface visuelle, sans terminal. Dispatch = déclencher Cowork depuis ton téléphone. Les deux sont inclus dans ton abonnement Claude Max.
+
+---
+
+### 16.1 C'est quoi exactement ?
+
+| Outil | Ce que c'est | Pour quoi |
+|-------|-------------|-----------|
+| **Claude Code** | Claude dans le terminal | Modifier le code, déployer |
+| **Claude Cowork** | Claude Code avec interface visuelle | Même chose, sans terminal |
+| **Dispatch** | Déclencheur mobile pour Cowork | Lancer des tâches depuis ton téléphone |
+| **Claude Projects** | Contexte persistant par projet | Retbaa Circle = un projet avec tout son contexte |
+
+---
+
+### 16.2 Installation — Claude Desktop (Mac)
+
+1. Télécharge **Claude Desktop** : https://claude.ai/download
+2. Connecte-toi avec ton compte Claude Max (massata@retbaa.com)
+3. Dans l'app, clique sur **"Cowork"** dans la barre latérale
+
+C'est tout. Cowork est inclus dans Max. Pas d'installation supplémentaire.
+
+---
+
+### 16.3 Configurer le projet Retbaa Circle dans Cowork
+
+1. Ouvre Claude Desktop → Cowork
+2. Clique **"New Project"**
+3. Pointe vers le dossier du repo cloné sur ton Mac :
+   ```
+   /Users/massata/retbaa-circle-spa  (ou là où tu as cloné)
+   ```
+4. Dans les instructions du projet, colle ceci :
+   ```
+   Tu travailles sur le portail investisseurs Retbaa Circle.
+   Stack : React 19 + Vite + Clerk auth + Express PM2 + Caddy + Docuseal.
+   Site live : https://circle.retbaa.com
+   VM : work@20.214.160.202
+   Deploy : ./deploy.sh
+   Ne jamais modifier MEMORY.md, SOUL.md, AGENTS.md, TOOLS.md.
+   Demander validation avant tout changement d'architecture ou d'auth.
+   ```
+
+Désormais chaque session dans ce projet a tout le contexte sans te répéter.
+
+---
+
+### 16.4 Ce que tu peux faire avec Cowork (en langage naturel)
+
+**Modifications visuelles :**
+> "Change la couleur du titre de la page Documents en rouge bordeaux"
+
+**Ajout de contenu :**
+> "Ajoute Raphaël Perdrix dans la liste des investisseurs avec 1250 actions"
+
+**Corrections de bugs :**
+> "Le bouton Ouvrir sur mobile ne fonctionne pas, corrige-le"
+
+**Déploiement :**
+> "Déploie les changements sur la VM en SSH"
+
+---
+
+### 16.5 Dispatch — Travailler depuis ton téléphone
+
+Dispatch te permet de déclencher Cowork depuis ton iPhone sans ouvrir ton Mac.
+
+#### Setup (1 minute)
+1. Installe l'app **Claude** sur ton iPhone
+2. Va dans la section **Cowork** → **Dispatch**
+3. Appaire avec ton Mac (QR code, 60 secondes)
+
+⚠️ **Condition :** ton Mac doit être allumé et Claude Desktop ouvert.
+
+#### Exemples d'utilisation
+Depuis ton téléphone, tu envoies :
+- "Envoie le lien d'invitation à Barthélemy" → Cowork exécute sur ton Mac
+- "Vérifie que le portail fonctionne" → prend un screenshot, te répond
+- "Déploie les derniers changements" → lance ./deploy.sh
+
+---
+
+### 16.6 Scheduled Tasks — Automatiser sans y penser
+
+Dans Cowork → **Scheduled** → **+ New Task**
+
+**Exemple de tâche utile pour Retbaa Circle :**
+```
+Tous les lundis à 9h :
+- Vérifie que circle.retbaa.com charge correctement
+- Vérifie que pm2 status montre tous les services online
+- Vérifie que Docuseal est accessible sur le port 8080
+- Envoie-moi un résumé par email
+```
+
+---
+
+### 16.7 Canaux Telegram (optionnel mais puissant)
+
+Claude Code peut envoyer ses résultats directement dans Telegram plutôt que d'attendre que tu consultes le terminal.
+
+**Setup :**
+1. Crée un bot Telegram via @BotFather
+2. Dans Claude Code, tape : `/channel telegram`
+3. Donne le token du bot
+
+**Usage :** Lance une tâche longue (ex: analyse de logs), va boire un café, reçois le résultat sur Telegram.
+
+---
+
+### 16.8 Ce qui ne change PAS avec Cowork
+
+Cowork ne remplace pas la VM. Pour déployer sur le site live, tu as toujours besoin d'un accès à la VM (via SSH depuis ton Mac ou depuis Cowork directement si tu configures une connexion SSH).
+
+**Workflow recommandé :**
+1. Modifie le code avec Cowork sur ton Mac (en local)
+2. Teste en local : `npm run dev`
+3. Commit et push sur GitHub
+4. Connecte-toi à la VM (SSH ou VNC)
+5. `git pull && ./deploy.sh`
+
+Ou si tu configures Cowork avec accès SSH à la VM, il peut déployer directement.
+
+---
+
+### 16.9 Comparatif — Comment travailler selon les cas
+
+| Situation | Outil recommandé |
+|-----------|-----------------|
+| Petite correction visuelle | Cowork sur ton Mac |
+| Modification de données (investisseurs) | Cowork sur ton Mac |
+| Déploiement live | SSH vers VM + ./deploy.sh |
+| Tâche urgente depuis le téléphone | Dispatch |
+| Analyse de problème complexe | Claude Projects (contexte complet) |
+| Plus d'accès à la VM | Cowork en local + GitHub |
+| Urgence totale | Restauration depuis GitHub (section 15) |
+
+---
+
+### 16.10 Pour être 100% autonome — Checklist finale
+
+- [ ] Claude Desktop installé sur Mac
+- [ ] Projet "Retbaa Circle" créé dans Cowork avec les instructions
+- [ ] Repo cloné sur ton Mac : `git clone https://github.com/retbaa-dev/retbaa-circle-spa.git`
+- [ ] SSH configuré vers la VM (ou utilise VNC)
+- [ ] Dispatch appairé avec ton iPhone
+- [ ] Gmail reconnecté sur genspark.ai (pour les emails d'invitation)
+- [ ] Tu as lu les sections 3, 4, 5 de ce manuel
+
+**Temps estimé pour tout configurer : 30 minutes.**
+
