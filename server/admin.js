@@ -326,6 +326,118 @@ app.get('/api/stats', async (req, res) => {
   })
 })
 
+// ── POST /onboarding/magic-link ────────────────────────────────────────────
+// Page /bienvenue : l'investisseur entre son email → reçoit un magic link Clerk
+// Pas d'auth requise — on vérifie juste que l'email est dans la liste investisseurs
+app.post('/onboarding/magic-link', async (req, res) => {
+  try {
+    const { email } = req.body
+    if (!email) return res.status(400).json({ error: 'Email requis' })
+
+    const normalizedEmail = email.trim().toLowerCase()
+
+    // Vérifier que l'email est dans la liste investisseurs autorisés
+    const AUTHORIZED_EMAILS = Object.values(INVESTOR_DATA).map(i => i.email.toLowerCase())
+    const investorEntry = Object.entries(INVESTOR_DATA).find(
+      ([, v]) => v.email.toLowerCase() === normalizedEmail
+    )
+
+    if (!investorEntry) {
+      // On retourne toujours succès pour éviter l'énumération d'emails
+      return res.json({ success: true, message: 'Si cet email est enregistré, vous recevrez un lien de connexion.' })
+    }
+
+    const [investorKey, investorData] = investorEntry
+
+    // Trouver ou créer l'utilisateur Clerk
+    let clerkUser = null
+    try {
+      const users = await clerk.users.getUserList({ emailAddress: [email.trim()] })
+      clerkUser = users.data?.[0] || users[0] || null
+    } catch (e) {
+      console.error('Clerk getUserList error:', e.message)
+    }
+
+    // Si pas de compte Clerk → créer le compte
+    if (!clerkUser) {
+      try {
+        clerkUser = await clerk.users.createUser({
+          emailAddress: [email.trim()],
+          firstName: investorData.name.split(' ')[0],
+          lastName: investorData.name.split(' ').slice(1).join(' '),
+          publicMetadata: {
+            investor: investorKey,
+            role: investorData.role || 'investor',
+            status: 'active',
+            linkedTo: investorData.linkedTo || null,
+          }
+        })
+      } catch (e) {
+        console.error('Clerk createUser error:', e.message)
+        return res.status(500).json({ error: 'Erreur création compte' })
+      }
+    } else {
+      // Mettre à jour les metadata si manquantes
+      if (!clerkUser.publicMetadata?.investor) {
+        await clerk.users.updateUser(clerkUser.id, {
+          firstName: clerkUser.firstName || investorData.name.split(' ')[0],
+          lastName: clerkUser.lastName || investorData.name.split(' ').slice(1).join(' '),
+          publicMetadata: {
+            investor: investorKey,
+            role: investorData.role || 'investor',
+            status: 'active',
+            linkedTo: investorData.linkedTo || null,
+          }
+        })
+      }
+    }
+
+    // Générer un sign-in token Clerk (magic link valable 24h)
+    const tokenResult = await clerk.signInTokens.createSignInToken({
+      userId: clerkUser.id,
+      expiresInSeconds: 86400,
+    })
+
+    const magicLink = `https://circle.retbaa.com/?__clerk_ticket=${tokenResult.token}`
+
+    // Envoyer l'email via Clerk (email transactionnel)
+    try {
+      await clerk.emails.createEmail({
+        fromEmailName: 'circle',
+        subject: 'Votre accès Retbaa Circle',
+        body: `
+Bonjour ${investorData.name.split(' ')[0]},
+
+Voici votre lien de connexion à Retbaa Circle. Il est personnel et valable 24h.
+
+${magicLink}
+
+Aucun mot de passe requis — cliquez simplement sur le lien.
+
+Cordialement,
+Massata Niang
+Retbaa
+        `.trim(),
+        emailAddressId: clerkUser.emailAddresses[0].id,
+      })
+      return res.json({ success: true, message: 'Lien envoyé par email.' })
+    } catch (emailErr) {
+      // Si l'envoi email Clerk échoue (plan limité), retourner le lien directement
+      console.error('Clerk email error (non bloquant):', emailErr.message)
+      return res.json({
+        success: true,
+        message: 'Lien généré.',
+        magicLink, // Retourné pour affichage direct si email indisponible
+        fallback: true,
+      })
+    }
+
+  } catch (err) {
+    console.error('onboarding/magic-link error:', err)
+    res.status(500).json({ error: 'Erreur serveur' })
+  }
+})
+
 const PORT = process.env.ADMIN_PORT || 3002
 app.listen(PORT, '127.0.0.1', () => {
   console.log(`Admin server running on port ${PORT}`)

@@ -18,7 +18,7 @@ import InnerCirclePage from './pages/InnerCirclePage'
 import Tranche2Page from './pages/Tranche2Page'
 import MonInvestissementPage from './pages/MonInvestissementPage'
 import PodcastPage from './pages/PodcastPage'
-import AnalyticsPage from './pages/AnalyticsPage'
+import BienvenueOnboarding from './pages/BienvenueOnboarding'
 import { track } from './utils/tracker'
 import './index.css'
 
@@ -113,6 +113,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Route onboarding investisseur — sans auth */}
+        <Route path="/bienvenue" element={<BienvenueOnboarding />} />
+
         {/* Route invitation unique */}
         <Route path="/invite/:token" element={<InvitePage />} />
 
