@@ -58,6 +58,17 @@ const episodes = [
     src: '/podcasts/podcast_ep5_en.mp3',
     topics: ['Strategy', 'Go', 'Empty Spaces', 'B2B', 'Moat', 'Long Game'],
   },
+  {
+    id: 6,
+    number: 'EP. 06',
+    title: 'Cultural Luxury: The Retbaa Thesis',
+    subtitle: 'Why a Philosophy Travels Further Than a Label',
+    description: 'Retbaa does not say "we come from Africa." It says: we share the same way of inhabiting the world. A conversation on what Cultural Luxury really means, why the moment is now, and how Kemia embodies a philosophy that resonates from Tokyo to Riyadh, from São Paulo to Scandinavia.',
+    duration: '5 min',
+    date: 'April 2026',
+    src: '/podcasts/podcast_ep6_en.mp3',
+    topics: ['Cultural Luxury', 'Kemia', 'Global Markets', 'Japan', 'GCC', 'Philosophy'],
+  },
 ]
 
 function AudioPlayer({ src, title, userName = '' }) {

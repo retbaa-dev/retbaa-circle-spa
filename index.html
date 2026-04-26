@@ -5,43 +5,145 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Retbaa Circle — Private Wealth Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0&display=swap" rel="stylesheet"/>
+    <!-- Fonts: preconnect d'abord pour ne pas bloquer le rendu -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript>
+      <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Manrope:wght@200..800&display=swap" rel="stylesheet"/>
+      <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0&display=swap" rel="stylesheet"/>
+    </noscript>
     <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #f9f6f0; }
+
+      /* ── SPLASH SCREEN natif HTML (visible avant React) ── */
       #splash {
         position: fixed; inset: 0; z-index: 9999;
-        background: #f9f9f9;
+        background: #f9f6f0;
         display: flex; flex-direction: column;
         align-items: center; justify-content: center;
-        transition: opacity 0.4s ease;
+        gap: 0;
+        transition: opacity 0.5s ease;
       }
       #splash.fade { opacity: 0; pointer-events: none; }
-      #splash-title { font-family: Georgia,serif; font-style:italic; font-weight:300; font-size:28px; color:#1A3A6B; letter-spacing:-0.01em; margin:0; }
-      #splash-sub { font-family:Arial,sans-serif; font-size:9px; letter-spacing:0.35em; text-transform:uppercase; color:#EFC0D4; font-weight:700; margin:10px 0 0; }
-      #splash-dot { width:6px; height:6px; border-radius:50%; background:#EFC0D4; margin-top:28px; animation:pulse 1.2s ease-in-out infinite; }
-      @keyframes pulse { 0%,100%{opacity:0.3;transform:scale(0.8)} 50%{opacity:1;transform:scale(1.2)} }
+
+      /* Logo text */
+      #splash-wordmark {
+        font-family: Georgia, 'Times New Roman', serif;
+        font-style: italic;
+        font-weight: 300;
+        font-size: 32px;
+        color: #1A3A6B;
+        letter-spacing: -0.01em;
+        margin: 0 0 6px;
+        opacity: 0;
+        animation: fadeUp 0.6s ease 0.1s forwards;
+      }
+      #splash-sub {
+        font-family: Arial, sans-serif;
+        font-size: 8px;
+        letter-spacing: 0.4em;
+        text-transform: uppercase;
+        color: #EFC0D4;
+        font-weight: 700;
+        margin: 0 0 40px;
+        opacity: 0;
+        animation: fadeUp 0.6s ease 0.3s forwards;
+      }
+
+      /* Barre de progression */
+      #splash-bar-track {
+        width: 120px;
+        height: 1px;
+        background: rgba(26,58,107,0.12);
+        position: relative;
+        overflow: hidden;
+        opacity: 0;
+        animation: fadeUp 0.4s ease 0.5s forwards;
+      }
+      #splash-bar-fill {
+        position: absolute;
+        top: 0; left: -100%;
+        width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, #EFC0D4, #1A3A6B, #EFC0D4, transparent);
+        animation: barSlide 1.6s ease-in-out 0.6s infinite;
+      }
+
+      /* Texte "Chargement" discret */
+      #splash-loading {
+        font-family: Arial, sans-serif;
+        font-size: 8px;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: rgba(26,58,107,0.35);
+        margin: 14px 0 0;
+        opacity: 0;
+        animation: fadeUp 0.4s ease 0.7s forwards;
+      }
+
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(8px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes drawCircle {
+        to { stroke-dashoffset: 0; }
+      }
+      @keyframes barSlide {
+        0%   { left: -100%; }
+        100% { left: 100%; }
+      }
     </style>
   </head>
   <body>
+    <!-- Splash natif : visible immédiatement, avant tout JS -->
     <div id="splash">
-      <p id="splash-title">Retbaa Circle</p>
-      <p id="splash-sub">Portail Investisseurs</p>
-      <div id="splash-dot"></div>
+      <!-- Logo SVG Retbaa Circle animé -->
+      <svg id="splash-logo" width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"
+        style="margin-bottom:20px; opacity:0; animation: fadeUp 0.6s ease 0s forwards;">
+        <!-- Cercle extérieur -->
+        <circle cx="24" cy="24" r="22" stroke="#1A3A6B" stroke-width="1" fill="none"
+          stroke-dasharray="138.2" stroke-dashoffset="138.2"
+          style="animation: drawCircle 1.2s ease 0.2s forwards;" />
+        <!-- Cercle intérieur rose -->
+        <circle cx="24" cy="24" r="14" stroke="#EFC0D4" stroke-width="0.75" fill="none"
+          stroke-dasharray="87.96" stroke-dashoffset="87.96"
+          style="animation: drawCircle 1s ease 0.5s forwards;" />
+        <!-- Point central -->
+        <circle cx="24" cy="24" r="2.5" fill="#1A3A6B"
+          style="opacity:0; animation: fadeUp 0.4s ease 1s forwards;" />
+      </svg>
+
+      <p id="splash-wordmark">Retbaa Circle</p>
+      <p id="splash-sub">Portail Investisseurs · Espace Privé</p>
+      <div id="splash-bar-track">
+        <div id="splash-bar-fill"></div>
+      </div>
+      <p id="splash-loading">Chargement en cours…</p>
     </div>
+
     <div id="root"></div>
+
     <script>
+      // Disparaît dès que React injecte son premier enfant dans #root
       var splash = document.getElementById('splash');
       var observer = new MutationObserver(function() {
         var root = document.getElementById('root');
         if (root && root.children.length > 0) {
           splash.classList.add('fade');
-          setTimeout(function(){ splash.style.display='none'; }, 400);
+          setTimeout(function() { splash.style.display = 'none'; }, 500);
           observer.disconnect();
         }
       });
       observer.observe(document.getElementById('root'), { childList: true, subtree: true });
-      setTimeout(function(){ splash.classList.add('fade'); setTimeout(function(){ splash.style.display='none'; },400); }, 10000);
+      // Fallback : masque après 12s maximum
+      setTimeout(function() {
+        splash.classList.add('fade');
+        setTimeout(function() { splash.style.display = 'none'; }, 500);
+      }, 12000);
     </script>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

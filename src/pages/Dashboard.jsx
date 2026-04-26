@@ -56,14 +56,32 @@ const news = [
 ]
 
 // ─── CAROUSEL BLOCKS ─────────────────────────────────────────
+// ─── LATEST CONTENT (branché sur les vrais articles/podcasts) ───
+const LATEST_INSIGHT = {
+  title: 'Retbaa Community : La Philosophie de l\'Expérience',
+  date: 'Avril 2026',
+  tag: 'Vision · Stratégie',
+}
+const LATEST_INSIGHT_2 = {
+  title: 'Cultural Luxury: The Retbaa Vision',
+  date: 'Avril 2026',
+  tag: 'Vision',
+}
+const LATEST_PODCAST = {
+  number: 'EP. 06',
+  title: 'Cultural Luxury: The Retbaa Thesis',
+  date: 'April 2026',
+}
+
 const carouselBlocks = [
   {
     id: 'insights',
     icon: 'insights',
-    tag: 'Editorial',
+    tag: 'Editorial · ' + LATEST_INSIGHT.tag,
     title: 'Retbaa Insights',
-    subtitle: 'Études & analyses du marché du luxe africain',
-    preview: '"The Rise of African Artisanal Perfumery"',
+    subtitle: 'Études & analyses — marché du luxe',
+    preview: '"' + LATEST_INSIGHT.title + '"',
+    previewMeta: LATEST_INSIGHT.date,
     cta: 'Explore',
     ctaIcon: 'east',
     bg: '#1A3A6B',
@@ -77,10 +95,11 @@ const carouselBlocks = [
   {
     id: 'podcast',
     icon: 'mic',
-    tag: 'Audio',
+    tag: 'Audio · ' + LATEST_PODCAST.number,
     title: 'Retbaa Podcast',
-    subtitle: 'Les coulisses de la marque',
-    preview: '"Episode 12: Crafting Scented Memories"',
+    subtitle: 'Analyses audio pour investisseurs',
+    preview: '"' + LATEST_PODCAST.title + '"',
+    previewMeta: LATEST_PODCAST.date,
     cta: 'Listen',
     ctaIcon: 'play_circle',
     bg: '#EFC0D4',
@@ -98,6 +117,7 @@ const carouselBlocks = [
     title: 'Retbaa Inner Circle',
     subtitle: 'Espace exclusif investisseurs',
     preview: 'Message privé de Massata — 2 avr. 2026',
+    previewMeta: null,
     cta: 'Enter',
     ctaIcon: 'lock_open',
     bg: '#001026',
@@ -181,6 +201,16 @@ function CarouselCard({ block, onClick }) {
           }}>
             {block.preview}
           </p>
+          {block.previewMeta && (
+            <p style={{
+              fontFamily: 'Manrope, sans-serif', fontSize: '10px',
+              letterSpacing: '0.1em', textTransform: 'uppercase',
+              color: block.previewColor, opacity: 0.6, margin: '6px 0 0',
+              fontStyle: 'normal',
+            }}>
+              {block.previewMeta}
+            </p>
+          )}
         </div>
       </div>
 

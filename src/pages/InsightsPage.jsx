@@ -86,6 +86,177 @@ function ArticleModal({ article, onClose }) {
 // ─── DONNÉES ARTICLES ──────────────────────────────────────────
 const articles = [
   {
+    id: 14,
+    tag: 'Vision · Stratégie',
+    title: 'Retbaa Community : La Philosophie de l\'Expérience',
+    subtitle: 'Jobs, la neuroscience du luxe, et pourquoi les grandes maisons créent des communautés — pas des clients',
+    summary: 'En 1997, Jobs renverse le paradigme : "Start with the customer experience, work backwards to the technology." Trente ans après, la neuroscience confirme ce que les grandes maisons de luxe ont compris intuitivement. Retbaa Community en tire une doctrine en 5 principes — et une vision pour devenir la maison de luxe qui écoute vraiment.',
+    date: 'Avril 2026',
+    author: 'Kemia · Chief of Staff IA',
+    source: 'Bain & Company 2025, McKinsey State of Luxury 2025, Journal of Neuroaesthetics 2024, BCG Luxury AI Report 2025',
+    sourceUrl: '/docs/Retbaa_Community_Philosophy_v1.pdf',
+    pdf: '/docs/Retbaa_Community_Philosophy_v1.pdf',
+    img: '/retbaa-photos/retbaa_01.jpg',
+    featured: true,
+    category: 'Vision',
+    content: `
+## Le point de départ : Jobs et le renversement du paradigme
+
+En 1997, à la WWDC d'Apple, Steve Jobs répond à un ingénieur qui tente de le déstabiliser publiquement sur ses lacunes techniques. Sa réponse va redéfinir la façon dont on pense le produit :
+
+> *"Start with the customer experience and work backwards to the technology."*
+> — Steve Jobs · WWDC 1997
+
+Cette phrase n'est pas un conseil de design. C'est une philosophie d'entreprise complète. La plupart des fondateurs partent du produit et cherchent ensuite à convaincre un client. Jobs inversa cette logique : commencer par ce que le client vit, ressent, désire — et travailler à rebours jusqu'à la technologie qui rend cette expérience possible.
+
+Le résultat ? Apple est devenue une entreprise de 3 000 milliards de dollars. Plus significatif encore : Apple n'a pas créé une base de clients. Elle a créé une **communauté**. Des personnes qui ne disent pas "j'utilise Apple" — elles disent "je suis Apple".
+
+## La neuroscience du luxe : ce que le cerveau ressent vraiment
+
+Le luxe n'est pas une catégorie de prix. C'est une série de réponses neurologiques complexes. Les recherches de **Chanel avec l'IRMf**, **Rolex avec l'EEG**, et **Louis Vuitton avec le facial coding** ont mis en évidence une vérité fondamentale :
+
+Quand un consommateur interagit avec un objet de luxe, son cerveau active simultanément le **nucleus accumbens** (système de récompense) et le **cortex orbitofrontal** (valeur émotionnelle). Ce double déclencheur provoque une libération de dopamine qui crée non pas une satisfaction momentanée, mais un *désir de répétition* — la base neurochimique de la fidélité.
+
+**4 leviers sensoriels identifiés :**
+
+- **Le toucher** : L'*endowment effect* — tenir un objet active le sentiment de possession. Le médaillon Kemia, fait pour être tenu et tourné dans les mains, est neurochimiquement un objet parfait.
+- **L'olfaction** : Le seul sens directement connecté au système limbique. Les odeurs génèrent des réponses émotionnelles immédiates et involontaires. C'est l'ADN de Retbaa.
+- **Le visuel** : +37% d'intention d'achat avec une expérience multisensorielle cohérente (Dior Sensory Studies, 2023).
+- **L'auditif** : Rolls-Royce a investi des années à perfectionner le son de ses portières. Le son d'un flacon, d'une céramique posée — ces micro-expériences ancrent la mémoire de marque.
+
+## Benchmark : ce que les grandes maisons ont compris avant nous
+
+**Aesop** — La boutique comme espace philosophique. Le staff formé à la conversation, pas à la vente. Acquisition par L'Oréal à $2.5B (2023).
+
+**Byredo** — La fragrance comme langage personnel. Chaque parfum est une biographie émotionnelle, pas une composition.
+
+**Diptyque** — L'objet comme souvenir de voyage. Fidélité transgénérationnelle.
+
+**Hermès** — L'artisanat comme acte de résistance culturelle. ×4 de temps en boutique avec une identité olfactive exclusive. La seule marque à n'avoir jamais soldé.
+
+**Ce qu'ils ont tous en commun** : ils ont théorisé leur propre catégorie. Retbaa ne s'inscrit pas dans une catégorie existante. Retbaa *est* la catégorie — Cultural Luxury.
+
+## Bain 2025 & McKinsey : l'IA comme levier d'intimité
+
+Le rapport **Bain Technology Report 2025** est clair : *"Le futur appartient aux marques qui fusionnent la précision de l'IA avec l'élégance humaine, créant des interactions qui semblent à la fois effortless et profondément personnelles."*
+
+Le rapport **McKinsey State of Luxury 2025** confirme : le client luxe n'a pas besoin de plus d'information. Il a besoin de *connexion*. Les marques qui réussiront sont celles qui utilisent l'IA non pour automatiser le service — mais pour le rendre plus humain, plus attentionné, plus mémorable.
+
+**98% des implémentations IA dans le luxe aujourd'hui sont des chatbots.** Ils répondent plus vite — mais ils ne créent pas de connexion. Ils n'activent pas le nucleus accumbens. Retbaa Community n'est pas un chatbot.
+
+## La doctrine Retbaa Community en 5 principes
+
+**1. L'expérience d'abord, la technologie ensuite.**
+Chaque feature part d'un moment vécu — tenir Kemia, découvrir un parfum, partager un rituel. La technologie est invisible. L'expérience est tout.
+
+**2. Un compagnon, pas un assistant.**
+Retbaa Community ne répond pas à des questions. Il accompagne un chemin. Il raconte les histoires derrière les objets, suggère des rituels, crée une continuité entre l'expérience physique et le monde digital de la marque.
+
+**3. Le Cultural Resonance comme filtre universel.**
+Il résonne à Tokyo, Riyadh, Milan et Dakar — parce qu'il parle le langage des cultures qui partagent le rituel, le sensible, le craft. Pas un langage africain. Un langage humain.
+
+**4. La mémoire comme luxe.**
+Retbaa Community se souvient. Dans un monde où tout est éphémère, la mémoire est le vrai luxe. (Bain 2025 : "proprietary data as the true source of competitive strength")
+
+**5. La communauté avant la conversion.**
+Apple a créé des évangélistes, pas des clients. Retbaa Community crée une appartenance. La conversion est une conséquence, pas un objectif.
+
+## Les enseignements pour Retbaa — Applications concrètes
+
+### Retbaa Community (app cliente)
+L'enseignement Jobs s'applique directement : ne pas partir de "que peut faire l'IA ?" mais de "quel est le moment le plus intime dans la relation client-Retbaa ?" La réponse : ce moment où quelqu'un tient Kemia pour la première fois et cherche à comprendre ce qu'il tient. Community est ce pont — entre l'objet et son sens, entre le geste et l'histoire.
+
+Sur retbaa.com : compagnon IA intégré qui guide la découverte de l'univers.
+En QR code dans les hôtels partenaires Retbaa Trade : activation sensorielle dans la chambre.
+En app premium : rituals personnalisés, mémoire des préférences, pont entre cultures.
+
+### Retbaa Moments
+Les enseignements neuroscientifiques sur la saisonnalité et l'ancrage mémoriel sont centraux ici. Noël, Ramadan, Golden Week, Diwali — chaque moment culturel est une opportunité de résonance authentique, pas de marketing saisonnier. Retbaa Moments utilise le Cultural Resonance Framework pour calibrer le bon message, dans le bon format, pour la bonne culture — au bon moment. Le Cultural Resonance Score par marché permet de mesurer l'impact réel, pas les impressions.
+
+### L'application cliente finale
+L'enseignement Hermès (×4 temps en boutique avec identité olfactive) se traduit dans l'app par une expérience multisensorielle : descriptions immersives, suggestion de rituels contextualisés, personnalisation profonde via Retbaa Brain. L'objectif n'est pas le temps passé dans l'app — c'est la fréquence du retour. Une app qu'on ouvre quand on veut se souvenir de quelque chose. Pas quand on veut acheter.
+
+## Le Cultural Resonance Framework
+
+| Dimension | Question clé | Application |
+|-----------|-------------|-------------|
+| **Sensoriality** | Quel sens cette interaction active-t-elle ? | Descriptions olfactives, rituels tactiles, ambiances |
+| **Ritual** | Quel rituel cela s'inscrit-il ? | Morning ritual, hospitalité, méditation, partage |
+| **Craft** | Quelle histoire d'artisanat est cachée ? | Récits de fabrication, matières, gestes |
+| **Cultural Bridge** | Avec quelle culture universelle résonne-t-il ? | Wabi-sabi / Kemia, hospitalité oud / fragrances |
+| **Memory** | Quelle mémoire personnelle cela réveille-t-il ? | Retbaa Brain — personnalisation profonde |
+
+## Conclusion : la maison qui écoute
+
+Jobs avait raison en 1997. La neuroscience confirme : la fidélité est dopaminergique. Les marques qui gagnent ne vendent pas des produits — elles créent des expériences que les clients veulent répéter, partager, défendre.
+
+Retbaa Community est notre réponse à cette vérité. Pas une app de plus. Une présence. Un compagnon qui accompagne chaque moment de l'univers Retbaa — dans une chambre d'hôtel à Riyadh, dans un appartement à Tokyo, sur un marché à Dakar.
+
+La technologie est le moyen. L'expérience est la fin. Et la communauté — ces personnes qui *vivent* Retbaa plutôt que de l'acheter — est l'actif le plus précieux qu'une maison de luxe puisse construire.
+
+*"Designed in Paris, from Africa to the world."*
+    `,
+  },
+  {
+    id: 13,
+    tag: 'Vision',
+    title: 'Cultural Luxury: The Retbaa Vision',
+    subtitle: 'A philosophy that resonates wherever craft, ritual and depth exist',
+    summary: 'Retbaa does not say only "we come from Africa." Retbaa says: "we share the same way of inhabiting the world." This is Cultural Luxury — a universal positioning that unlocks Japan, Saudi Arabia, Scandinavia, Brazil, and beyond. A strategic vision for investors and partners.',
+    date: 'April 2026',
+    author: 'Kemia · Chief of Staff IA',
+    source: 'Bain & Company, Deloitte, KPMG, BeautyMatter — 2025/2026',
+    sourceUrl: 'https://circle.retbaa.com/cultural-luxury.html',
+    pdf: null,
+    img: '/retbaa-photos/retbaa_01.jpg',
+    featured: false,
+    category: 'Vision',
+    content: `
+## The Positioning
+
+Cultural Luxury is not a marketing slogan. It is a philosophical positioning that redefines the relationship between object, user, and world.
+
+**The filter is not:** "Is there an African diaspora in this market?"
+
+**The filter is:** "Is there a culture of the sensory object, ritual, authentic craft?"
+
+This opens every market where these values exist — regardless of geography.
+
+## The Market Moment
+
+Three converging forces make now the right moment:
+
+- **Decentralization of luxury authority** — Paris is no longer the only validator. Niche communities and non-European brands have redistributed prestige.
+- **The shift toward authentic narrative** — Gen Z evaluates brands on cultural relevance, not status. Depth matters more than logos.
+- **New geographic engines** — Southeast Asia, Latin America, Middle East, Africa: €40-45B in emerging luxury retail. These markets want brands that speak to something they recognize.
+
+## The Markets
+
+**Japan** — wabi-sabi, ceramic philosophy, the ritual of scent. Near-identical DNA with Kemia.
+**Saudi Arabia** — oud, bakhoor, olfactory hospitality. Culture of the gifted object as act of respect.
+**UK** — world capital of niche fragrance. Concept stores, curatorial culture.
+**Italy** — artigianato, the object that tells a story of hand and earth.
+**Scandinavia** — craft, sustainability, conscious daily life.
+**Korea** — baekja ceramics, jeong (deep emotional bond), ritual as discipline.
+**Brazil** — São Paulo is the 3rd largest luxury market in the Americas. Cultural syncretism, fragrance as identity.
+
+## Kemia as Cultural Luxury Artifact
+
+The sensory ceramic medallion is not a container. It is a living material that absorbs, develops patina, holds memory. It does not get discarded — it is kept, transmitted.
+
+In every culture where the gifted object is an act of language — Japan, the Gulf, West Africa, Italy — Kemia is immediately understood as carrying meaning. **That is not positioning. That is truth.**
+
+## The Numbers
+
+- Global luxury market 2025: **€1.44 trillion** — stable
+- Niche fragrances: **most dynamic subcategory** in all luxury beauty
+- Specialist brands: **70%+ of growing brands** in 2025 were specialists
+- New growth engines: Southeast Asia, LatAm, Middle East, Africa = **€40-45B** in retail value
+
+*Sources: Bain & Company Luxury Goods Worldwide Market Study 2025, Deloitte Global Powers of Luxury 2026, BeautyMatter*
+    `,
+  },
+  {
     id: 8,
     tag: 'Veille Marché',
     title: 'LVMH Q1 2026 : Le Luxe Silencieux Gagne la Bataille',
@@ -418,7 +589,7 @@ Richemont surperforme parce que Cartier et Van Cleef vendent des objets qui *dur
   },
 ]
 
-const FILTERS = ['Tout', 'Veille Marché', 'Afrique', 'Marché Luxe', 'Stratégie', 'Géopolitique', 'Distribution']
+const FILTERS = ['Tout', 'Vision', 'Veille Marché', 'Afrique', 'Marché Luxe', 'Stratégie', 'Géopolitique', 'Distribution']
 
 // ─── ARTICLE FEATURED (pleine largeur) ───────────────────────
 function FeaturedArticle({ article, onOpen }) {
