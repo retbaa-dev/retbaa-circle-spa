@@ -29,30 +29,9 @@ const docs = [
 
 // ─── ACTUALITÉS ──────────────────────────────────────────────
 const news = [
-  {
-    tag: 'Marché Luxe',
-    date: '7 Avr 2026',
-    title: 'LVMH, Kering, Hermès : les résultats T1 tombent cette semaine',
-    summary: "Le secteur luxe sous les projecteurs : LVMH (lundi 13), Kering (mardi 14), Hermès (mercredi 15). Après un T4 2025 difficile pour les géants, le marché attend des signaux sur la reprise chinoise et l'impact des droits de douane américains.",
-    analysis: "Si Hermès publie encore une croissance positive, ça confirme que le luxe intégral tient. Retbaa est exactement sur ce positionnement — artisanal, rare, sans compromis.",
-    img: '/retbaa-photos/retbaa_11.jpg',
-  },
-  {
-    tag: 'Stratégie',
-    date: '31 Mar 2026',
-    title: "L'Oréal rachète Kering Beauté (dont Creed) pour 4 Mds€",
-    summary: "Plus grosse acquisition de l'histoire de L'Oréal. Kering cède tout son pôle olfactif pour se recentrer sur la mode. Une recomposition majeure du marché de la parfumerie niche.",
-    analysis: "La cession de Creed redistribue les cartes dans la parfumerie niche. Le terrain se restructure — une fenêtre s'ouvre pour les acteurs africains du luxe sensoriel comme Retbaa.",
-    img: '/retbaa-photos/retbaa_12.jpg',
-  },
-  {
-    tag: 'Opportunité',
-    date: '1 Avr 2026',
-    title: "Luxe MEA : +10,6% de croissance annuelle attendue d'ici 2031",
-    summary: "Le marché du luxe Moyen-Orient & Afrique devrait passer de 19,8 Mds$ à 36,2 Mds$ d'ici 2031. La classe HNW africaine atteindra 198 000 personnes en 2026.",
-    analysis: "Retbaa entre sur ce marché au moment exact où il prend de la vitesse. L'avantage du premier entrant — africain et authentique — ne durera pas indéfiniment.",
-    img: '/retbaa-photos/retbaa_13.jpg',
-  },
+  { tag: 'Marché Luxe', date: '17 Avr 2026', title: "Luxe africain : 32,97 milliards de dollars attendus d'ici 2030", summary: "Le marché du luxe africain entre dans une phase d'accélération majeure, porté par une clientèle premium connectée et une classe aisée en forte croissance. Une fenêtre d'entrée historique pour les marques africaines authentiques.", img: '/retbaa-photos/retbaa_11.jpg' },
+  { tag: 'Stratégie', date: '19 Avr 2026', title: "Résultats Q1 2026 : Hermès +6% confirme la résilience du luxe artisanal", summary: "Pendant que LVMH recule de 6% et Kering chute de 10%, Hermès affiche une croissance de +6% — preuve que le luxe intégral, rare et artisanal résiste aux turbulences macro. Exactement le positionnement de Retbaa.", img: '/retbaa-photos/retbaa_12.jpg' },
+  { tag: 'Opportunité', date: '28 Fév 2026', title: "Parfumerie niche : CAGR +9,1% jusqu'en 2033, Moyen-Orient à 8 Mds$ en 2035", summary: "Le marché mondial de la parfumerie niche devrait croître à un rythme de +9,1% par an jusqu'en 2033. Au Moyen-Orient, le segment atteindra 8 milliards de dollars d'ici 2035, porté par la demande de formules haute concentration et d'identités olfactives uniques.", img: '/retbaa-photos/retbaa_13.jpg' },
 ]
 
 // ─── CAROUSEL BLOCKS ─────────────────────────────────────────
