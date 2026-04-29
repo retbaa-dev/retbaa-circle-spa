@@ -153,14 +153,14 @@ function PreviewApp({ userName }) {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#F9F9F9' }}>
       {isMobile && sidebarOpen && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(26,58,107,0.4)', zIndex: 99 }}
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(10,20,40,0.65)', backdropFilter: 'blur(2px)', zIndex: 99 }}
           onClick={() => setSidebarOpen(false)} />
       )}
       <div style={{
         position: 'fixed', top: 0, left: 0, height: '100vh', zIndex: 100,
         transform: isMobile ? (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
         transition: 'transform 0.25s ease',
-        width: isMobile ? '100vw' : '288px',
+        width: '288px',
       }}>
         <Sidebar
           activePage={activePage}
@@ -533,7 +533,7 @@ function InvestisseurApp() {
           onClick={() => setSidebarOpen(false)}
           style={{
             position: 'fixed', inset: 0, zIndex: 90,
-            background: 'rgba(0,27,63,0.4)',
+            background: 'rgba(10,20,40,0.65)',
             backdropFilter: 'blur(2px)',
           }}
         />
@@ -544,7 +544,7 @@ function InvestisseurApp() {
         position: 'fixed', top: 0, left: 0, height: '100vh', zIndex: 100,
         transform: isMobile ? (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
         transition: 'transform 0.25s ease',
-        width: isMobile ? '100vw' : '288px',
+        width: '288px',
       }}>
         <Sidebar
           activePage={activePage}
