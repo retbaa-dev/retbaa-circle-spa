@@ -53,8 +53,8 @@ function ArticleModal({ article, onClose }) {
   }, [onClose])
 
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,40,0.7)', zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '40px 16px', overflowY: 'auto' }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: '6px', maxWidth: '720px', width: '100%', overflow: 'hidden', boxShadow: '0 40px 80px rgba(0,0,0,0.3)' }}>
+    <div className="article-modal-wrapper" onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,40,0.7)', zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '40px 16px', overflowY: 'auto' }}>
+      <div className="article-modal-inner" onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: '6px', maxWidth: '720px', width: '100%', overflow: 'hidden', boxShadow: '0 40px 80px rgba(0,0,0,0.3)' }}>
         {/* Image header */}
         {article.img && (
           <div style={{ position: 'relative', height: '240px', overflow: 'hidden' }}>
@@ -1062,7 +1062,7 @@ function FeaturedArticle({ article, onOpen }) {
       className="featured-article-grid"
     >
       {/* Image gauche */}
-      <div style={{ overflow: 'hidden', position: 'relative', minHeight: '420px' }}>
+      <div className="featured-article-image" style={{ overflow: 'hidden', position: 'relative', minHeight: '420px' }}>
         <img
           src={article.img}
           alt={article.title}
@@ -1097,6 +1097,7 @@ function FeaturedArticle({ article, onOpen }) {
 
       {/* Contenu droite */}
       <div
+        className="featured-article-content"
         style={{
           padding: '48px 40px',
           display: 'flex', flexDirection: 'column', justifyContent: 'center',
@@ -1333,7 +1334,7 @@ export default function InsightsPage() {
     <div style={{ background: '#F9F9F9', minHeight: '100vh' }}>
 
       {/* ─── HERO ──────────────────────────────────────────── */}
-      <section style={{
+      <section className="insights-hero" style={{
         background: '#1A3A6B',
         padding: '80px 48px 64px',
         position: 'relative',
@@ -1393,7 +1394,7 @@ export default function InsightsPage() {
           padding: '0 48px',
           display: 'flex', gap: '8px', alignItems: 'center',
           overflowX: 'auto',
-        }} className="no-scrollbar">
+        }} className="no-scrollbar insights-filters">
           {FILTERS.map(filter => (
             <button
               key={filter}
@@ -1426,7 +1427,7 @@ export default function InsightsPage() {
       </section>
 
       {/* ─── CONTENU PRINCIPAL ─────────────────────────────── */}
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '56px 48px 80px' }}>
+      <div className="insights-main-container" style={{ maxWidth: '1400px', margin: '0 auto', padding: '56px 48px 80px' }}>
 
         {/* Article featured */}
         {featuredArticle && filteredArticles.length > 0 && (

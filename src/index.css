@@ -300,3 +300,82 @@ body {
   height: 0 !important;
   overflow: hidden !important;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   INSIGHTS PAGE — RESPONSIVE MOBILE
+────────────────────────────────────────────────────────────── */
+
+/* Grille articles : 3 col → 2 col → 1 col */
+@media (max-width: 1024px) {
+  .insights-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 24px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .insights-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+}
+
+/* Padding container principal */
+@media (max-width: 768px) {
+  .insights-main-container {
+    padding: 32px 20px 60px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .insights-main-container {
+    padding: 24px 16px 48px !important;
+  }
+}
+
+/* Featured article : 2 col → stack vertical */
+@media (max-width: 768px) {
+  .featured-article-grid {
+    grid-template-columns: 1fr !important;
+    min-height: unset !important;
+  }
+  .featured-article-image {
+    height: 220px !important;
+    min-height: unset !important;
+  }
+  .featured-article-content {
+    padding: 28px 24px !important;
+  }
+}
+
+/* Modal article : ajustements mobile */
+@media (max-width: 640px) {
+  .article-modal-wrapper {
+    padding: 12px 8px 24px !important;
+    align-items: flex-end !important;
+  }
+  .article-modal-inner {
+    border-radius: 12px 12px 0 0 !important;
+    max-height: 92vh !important;
+    overflow-y: auto !important;
+  }
+  .article-modal-body {
+    padding: 20px 20px 32px !important;
+  }
+}
+
+/* Hero section : hauteur réduite sur mobile */
+@media (max-width: 640px) {
+  .insights-hero {
+    min-height: 200px !important;
+    padding: 40px 20px !important;
+  }
+}
+
+/* Filtres : scroll horizontal */
+@media (max-width: 640px) {
+  .insights-filters {
+    padding: 0 16px !important;
+    gap: 6px !important;
+  }
+}
