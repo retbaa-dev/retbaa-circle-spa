@@ -11,7 +11,7 @@ function renderMarkdown(text) {
   for (const line of lines) {
     const k = key++
     // Image inline [[IMG:/path/to/img.jpg|Caption]]
-    const imgMatch = line.match(/^\[\[IMG:(.+?)\|(.+?)\]\]$/)
+    const imgMatch = line.trim().match(/^\[\[IMG:(.+?)\|(.+?)\]\]$/)
     if (imgMatch) {
       const [, src, caption] = imgMatch
       elements.push(
