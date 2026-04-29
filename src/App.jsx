@@ -160,7 +160,7 @@ function PreviewApp({ userName }) {
         position: 'fixed', top: 0, left: 0, height: '100vh', zIndex: 100,
         transform: isMobile ? (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
         transition: 'transform 0.25s ease',
-        width: '288px',
+        width: isMobile ? '100vw' : '288px',
       }}>
         <Sidebar
           activePage={activePage}
@@ -544,7 +544,7 @@ function InvestisseurApp() {
         position: 'fixed', top: 0, left: 0, height: '100vh', zIndex: 100,
         transform: isMobile ? (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
         transition: 'transform 0.25s ease',
-        width: '288px',
+        width: isMobile ? '100vw' : '288px',
       }}>
         <Sidebar
           activePage={activePage}
