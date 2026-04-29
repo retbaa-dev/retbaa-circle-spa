@@ -2,7 +2,7 @@
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
 
-// Rendu markdown simple (gras, italique, titres, listes)
+// Rendu markdown simple (gras, italique, titres, listes, images [[IMG:url|caption]])
 function renderMarkdown(text) {
   if (!text) return []
   const lines = text.split('\n')
@@ -10,7 +10,23 @@ function renderMarkdown(text) {
   let key = 0
   for (const line of lines) {
     const k = key++
-    if (line.startsWith('## ')) {
+    // Image inline [[IMG:/path/to/img.jpg|Caption]]
+    const imgMatch = line.match(/^\[\[IMG:(.+?)\|(.+?)\]\]$/)
+    if (imgMatch) {
+      const [, src, caption] = imgMatch
+      elements.push(
+        <figure key={k} style={{ margin: '28px 0', textAlign: 'center' }}>
+          <img
+            src={src}
+            alt={caption}
+            style={{ width: '100%', maxWidth: '640px', borderRadius: '6px', boxShadow: '0 4px 20px rgba(0,0,0,0.10)', display: 'block', margin: '0 auto' }}
+          />
+          <figcaption style={{ fontFamily: 'Manrope, sans-serif', fontSize: '11px', color: '#9CA3AF', marginTop: '8px', fontStyle: 'italic', letterSpacing: '0.05em' }}>
+            {caption}
+          </figcaption>
+        </figure>
+      )
+    } else if (line.startsWith('## ')) {
       elements.push(<h3 key={k} style={{ fontFamily: 'Newsreader, serif', fontSize: '18px', color: '#1A3A6B', margin: '24px 0 8px', fontStyle: 'italic' }}>{line.slice(3)}</h3>)
     } else if (line.startsWith('### ')) {
       elements.push(<h4 key={k} style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px', fontWeight: 700, color: '#1A3A6B', margin: '16px 0 6px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>{line.slice(4)}</h4>)
@@ -297,7 +313,7 @@ Retbaa est là pour l'occuper.
     source: 'Retbaa Strategy',
     sourceUrl: null,
     summary: 'Retbaa ne vend pas des produits — elle orchestre un voyage sensoriel en trois actes. Découvrez le framework qui structure toute notre stratégie produit, commerciale et digitale.',
-    img: null,
+    img: '/frameworks/sensory-funnel.jpg',
     content: `## Le Sensory Funnel : From Space → To Palate → To Self
 
 Chez Retbaa, chaque décision produit, chaque campagne, chaque interaction client suit un même fil conducteur : **The Sensory Funnel**.
@@ -327,6 +343,8 @@ La Beauté est l'acte d'engagement. C'est Kemia — le médaillon sensoriel que 
 
 C'est la loyauté. Le rituel quotidien.
 
+[[IMG:/frameworks/sensory-funnel.jpg|The Sensory Funnel — From Space → To Palate → To Self]]
+
 ## La Matrix de Cohérence
 
 Ce funnel n'est pas linéaire — il est **orchestral**. Les trois univers se répondent à travers les moments de vie :
@@ -334,6 +352,8 @@ Ce funnel n'est pas linéaire — il est **orchestral**. Les trois univers se r�
 - **Morning Ritual** : bougie d'éveil + thé vitalité + soin du jour
 - **Evening Gather** : bougie signature + chocolat noir + crème mains
 - **Gift Curation** : diffuseur + café premium + sérum visage
+
+[[IMG:/frameworks/sensory-matrix.jpg|The Sensory Matrix — 4 moments × 3 univers]]
 
 C'est pour cela que Retbaa ne vend pas des produits isolés. Elle propose des **moments cohérents**.
 
