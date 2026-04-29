@@ -86,6 +86,78 @@ function ArticleModal({ article, onClose }) {
 // ─── DONNÉES ARTICLES ──────────────────────────────────────────
 const articles = [
   {
+    id: 'sensory-funnel-2026',
+    tag: 'Stratégie Produit',
+    title: 'The Sensory Funnel : comment Retbaa orchestre l\'expérience Cultural Luxury',
+    date: '28 avril 2026',
+    author: 'Massata Niang',
+    source: 'Retbaa Strategy',
+    sourceUrl: null,
+    summary: 'Retbaa ne vend pas des produits — elle orchestre un voyage sensoriel en trois actes. Découvrez le framework qui structure toute notre stratégie produit, commerciale et digitale.',
+    img: null,
+    content: `## Le Sensory Funnel : From Space → To Palate → To Self
+
+Chez Retbaa, chaque décision produit, chaque campagne, chaque interaction client suit un même fil conducteur : **The Sensory Funnel**.
+
+Ce n'est pas une théorie marketing. C'est l'observation de la façon dont les grandes expériences sensorielles se construisent naturellement — de l'espace vers l'intime.
+
+## Les 3 Actes
+
+### Acte 1 — Discovery : L'Atmosphère
+Le premier contact avec Retbaa passe toujours par l'espace. Une bougie qui brûle dans une pièce. Un diffuseur qui transforme l'air. Un médaillon Kemia posé sur une table de nuit.
+
+*L'Atmosphère crée le contexte.* Elle dit : "tu es dans un endroit différent maintenant."
+
+C'est le seuil. L'invitation.
+
+### Acte 2 — Exploration : Le Gourmet
+Une fois l'espace installé, le voyage continue par la table. Le sel de l'Atlantique. Les épices du Sénégal. Le chocolat 66% aux graines de paradis.
+
+*Le Gourmet approfondit la relation.* Il passe de l'espace vécu à l'expérience partagée — le repas, le cadeau, le rituel à deux.
+
+C'est la curiosité. L'envie d'en savoir plus.
+
+### Acte 3 — Engagement : La Beauté
+La Beauté est l'acte d'engagement. C'est Kemia — le médaillon sensoriel que l'on porte. Le parfum que l'on choisit comme signature. Le soin que l'on s'accorde chaque matin.
+
+*La Beauté ancre l'identité.* Elle dit : "Retbaa fait partie de qui je suis."
+
+C'est la loyauté. Le rituel quotidien.
+
+## La Matrix de Cohérence
+
+Ce funnel n'est pas linéaire — il est **orchestral**. Les trois univers se répondent à travers les moments de vie :
+
+- **Morning Ritual** : bougie d'éveil + thé vitalité + soin du jour
+- **Evening Gather** : bougie signature + chocolat noir + crème mains
+- **Gift Curation** : diffuseur + café premium + sérum visage
+
+C'est pour cela que Retbaa ne vend pas des produits isolés. Elle propose des **moments cohérents**.
+
+## Pourquoi c'est stratégique
+
+Ce framework a trois implications directes sur notre trajectoire :
+
+**1. Panier moyen plus élevé**
+Un client qui entre par l'Atmosphère et découvre le Gourmet puis la Beauté dépense naturellement 3x plus qu'un client mono-catégorie. Le cross-sell n'est pas une technique — c'est le voyage lui-même.
+
+**2. Loyauté structurelle**
+Chaque univers renforce les autres. Un client fidèle à la Beauté revient pour l'Atmosphère. Un amateur de Gourmet devient ambassadeur. Le funnel crée une boucle de réengagement naturelle.
+
+**3. Pitch B2B universel**
+Pour un hôtel : lobby (Atmosphère) → restaurant (Gourmet) → spa (Beauté).
+Pour un investisseur : discovery → traction → engagement durable.
+Pour un partenaire retail : entrée facile (bougies) → montée en gamme → collection exclusive.
+
+## En conclusion
+
+The Sensory Funnel est la colonne vertébrale de Retbaa. Il explique pourquoi notre stratégie e-commerce commence par l'Atmosphère, pourquoi notre offre B2B s'adapte naturellement à tous les contextes, et pourquoi nos investisseurs peuvent être confiants dans la profondeur de notre modèle.
+
+*"From Space → To Palate → To Self."*
+
+Ce n'est pas un slogan. C'est une architecture.`
+  },
+  {
     id: 14,
     tag: 'Vision · Stratégie',
     title: 'Retbaa Community : La Philosophie de l\'Expérience',

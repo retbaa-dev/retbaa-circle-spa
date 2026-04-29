@@ -69,6 +69,17 @@ const episodes = [
     src: '/podcasts/podcast_ep6_en.mp3',
     topics: ['Cultural Luxury', 'Kemia', 'Global Markets', 'Japan', 'GCC', 'Philosophy'],
   },
+  {
+    id: 7,
+    number: 'EP. 07',
+    title: 'The Sensory Funnel',
+    subtitle: 'How Retbaa Architects a Luxury Experience in Three Acts',
+    description: 'From a candle that transforms a room to a perfume that becomes a signature — Retbaa\'s Sensory Funnel explains how three universes (Atmosphère, Gourmet, Beauté) create a natural journey from discovery to commitment. This episode breaks down the framework that shapes every product decision, every campaign, and every partnership at Retbaa.',
+    duration: '9 min',
+    date: 'April 2026',
+    src: '/podcasts/podcast_ep7_en.mp3',
+    topics: ['Sensory Funnel', 'Product Strategy', 'Atmosphère', 'Gourmet', 'Beauté', 'Cultural Luxury', 'Cross-sell'],
+  },
 ]
 
 function AudioPlayer({ src, title, userName = '' }) {
