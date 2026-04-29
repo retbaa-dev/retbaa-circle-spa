@@ -102,6 +102,163 @@ function ArticleModal({ article, onClose }) {
 // ─── DONNÉES ARTICLES ──────────────────────────────────────────
 const articles = [
   {
+    id: 'bifurcation-hermes-lvmh-2026',
+    tag: 'Signal Marché',
+    title: 'Hermès +5.6% vs LVMH -2% vs Kering -6% : la bifurcation qui valide tout',
+    date: '29 avril 2026',
+    author: 'Orion · Veille Stratégique',
+    source: 'The Silent Luxury · Luxury Daily · Business of Fashion',
+    sourceUrl: null,
+    summary: 'Les résultats Q1 2026 ne laissent plus de place au doute : le marché bifurque entre les maisons de craft et d\'identité forte d\'un côté, les conglomérats de logo luxury de l\'autre. Pour Retbaa et ses investisseurs, c\'est l\'argument du moment.',
+    img: 'https://sspark.genspark.ai/cfimages?u1=M5cLZ7vqU0dbGUjk0ZEaz6H7eysAb1A345fA0QeqEkSwYYyWu3r%2FXxfjglnO9j6GGe8MAnMFtvJyCQLEZLvNhmyu3RLyQYpvr5TGJznijPYnM6a0AfMPi8LQaZmAsSY%2Bty3esWBGDw%3D%3D&u2=aeNmZDEotS%2FCU5Md&width=2560',
+    content: `## Le marché parle — enfin clairement
+
+Les résultats Q1 2026 ont mis fin au débat théorique. En trois lignes :
+
+- **Hermès :** +5.6% de croissance organique
+- **LVMH (Fashion & Leather) :** -2%
+- **Kering (Gucci en tête) :** -6%
+
+Ce n'est pas un accident de calendrier. C'est la confirmation d'une thèse structurelle que les observateurs du luxe formulent depuis 2023 : **le marché bifurque**.
+
+## Les deux luxes
+
+Il existe désormais deux marchés du luxe qui évoluent en sens inverse.
+
+**Le luxe de craft et d'identité forte** — Hermès, Brunello Cucinelli, certaines maisons indépendantes. Caractéristiques : artisanat visible, récit authentique, désirabilité intrinsèque, résistance aux cycles économiques. Ces marques ne font pas de promotions. Elles ont des listes d'attente.
+
+**Le luxe de logo et de volume** — les grandes divisions des conglomérats. Caractéristiques : croissance portée par l'aspiration de masse, sensibilité au cycle économique, dilution de la désirabilité quand le volume monte trop vite. Ces marques gèrent aujourd'hui les conséquences de leur propre succès.
+
+La divergence Q1 2026 n'est pas une surprise. Elle était prévisible. Elle est maintenant chiffrée.
+
+## Ce que ça signifie pour Retbaa
+
+Retbaa n'est pas LVMH. Elle n'a jamais voulu l'être.
+
+Retbaa est une maison de craft — céramique sensorielle faite à la main, fragrances niche, artisanat africain transmis. C'est exactement le profil des marques qui surperforment aujourd'hui.
+
+**La question pour un investisseur n'est plus "est-ce que le luxe va bien ?" — c'est "quel luxe ?"**
+
+Les chiffres Q1 2026 répondent : le luxe d'identité forte, le luxe de matière et de récit, le luxe qui ne se solde pas — ce luxe-là va très bien.
+
+Retbaa entre sur ce marché au bon moment, avec le bon positionnement.
+
+## L'argument Tranche 2
+
+Pour les investisseurs qui accompagnent Retbaa dans la levée en cours, ces chiffres ont une implication directe.
+
+Vous n'investissez pas dans le luxe en général. Vous investissez dans **le segment du luxe qui résiste** — celui qui grandit quand les autres reculent.
+
+La bifurcation n'est pas un risque à hedger. C'est un moteur à activer.
+
+*Sources : The Silent Luxury (20 avr. 2026) · Luxury Daily (15 avr. 2026) · Business of Fashion (12 avr. 2026)*`,
+  },
+  {
+    id: 'lvmh-bdk-niche-fragrance-acquisition',
+    tag: 'Signal Marché',
+    title: 'LVMH Ventures rachète BDK Parfums : la niche fragrance devient cible d\'acquisition',
+    date: '29 avril 2026',
+    author: 'Orion · Veille Stratégique',
+    source: 'LVMH Luxury Ventures · Forbes · Scento 2026',
+    sourceUrl: null,
+    summary: 'Quand LVMH Ventures entre au capital d\'une maison de parfumerie niche, c\'est un signal clair : les géants ne construisent plus dans ce segment — ils rachètent. Retbaa coche tous les critères d\'une cible.',
+    img: 'https://sspark.genspark.ai/cfimages?u1=yn3ZfEzYMzl8rUJXyraIoKKtaKGipkMvxUyys%2BIvMQpCBd%2FBww1kx8N0YDMzKN3egyA4kMzmy0GxAIoXGcUQRt3MDMBgOE6iGschRi%2FQ%2FNllc2bYRvs%2FkiV%2BLCSG2NU%3D&u2=2Fl7ej6w7VTZ1L%2Bh&width=2560',
+    content: `## Un signal que le marché attendait
+
+LVMH Luxury Ventures vient de prendre une participation dans **BDK Parfums** — maison de parfumerie niche fondée à Paris en 2016. Le deal n'a pas été commenté en détail, mais le signal est limpide.
+
+Les géants du luxe ne construisent plus dans la niche fragrance. **Ils rachètent.**
+
+## Pourquoi maintenant
+
+Le marché de la parfumerie niche a atteint une taille critique :
+
+- **$3.8 milliards** en 2024
+- **$7.6 milliards** projetés d'ici 2030 — CAGR 13.2%
+- Le segment le plus dynamique de toute l'industrie du luxe
+
+À ce niveau de croissance, une maison de niche bien positionnée vaut structurellement plus que sa taille actuelle. Elle vaut l'optionalité — la capacité à capter une part de marché disproportionnée dans un segment qui double.
+
+LVMH l'a compris. D'autres suivront.
+
+## Le profil d'une cible
+
+BDK Parfums cumule plusieurs caractéristiques qui ont rendu le deal attractif :
+
+- Identité olfactive forte et cohérente
+- Distribution sélective (retail premium + e-commerce DTC)
+- Fondateurs présents et impliqués
+- Géographie et récit différenciants (Paris, craft artisanal)
+- Traction prouvée sans dépendance aux dépenses marketing massives
+
+Retbaa coche les mêmes cases — et en ajoute une que BDK n'a pas : **une géographie d'origine à fort coefficient de désirabilité émergente** (Sénégal, Afrique de l'Ouest) et un format produit propriétaire (Kemia, le médaillon sensoriel céramique).
+
+## Ce que ça change pour les investisseurs Retbaa
+
+Investir dans Retbaa aujourd'hui, c'est entrer avant que le marché price la désirabilité du segment.
+
+La question n'est pas "est-ce que Retbaa sera rachetée ?" C'est : **dans 3 à 5 ans, quand un fonds de luxe cherche une maison de niche fragrance/sensory avec une géographie émergente et un format propriétaire — combien y en a-t-il sur le marché ?**
+
+La réponse est : très peu. Probablement une.
+
+*Sources : LVMH Luxury Ventures (jan. 2026) · Forbes · Scento Niche Fragrance Market Report 2026*`,
+  },
+  {
+    id: 'gcc-riyadh-luxe-2026',
+    tag: 'Géographie · GCC',
+    title: 'GCC Luxe $16.53B en 2026 : pourquoi Riyadh s\'impose face à Dubai',
+    date: '29 avril 2026',
+    author: 'Orion · Veille Stratégique',
+    source: 'ResearchAndMarkets · Bernstein · Yahoo Finance · Argaam',
+    sourceUrl: null,
+    summary: 'Malgré les tensions Iran/MEA, le marché du luxe GCC reste le plus dynamique au monde. L\'Arabie Saoudite s\'impose comme le "rare bright spot" identifié par Bernstein. Le pivot stratégique Retbaa de Dubai vers Riyadh est validé par les données.',
+    img: 'https://sspark.genspark.ai/cfimages?u1=ZHTN0OMsclmiTDE%2FevNdQC3CDZhvORFbhb0nult%2BApHwQc4Cb288w8otFrDmDYQ0V7LTzUU8tO%2B%2FF8j4Xz%2B5G99GV4J9qbwgX9CQ%2FpeJKgPABGTqScdKBx2wl8wy8AxrMztXqpQGCs1TdqYm4vwHbu5D%2Fs8EgGeyLD38o49BWRFAzTiWDTzrYdNyFpJ%2FaQ%3D%3D&u2=4qK503AoIiW43Leh&width=2560',
+    content: `## Le GCC résiste — et l'Arabie Saoudite mène
+
+Dans un contexte de tensions géopolitiques régionales, le marché du luxe GCC affiche une résilience remarquable.
+
+**Chiffres clés 2026 :**
+- **$16.53 milliards** — taille du marché luxe GCC (2026)
+- **CAGR 10%** — rythme de croissance projeté
+- **Saudi Arabia** — identifiée comme "rare bright spot" par Bernstein Research (avril 2026)
+
+Pendant que certains marchés premium ralentissent, Riyadh accélère.
+
+## Pourquoi l'Arabie Saoudite distance Dubai
+
+La géopolitique a redistribué les cartes. Les tensions Iran/région MEA ont créé une incertitude autour de Dubai comme hub régional. Riyadh n'a pas ce problème — elle est portée par une dynamique propre.
+
+**Drivers structurels Saudi Arabia :**
+
+**Vision 2030** — l'État investit massivement dans le tourisme premium, les arts, la culture, l'hospitalité de luxe. Ce n'est pas un cycle économique, c'est une politique nationale.
+
+**Population jeune et premium** — 60% de la population saoudienne a moins de 35 ans, avec un pouvoir d'achat en forte croissance. La demande intérieure est réelle.
+
+**Culture olfactive profonde** — l'oud, le bakhoor, la parfumerie orientale sont des pratiques culturelles quotidiennes, pas des tendances. Un marché qui comprend naturellement la sensorialité et le rituel.
+
+**Sécularisation accélérée** — l'ouverture culturelle depuis 2019 a créé une nouvelle classe de consommateurs premium qui combinent codes occidentaux et ancrage identitaire fort. C'est exactement le profil qui résonne avec Cultural Luxury.
+
+## Le pivot Retbaa : de Dubai à Riyadh
+
+Retbaa a activé une stratégie GCC B2B-first depuis 2025, avec Dubai comme point d'entrée initial (contact Galeries Lafayette Dubai Mall, hospitalité premium Forest Rain). Ces actifs sont conservés.
+
+Mais les données 2026 valident un pivot d'accent : **Riyadh comme marché prioritaire**, Dubai comme marché de visibilité.
+
+**"Crafted in Paris, Nurtured in Africa, Revealed in Dubai"** reste le positionnement de marque pour la région. La mécanique d'entrée commerciale, elle, se concentre là où la croissance est la plus forte.
+
+## Ce que Retbaa apporte que personne d'autre n'a
+
+Sur le marché GCC, les maisons de parfumerie niche premium sont soit occidentales (sans ancrage culturel moyen-oriental), soit orientales traditionnelles (sans dimension internationale).
+
+Retbaa est ni l'un ni l'autre — et les deux à la fois.
+
+L'oud africain, la céramique sensorielle, le rituel quotidien comme architecture de marque : c'est un dialogue naturel avec la culture GCC, porté par une origine géographique inédite.
+
+**Le marché n'attend pas Retbaa. Il la cherche.**
+
+*Sources : ResearchAndMarkets (mars 2026) · Bernstein Research (avr. 2026) · Yahoo Finance · Argaam*`,
+  },
+  {
     id: 'marche-luxe-sensoriel-2026',
     tag: 'Étude de Marché',
     title: 'Le marché du luxe sensoriel en 2026 : une opportunité à $100B+ pour Retbaa',
