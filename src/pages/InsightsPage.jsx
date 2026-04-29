@@ -86,6 +86,209 @@ function ArticleModal({ article, onClose }) {
 // ─── DONNÉES ARTICLES ──────────────────────────────────────────
 const articles = [
   {
+    id: 'marche-luxe-sensoriel-2026',
+    tag: 'Étude de Marché',
+    title: 'Le marché du luxe sensoriel en 2026 : une opportunité à $100B+ pour Retbaa',
+    date: '29 avril 2026',
+    author: 'Massata Niang',
+    source: 'Bain & Company · Grand View Research · Globe Newswire · Scento',
+    sourceUrl: null,
+    summary: 'Le luxe mondial traverse une mutation profonde. Les marques qui gagnent ne vendent plus des objets — elles vendent des expériences sensorielles. Retbaa est née exactement là où ce marché veut aller.',
+    img: null,
+    content: `## I. Un marché à la croisée des chemins
+
+Le luxe mondial 2026 ne ressemble plus à ce qu'il était en 2019. Après des années de croissance portée par le volume et la démocratisation, le secteur opère un recentrage net : **la qualité contre la quantité, l'expérience contre la possession, l'identité contre le statut**.
+
+Les données Bain & Company (décembre 2025) le confirment sans ambiguïté :
+- **€1.44 trillion** — taille totale du marché du luxe global (toutes catégories)
+- **€358 milliards** — personal luxury goods (mode, beauté, joaillerie, parfumerie)
+- **+3 à +5%** de croissance prévue en 2026, malgré les incertitudes macro
+- **70% des marques en croissance** sont des spécialistes de niche — pas des conglomérats
+
+Ce dernier chiffre est le plus important pour Retbaa. Dans un marché qui se fragmente, la spécialisation gagne.
+
+## II. Les trois univers — une opportunité à $100B+
+
+Retbaa n'opère pas dans un seul segment. Elle orchestre trois univers complémentaires, chacun porteur d'une dynamique de marché indépendante et puissante.
+
+### L'Atmosphère — Home Fragrance & Sensory Living
+
+Le marché du home fragrance de luxe est en pleine expansion structurelle :
+
+- **$7.1B → $11.5B d'ici 2033** (Mark Spark Solutions, 2026) — CAGR de 7.2%
+- **Bougies de luxe seules : $680M–$807M** avec CAGR de **10.8%** (Grand View Research)
+- Driver principal : la pandémie a transformé le domicile en espace de bien-être permanent
+
+La bougie n'est plus un accessoire. C'est un acte d'intention.
+
+### Le Gourmet — Luxe alimentaire & Rituel de table
+
+Bain 2025 intègre pour la première fois le "gourmet & dining" dans son baromètre luxe :
+
+- **€74 milliards** — taille du marché du luxe alimentaire global
+- **+5% en 2025**, croissance continue prévue pour 2026-2028
+- Ce segment croît plus vite que la mode luxe pour la 3e année consécutive
+
+Le repas luxueux n'est plus réservé au restaurant étoilé. Il s'invite à la maison.
+
+### La Beauté — Parfumerie niche & Sensory Identity
+
+C'est le segment le plus dynamique de tout le secteur :
+
+- **Parfumerie niche : $4.85 milliards** en 2026, CAGR **13.2%** (Scento 2026)
+- Le segment le plus rapide de toute l'industrie du luxe
+- Driver : refus des grands classiques, recherche d'une signature olfactive personnelle
+
+La parfumerie niche ne vend pas un parfum. Elle vend une identité.
+
+### Total adressable : $100B+
+
+Pris ensemble, ces trois univers représentent un marché adressable supérieur à **$100 milliards**, avec des trajectoires de croissance à deux chiffres dans les segments les plus porteurs. Retbaa est positionnée à l'intersection exacte de ces trois forces.
+
+## III. The Sensory Funnel
+
+Retbaa ne vend pas des produits dans trois catégories. Elle orchestre un voyage :
+
+**From Space → To Palate → To Self.**
+
+C'est le Sensory Funnel. Les trois univers ne sont pas parallèles — ils sont séquentiels et cumulatifs.
+
+- **Acte 1 — L'Atmosphère** crée le contexte. Elle dit : "tu es dans un endroit différent maintenant." C'est le seuil, l'invitation, la première impression sensorielle.
+- **Acte 2 — Le Gourmet** approfondit la relation. Il transforme l'expérience spatiale en partage — le repas, le cadeau, le rituel à deux.
+- **Acte 3 — La Beauté** ancre l'identité. Elle dit : "Retbaa fait partie de qui je suis." C'est la loyauté, le rituel quotidien, la signature permanente.
+
+Ce funnel a une conséquence directe sur la business mechanics : un client qui entre par l'Atmosphère et découvre progressivement les deux autres univers génère **3x plus de valeur** qu'un client mono-catégorie. Le cross-sell n'est pas une technique marketing — c'est l'architecture naturelle du voyage.
+
+## IV. La Matrix de Cohérence
+
+Le Sensory Funnel se déploie dans des moments de vie précis. Ce sont eux qui structurent le catalogue, les coffrets et les campagnes :
+
+**Morning Ritual** — Bougie d'éveil + thé vitalité + soin du visage
+*Message : Commencer la journée avec intention.*
+
+**Evening Gather** — Bougie signature + chocolat noir + crème mains
+*Message : La fin de journée mérite un rituel.*
+
+**Intimate Care** — Parfum Kemia + huile corps + diffuseur chambre
+*Message : S'accorder une attention totale.*
+
+**Gift Curation** — Coffret diffuseur + épices premium + sérum visage
+*Message : Offrir une expérience complète, pas un objet.*
+
+Ces quatre moments couvrent les principales occasions d'achat luxe : usage personnel, auto-cadeau, cadeau corporate, cadeau intime. La Matrix garantit la cohérence entre le design produit, le merchandising e-commerce et la stratégie de contenu.
+
+## V. La thèse Cultural Luxury
+
+Retbaa n'est pas une marque "africaine de luxe". Elle est une maison de **Cultural Luxury** — un positionnement universel ancré dans une origine singulière.
+
+La distinction est stratégique, pas sémantique.
+
+"Africain de luxe" est une case géographique. Cultural Luxury est un filtre de lecture du monde : artisanat, rituel, héritage, savoir-faire transmis. Des valeurs qui résonnent au Japon avec le *wabi-sabi*, dans le GCC avec la culture de l'*oud* et de l'hospitalité, en Italie avec la tradition du *bella vita*, en France avec l'idée de *savoir-vivre*.
+
+La thèse : **les marchés émergents premium ne cherchent pas une copie des grandes maisons européennes. Ils cherchent une alternative authentique, ancrée dans une culture vivante.**
+
+Retbaa est cette alternative.
+
+Les indicateurs de marché valident la thèse :
+- La montée des indie houses dans la parfumerie : +13.2% CAGR vs +4% pour les grands groupes
+- Le "made with story" supplante le "made in France" comme critère de valeur perçue
+- Les acheteurs millennials GCC et diaspora africaine constituent un segment de 40M+ personnes sans maison dédiée
+
+## VI. L'opportunité MEA
+
+Le Moyen-Orient et l'Afrique constituent l'opportunité géographique la plus sous-estimée du luxe mondial.
+
+Données Globe Newswire 2026 :
+- **$21.85 milliards** — taille du marché luxe MEA en 2026
+- **$36.15 milliards** d'ici 2031, CAGR **10.57%**
+- Croissance quasi-deux-fois supérieure à l'Europe occidentale
+
+Bain va plus loin dans son analyse 2025 :
+- **MEA + SE Asia + Amérique Latine = €40-45 milliards** de potentiel combiné
+- Équivalent en volume à la **Chine entière**
+- Mais avec un profil de risque infiniment plus favorable (géopolitique, réglementaire, accès)
+
+Pour Retbaa, l'opportunité MEA se lit à deux niveaux :
+
+**Niveau 1 — GCC comme marché client premium**
+Dubaï, Riyad, Doha sont des places de luxe de premier rang, avec une culture olfactive profonde (oud, bakhoor, parfumerie orientale) qui résonne directement avec l'ADN Retbaa. La visite de Massata à Dubaï (février 2026) a confirmé la réceptivité du marché.
+
+**Niveau 2 — Afrique de l'Ouest comme marché de croissance structurelle**
+Dakar, Abidjan, Accra constituent une zone de 15M+ de consommateurs urbains premium. C'est le marché d'origine de Retbaa — et potentiellement son plus fort levier de différenciation globale.
+
+## VII. Implications pour les investisseurs
+
+La thèse d'investissement Retbaa se construit sur six piliers de conviction :
+
+**1. Marché en croissance structurelle**
+Le luxe sensoriel (home fragrance + parfumerie niche + gourmet) croît à 10-13% par an, porté par des changements de comportement durables post-pandémie.
+
+**2. Positionnement sans concurrent direct**
+Aucune maison ne combine les trois univers (Atmosphère + Gourmet + Beauté) sous un positionnement Cultural Luxury africain à l'international. Le créneau est libre.
+
+**3. Architecture multi-marchés**
+Retbaa peut adresser simultanément Europe, GCC, Afrique et Asie avec le même ADN produit, en adaptant uniquement le mix et le pricing. C'est une optionalité géographique rare.
+
+**4. Modèle économique scalable**
+E-commerce DTC (marges 60-70%) + B2B hospitality (volume) + retail sélectif (visibilité). Trois flux de revenus avec des mécaniques de croissance indépendantes.
+
+**5. Effet de réseau communautaire**
+Le Retbaa Circle (portail investisseurs + communauté premium) crée un actif immatériel : une base d'ambassadeurs naturels parmi les 5-10% les plus influents dans leur réseau.
+
+**6. Traction prouvée**
+€191K de CA en 2025, EBITDA positif (22.7%), première commande export confirmée (La Grande Épicerie de Paris, avril 2026).
+
+## VIII. Le funnel comme moteur commercial
+
+Le Sensory Funnel n'est pas qu'une vision produit — c'est un moteur commercial calculable.
+
+Hypothèse conservative basée sur les benchmarks du secteur :
+- **Panier moyen entrée Atmosphère** : €65-90 (bougie + accessoire)
+- **Conversion Atmosphère → Gourmet** : 35% dans les 90 jours
+- **Conversion Gourmet → Beauté** : 40% dans les 180 jours
+- **Panier moyen client 3 univers** : €180-240
+
+Un client qui complète le funnel représente **2.8x la valeur** d'un client mono-produit. Avec une base de 2 000 clients fin Q2 2026, l'enjeu est moins l'acquisition que la traversée du funnel.
+
+C'est pourquoi la stratégie Klaviyo (email flows par étape du funnel) et les coffrets (moment de transition naturel entre univers) sont des priorités absolues du plan e-commerce.
+
+## IX. Roadmap — construire la Maison complète
+
+La trajectoire Retbaa suit une logique de construction séquentielle :
+
+**2026 — Les fondations**
+- E-commerce Shopify live (Q2)
+- 3 univers représentés : 20 SKUs minimum
+- First movers : France + diaspora + GCC early adopters
+- CA cible : €500K
+
+**2027 — L'ancrage**
+- Retail sélectif : 5-8 points de vente premium (Paris, Dubaï, Dakar)
+- Lancement collection Gourmet élargie
+- Partenariats hospitality : 2-3 hôtels signature
+- CA cible : €1.5M
+
+**2028 — La Maison**
+- Pan-Africa (Nigeria, Kenya, Maroc)
+- Asia launch (Singapour, Séoul)
+- Retbaa X : collaborations artistes / maisons
+- CA cible : €3M+
+
+## X. Conclusion — La Maison inévitable
+
+Il existe une convergence rare entre ce que Retbaa est — une maison sensorielle ancrée dans une culture vivante — et ce que le marché du luxe cherche en 2026 : de l'authenticité, de l'histoire, de la profondeur.
+
+Les grandes maisons européennes ont le prestige mais ont perdu l'âme. Les nouvelles marques ont l'esthétique mais manquent de racines. Retbaa a les deux.
+
+**La Maison sensorielle Cultural Luxury n'est pas un concept à prouver. C'est un espace vacant dans le marché mondial du luxe qui attend d'être occupé.**
+
+Retbaa est là pour l'occuper.
+
+*"From Space → To Palate → To Self. Une architecture sensorielle née de l'Afrique, conçue à Paris, offerte au monde."*
+
+— Massata Niang, fondateur`,
+  },
+  {
     id: 'sensory-funnel-2026',
     tag: 'Stratégie Produit',
     title: 'The Sensory Funnel : comment Retbaa orchestre l\'expérience Cultural Luxury',
