@@ -110,7 +110,7 @@ const articles = [
     source: 'The Silent Luxury · Luxury Daily · Business of Fashion',
     sourceUrl: null,
     summary: 'Les résultats Q1 2026 ne laissent plus de place au doute : le marché bifurque entre les maisons de craft et d\'identité forte d\'un côté, les conglomérats de logo luxury de l\'autre. Pour Retbaa et ses investisseurs, c\'est l\'argument du moment.',
-    img: 'https://sspark.genspark.ai/cfimages?u1=M5cLZ7vqU0dbGUjk0ZEaz6H7eysAb1A345fA0QeqEkSwYYyWu3r%2FXxfjglnO9j6GGe8MAnMFtvJyCQLEZLvNhmyu3RLyQYpvr5TGJznijPYnM6a0AfMPi8LQaZmAsSY%2Bty3esWBGDw%3D%3D&u2=aeNmZDEotS%2FCU5Md&width=2560',
+    img: 'https://sspark.genspark.ai/cfimages?u1=McgFfPslu50S2ZcSxzRQGNEHWP5W7bn%2BOZoW0fUZKOPzvXvo75VH0s5kiAf7CZYmgQduwrMwSHt3ALCjdEZwYuTDeIZxJJVZV1v1xocDsIXRUnmmT2IEUw%3D%3D&u2=5kE1wzjKcnibWzy2&width=2560',
     content: `## Le marché parle — enfin clairement
 
 Les résultats Q1 2026 ont mis fin au débat théorique. En trois lignes :
@@ -162,7 +162,7 @@ La bifurcation n'est pas un risque à hedger. C'est un moteur à activer.
     source: 'LVMH Luxury Ventures · Forbes · Scento 2026',
     sourceUrl: null,
     summary: 'Quand LVMH Ventures entre au capital d\'une maison de parfumerie niche, c\'est un signal clair : les géants ne construisent plus dans ce segment — ils rachètent. Retbaa coche tous les critères d\'une cible.',
-    img: 'https://sspark.genspark.ai/cfimages?u1=yn3ZfEzYMzl8rUJXyraIoKKtaKGipkMvxUyys%2BIvMQpCBd%2FBww1kx8N0YDMzKN3egyA4kMzmy0GxAIoXGcUQRt3MDMBgOE6iGschRi%2FQ%2FNllc2bYRvs%2FkiV%2BLCSG2NU%3D&u2=2Fl7ej6w7VTZ1L%2Bh&width=2560',
+    img: 'https://sspark.genspark.ai/cfimages?u1=pLlWtKyPOdXdida7tOqG3vSGu%2BtFYtEl0mixVX0nfFFnlx4Xbs76JxY0zHAb6HeaXPZq%2FPAAx%2Fc1qlPKmi2ZKtcRRnz8j7m7pCy%2FpCeQPygRtLfc014aYXxmkjIYWSGPoQKyMa2i&u2=qCKa%2Fu5TpcAbX5T0&width=2560',
     content: `## Un signal que le marché attendait
 
 LVMH Luxury Ventures vient de prendre une participation dans **BDK Parfums** — maison de parfumerie niche fondée à Paris en 2016. Le deal n'a pas été commenté en détail, mais le signal est limpide.
@@ -212,7 +212,7 @@ La réponse est : très peu. Probablement une.
     source: 'ResearchAndMarkets · Bernstein · Yahoo Finance · Argaam',
     sourceUrl: null,
     summary: 'Malgré les tensions Iran/MEA, le marché du luxe GCC reste le plus dynamique au monde. L\'Arabie Saoudite s\'impose comme le "rare bright spot" identifié par Bernstein. Le pivot stratégique Retbaa de Dubai vers Riyadh est validé par les données.',
-    img: 'https://sspark.genspark.ai/cfimages?u1=ZHTN0OMsclmiTDE%2FevNdQC3CDZhvORFbhb0nult%2BApHwQc4Cb288w8otFrDmDYQ0V7LTzUU8tO%2B%2FF8j4Xz%2B5G99GV4J9qbwgX9CQ%2FpeJKgPABGTqScdKBx2wl8wy8AxrMztXqpQGCs1TdqYm4vwHbu5D%2Fs8EgGeyLD38o49BWRFAzTiWDTzrYdNyFpJ%2FaQ%3D%3D&u2=4qK503AoIiW43Leh&width=2560',
+    img: '/retbaa-photos/retbaa_18.jpg',
     content: `## Le GCC résiste — et l'Arabie Saoudite mène
 
 Dans un contexte de tensions géopolitiques régionales, le marché du luxe GCC affiche une résilience remarquable.
