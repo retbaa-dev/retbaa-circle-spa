@@ -961,6 +961,234 @@ Richemont surperforme parce que Cartier et Van Cleef vendent des objets qui *dur
 - **Canaux : Frieze, Art Basel, forums économiques africains** — là où cette clientèle se retrouve, pas sur les plateformes grand public
     `,
   },
+  // ─── VEILLE KEMIA — Semaine du 5 mai 2026 ───────────────────
+  {
+    id: 'luxe-crise-cultural-luxury-2026',
+    tag: 'Signal Marché',
+    title: 'Le Luxe Global en Crise : Fenêtre d\'Opportunité pour le Cultural Luxury',
+    subtitle: 'LVMH -6% Q1, Kering ReconKering, Hermès sous pression — la thèse Retbaa se valide',
+    summary: 'Les grandes maisons cherchent à "reignite desirability". Pendant qu\'elles recalibrent, les marques à fort ancrage culturel et sensoriel gagnent en différenciation. Ce contexte valide précisément la stratégie Retbaa.',
+    date: '5 mai 2026',
+    author: 'Kemia · Veille Stratégique',
+    source: 'Reuters, Business of Fashion, WWD',
+    sourceUrl: null,
+    img: '/retbaa-photos/retbaa_01.jpg',
+    featured: false,
+    category: 'Veille Marché',
+    content: `## Les Faits
+
+Les résultats Q1 2026 dressent un tableau contrasté du luxe mondial :
+
+- **LVMH (Fashion & Leather)** : -6% en organique sur le segment mode — Vuitton et Dior sous pression
+- **Kering** : restructuration "ReconKering" annoncée, Gucci perd de sa désirabilité après des années de sur-distribution
+- **Hermès** : résistance relative, mais pression sur les volumes et les délais de livraison
+
+Le mot clé dans les communications des grands groupes : **"reignite desirability"**. Après des années d'hyper-croissance, les conglomérats admettent avoir dilué leur capital de désirabilité.
+
+## Ce qui se passe structurellement
+
+Ce n'est pas une correction conjoncturelle. C'est une bifurcation structurelle.
+
+Le luxe de logo et de statut — celui qui se voit, se reconnaît immédiatement, se revend sur Vestiaire — traverse une crise de sens. La clientèle aspirationnelle qui avait gonflé les volumes depuis 2020 s'est retirée. Ce qui reste, c'est une clientèle qui achète pour elle-même, pas pour les autres.
+
+**Le luxe de sens surperforme le luxe de statut.** Les chiffres ne laissent plus de doute.
+
+Les marques qui résistent partagent un trait commun : elles vendent des expériences que le porteur ressent, pas que le spectateur reconnaît. Loro Piana (LVMH), Brunello Cucinelli, les maisons de parfumerie niche — toutes enregistrent des croissances à deux chiffres.
+
+## La Thèse Retbaa se Valide
+
+Retbaa n'a jamais visé le luxe de logo. Kemia est un objet qu'on porte contre soi, qu'on active quand on veut, dont la valeur est intrinsèque et invisible pour les autres. C'est la définition du luxe intime — celui qui gagne actuellement.
+
+**Pour les investisseurs Retbaa Circle :** vous n'investissez pas dans le luxe en général. Vous investissez dans le segment du luxe qui résiste — celui qui grandit quand les autres reculent.
+
+La bifurcation n'est pas un risque à hedger. C'est un moteur à activer.
+
+Pendant que les géants dépensent des centaines de millions pour "retrouver leur désirabilité", Retbaa la construit dès le premier jour — à travers le produit, le récit, et la sélectivité de sa distribution.
+
+## Points d'Action
+
+- Capitaliser sur ce contexte dans la narrative investisseurs : "nous entrons au bon moment, dans le bon segment"
+- Renforcer le storytelling sensoriel et intime dans toutes les communications
+- Maintenir une distribution ultra-sélective — c'est ce que le marché récompense`,
+  },
+  {
+    id: 'gcc-riyadh-refuge-strategique-2026',
+    tag: 'Géopolitique · GCC',
+    title: 'GCC sous Tension de Guerre : Riyadh comme Refuge Stratégique',
+    subtitle: 'Dubai -50% estimé · Riyadh isolée du conflit · SAR 11.1Mds$ +4.5%/an — le pivot Retbaa est validé',
+    summary: 'La guerre en Iran plombe Dubai et pousse LVMH, Hermès à pivoter vers d\'autres régions. Riyadh reste isolée et bénéficie du report de trafic. Le pivot stratégique Retbaa vers Riyadh, déjà décidé, est désormais confirmé par les données macro.',
+    date: '5 mai 2026',
+    author: 'Kemia · Veille Stratégique',
+    source: 'Bernstein Research, Reuters, Arab News',
+    sourceUrl: null,
+    img: '/retbaa-photos/retbaa_07.jpg',
+    featured: false,
+    category: 'Géopolitique',
+    content: `## 🔴 Signal Fort — Pertinence 9/10
+
+Ce n'est plus une décision de portefeuille. C'est la stratégie que les grandes maisons mondiales adoptent en urgence.
+
+## Les Faits
+
+La guerre en Iran a créé une onde de choc dans le luxe du Golfe :
+
+- **Dubai** : estimé à -50% sur les ventes de luxe (chiffre interne, non confirmé officiellement). Les touristes du Golfe et d'Europe évitent la région.
+- **LVMH, Hermès, Richemont** : tous en train de réviser leurs allocations budgétaires GCC, en rééquilibrant depuis Dubai vers Riyadh.
+- **Riyadh** : géographiquement et politiquement isolée du conflit Iran. Bénéficie du report de trafic premium depuis Dubai.
+
+**Marché luxe Saudi Arabia :**
+- **$11.1 milliards** (2025)
+- **+4.5% par an** — croissance structurelle portée par Vision 2030
+- Marché intérieur réel, pas uniquement touristique — contrairement à Dubai
+
+## Pourquoi Riyadh résiste
+
+L'Arabie Saoudite tire sa dynamique de ses propres fondamentaux, indépendamment des flux touristiques régionaux :
+
+**Vision 2030** : l'État investit massivement dans le tourisme premium, les arts, la culture, l'hospitalité de luxe. Ce n'est pas un cycle économique — c'est une politique nationale sur 10 ans.
+
+**Population domestique** : 60% des Saoudiens ont moins de 35 ans, pouvoir d'achat en forte progression. La demande est locale et structurelle.
+
+**Culture olfactive profonde** : l'oud, le bakhoor, la parfumerie orientale sont des pratiques culturelles quotidiennes — non des tendances. Retbaa parle naturellement ce langage.
+
+**Sécularisation accélérée** : depuis 2019, une nouvelle classe de consommateurs premium combine codes occidentaux et ancrage identitaire fort. Exactement le profil qui résonne avec Cultural Luxury.
+
+## Le Pivot Retbaa : Décision Confirmée
+
+Retbaa avait activé une stratégie GCC B2B-first avec Dubai comme point d'entrée initial. Ce cap reste valide pour la visibilité marque.
+
+Mais les données 2026 confirment le pivot d'accent : **Riyadh comme marché prioritaire**, Dubai comme marché de visibilité internationale.
+
+Pour les investisseurs Retbaa Circle, ce timing est une preuve d'agilité stratégique : **Retbaa pivote vers Riyadh au même moment que LVMH et Hermès.**
+
+La différence : eux réagissent à une crise. Retbaa exécute une stratégie déjà décidée, que la crise vient simplement valider.
+
+## Ce que Retbaa apporte que personne d'autre n'a sur ce marché
+
+Sur le marché GCC, les maisons de parfumerie niche premium sont soit occidentales (sans ancrage culturel moyen-oriental), soit orientales traditionnelles (sans dimension internationale).
+
+Retbaa est ni l'un ni l'autre — et les deux à la fois.
+
+L'oud africain, la céramique sensorielle, le rituel quotidien : un dialogue naturel avec la culture GCC, porté par une origine géographique inédite.
+
+**Le marché n'attend pas Retbaa. Il la cherche.**`,
+  },
+  {
+    id: 'osmo-70m-ia-fragrance-2026',
+    tag: 'Tech & IA',
+    title: 'Osmo lève $70M : L\'IA s\'attaque à la création olfactive',
+    subtitle: 'Series B · fév. 2026 · MOQ réduits · ingrédients AI-designés — pourquoi Kemia reste non-reproductible',
+    summary: 'Osmo veut démocratiser la fragrance avec des MOQ réduits et des ingrédients AI-designés. Signal double : investissement massif dans la fragrance ET menace réelle sur les marques craft non-différenciées. Retbaa doit articuler pourquoi le sensoriel humain est non-reproductible par l\'IA.',
+    date: '5 mai 2026',
+    author: 'Kemia · Veille Stratégique',
+    source: 'TechCrunch, Perfumer & Flavorist',
+    sourceUrl: null,
+    img: '/retbaa-photos/retbaa_09.jpg',
+    featured: false,
+    category: 'Veille Marché',
+    content: `## Les Faits
+
+**Osmo** (AI-powered scent design) vient de boucler une **Series B à $70 millions** (février 2026). La startup combine des modèles d'IA propriétaires avec des données de perception olfactive pour :
+
+- Concevoir des fragrances en heures plutôt qu'en mois
+- Réduire les MOQ (minimum order quantities) — rendant le marché accessible à des marques D2C sans infrastructure
+- Créer des ingrédients AI-designés à partir de données moléculaires
+
+Le pitch : démocratiser la création de fragrance de luxe.
+
+## Le Double Signal
+
+Ce financement envoie deux messages simultanés.
+
+**Signal positif pour l'industrie :** L'investissement dans la fragrance est massif. $70M en Series B confirme que les investisseurs croient au potentiel de la parfumerie premium. Le marché niche fragrance à $4.85B en 2026 (CAGR 13.2%) attire les capitaux.
+
+**Signal de menace pour les non-différenciés :** Osmo réduit la barrière à l'entrée. Demain, n'importe quelle marque D2C pourra commander une fragrance "premium" via une interface IA, avec un MOQ de 100 unités. Les marques qui ne proposent que "un beau parfum" vont se retrouver dans une guerre des prix.
+
+## Pourquoi Kemia est Non-Reproductible par l'IA
+
+Osmo peut reproduire une formule olfactive. Il ne peut pas reproduire ce que Kemia fait.
+
+**Le médaillon céramique** est façonné à la main. Sa porosité, sa texture, la façon dont il absorbe et libère le parfum progressivement — ce n'est pas une formule chimique. C'est un dialogue entre la matière et la peau.
+
+**Le rituel** : Kemia n'est pas une fragrance. C'est un acte. On choisit son spray, on le dépose sur le médaillon, on le porte. Ce processus d'intention, ce geste quotidien — l'IA ne le vend pas.
+
+**La provenance** : les matières premières de Retbaa viennent d'Afrique de l'Ouest. Cette géographie, cette histoire, ce savoir-faire transmis — c'est ce que le marché du luxe paie en premium. Pas la molécule.
+
+**L'expérience sensorielle multimodale** : toucher la céramique, voir le médaillon vieillir et développer une patine personnelle, sentir la diffusion progressive. Osmo produit du liquide parfumé. Retbaa produit une expérience.
+
+## Points d'Action
+
+- **Renforcer le narrative "non-reproductible"** dans tous les supports : pourquoi la céramique + le rituel + la provenance forment une triade que l'IA ne peut pas commoditiser
+- **Surveiller Osmo** comme potentiel partenaire de R&D (MOQ réduits = opportunité pour étendre la gamme fragrances)
+- **Articuler clairement** aux investisseurs Circle que l'IA dans la fragrance valide le marché tout en renforçant le moat Retbaa`,
+  },
+  {
+    id: 'afrique-marche-producteur-2026',
+    tag: 'Afrique',
+    title: 'L\'Afrique comme Marché Producteur : Au-delà de la Consommation',
+    subtitle: '"Rise of Africa\'s Brand Economy 2026" (BrandiQ/Brookings) · MEA luxury $21.85B · CAGR 10.57%',
+    summary: 'Les marques africaines ne sont plus cantonnées à un marché local — elles définissent des tendances globales. MEA luxury à $21.85Mds$ en 2026, diaspora commerce en forte hausse. Retbaa comme locomotive de cette vague.',
+    date: '5 mai 2026',
+    author: 'Kemia · Veille Stratégique',
+    source: 'BrandiQ, Brookings Institution, Globe Newswire',
+    sourceUrl: null,
+    img: '/retbaa-photos/retbaa_11.jpg',
+    featured: false,
+    category: 'Afrique',
+    content: `## Les Faits
+
+**"The Rise of Africa's Brand Economy 2026"** — publié conjointement par BrandiQ et la Brookings Institution — documente une rupture narrative majeure dans l'économie mondiale du luxe.
+
+Les marques africaines ne sont plus des curiosités régionales. Elles définissent des tendances.
+
+**Chiffres clés MEA :**
+- **$21.85 milliards** — marché luxe MEA 2026
+- **CAGR 10.57%** — vers $36.15 milliards d'ici 2031
+- **Diaspora commerce** : en forte hausse sur tous les segments premium
+- Croissance quasi-deux-fois supérieure à l'Europe occidentale
+
+## Le Changement de Paradigme
+
+Pendant des décennies, le luxe africain était lu à travers un prisme consommateur : "L'Afrique achète du luxe occidental." Ce cadre est en train de se renverser.
+
+**Trois vagues simultanées créent le changement :**
+
+**1. La montée de la classe créative africaine**
+Dakar, Lagos, Accra, Nairobi ont produit une génération de créateurs, directeurs artistiques et entrepreneurs qui refusent de s'inscrire dans les codes occidentaux. Ils créent des codes propres — et ces codes se diffusent globalement.
+
+**2. La diaspora comme pont culturel et commercial**
+Les 30+ millions d'Africains en diaspora disposent d'un pouvoir d'achat croissant et d'un appétit pour des marques qui parlent leur identité. Ce marché était invisible dans les statistiques traditionnelles. Il représente aujourd'hui plusieurs milliards de dollars en valeur adressable.
+
+**3. Les plateformes mondiales comme égaliseurs**
+Instagram, TikTok, Farfetch ont supprimé la barrière géographique. Une marque née à Dakar peut désormais être désirée à Tokyo, Milan et New York — sans passer par les gatekeepers traditionnels du luxe parisien.
+
+## La Position de Retbaa
+
+Retbaa n'est pas une marque africaine qui cherche à s'internationaliser. Retbaa est une maison de **Cultural Luxury** — positionnement universel — dont l'origine africaine est un différentiateur de valeur, pas une limitation géographique.
+
+Cette nuance est stratégique.
+
+"Made in Africa" était autrefois une friction dans la distribution luxe mondiale. En 2026, c'est un actif. La BrandiQ/Brookings l'a quantifié : la prime de désirabilité des marques à forte authenticité d'origine est en hausse constante depuis 2022.
+
+**Retbaa est positionnée à l'avant-garde de cette vague — pas dans son sillage.**
+
+## Implications pour les Investisseurs
+
+Pour les membres du Retbaa Circle, cette donnée macro traduit une vérité simple :
+
+Vous investissez dans une marque dont le contexte géopolitique et culturel devient plus favorable chaque année. L'Afrique monte. Le Cultural Luxury monte. La niche fragrance monte.
+
+Retbaa est à l'intersection des trois.
+
+**Le timing n'est pas un hasard. C'est une conviction stratégique exécutée.**
+
+## Points d'Action
+
+- Intégrer les données BrandiQ/Brookings dans le pitch investisseurs Tranche 2
+- Développer la narrative "locomotive de la vague" dans les supports Circle
+- Identifier les ambassadeurs diaspora (France, UK, USA) comme premier réseau d'acquisition premium`,
+  },
+  // ─── FIN VEILLE KEMIA 5 mai 2026 ────────────────────────────
   {
     id: 1,
     tag: 'Marché Luxe',
@@ -1041,7 +1269,7 @@ Richemont surperforme parce que Cartier et Van Cleef vendent des objets qui *dur
   },
 ]
 
-const FILTERS = ['Tout', 'Vision', 'Veille Marché', 'Afrique', 'Marché Luxe', 'Stratégie', 'Géopolitique', 'Distribution']
+const FILTERS = ['Tout', 'Vision', 'Veille Marché', 'Afrique', 'Marché Luxe', 'Stratégie', 'Géopolitique', 'Tech & IA', 'Distribution']
 
 // ─── ARTICLE FEATURED (pleine largeur) ───────────────────────
 function FeaturedArticle({ article, onOpen }) {
