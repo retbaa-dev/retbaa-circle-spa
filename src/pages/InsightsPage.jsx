@@ -961,6 +961,168 @@ Richemont surperforme parce que Cartier et Van Cleef vendent des objets qui *dur
 - **Canaux : Frieze, Art Basel, forums économiques africains** — là où cette clientèle se retrouve, pas sur les plateformes grand public
     `,
   },
+  // ─── ARTICLE IA INFRASTRUCTURE — Mai 2026 ──────────────────
+  {
+    id: 'ia-infrastructure-jpmorgan-anthropic-2026',
+    tag: 'Tech & IA',
+    title: 'L\'IA ne sera pas un outil. Ce sera l\'infrastructure.',
+    subtitle: 'Ce que JPMorgan, Anthropic — et Retbaa — ont compris en même temps.',
+    summary: 'FactSet perd 8,1% en une séance. JPMorgan publie Ask D.A.V.I.D. Anthropic s\'embarque dans FIS. Ce qui se joue n\'est pas une guerre de chatbots — c\'est un changement de couche. Et Retbaa l\'a anticipé.',
+    date: 'Mai 2026',
+    author: 'Kemia · Veille Stratégique',
+    source: 'JPMorgan Research · Anthropic · FactSet · FIS',
+    sourceUrl: null,
+    img: '/retbaa-photos/retbaa_09.jpg',
+    featured: false,
+    category: 'Tech & IA',
+    content: `## Acte I — Une journée ordinaire chez JPMorgan (avant)
+
+Il est 7h30 à New York. Marcus, analyste senior dans l'équipe de recherche investissement de JPMorgan, reçoit une demande d'un gérant de fonds : *"Je veux comprendre l'exposition de notre portefeuille aux financières européennes dans un scénario de remontée des taux à 50bps."*
+
+Ce que Marcus fait alors ressemble à ce que font des milliers d'analystes chaque matin dans chaque grande banque du monde :
+
+Il ouvre FactSet. Exporte des données. Ouvre Excel. Nettoie les colonnes. Cherche dans sa boîte mail les notes de réunion du trimestre dernier. Relance un modèle de risque. Reformate tout dans PowerPoint. Relit. Corrige. Envoie.
+
+**Temps total : 4 à 6 heures.**
+
+La valeur produite ? Réelle. Mais 80% du temps a été passé à *assembler* — pas à *analyser*.
+
+---
+
+## Acte II — La même journée, avec Ask D.A.V.I.D.
+
+JPMorgan a publié l'architecture de son système multi-agents interne. Il ne s'appelle pas "chatbot". Il s'appelle **Ask D.A.V.I.D.** — et il fonctionne comme une salle de recherche entière, en graphe.
+
+Voici ce qui se passe quand Marcus pose la même question au système :
+
+**1. L'agent superviseur** reçoit la question, identifie ce dont il a besoin — données structurées, documents non-structurés, modèles de risque — et distribue le travail.
+
+**2. L'agent données structurées** traduit la question en SQL et interroge directement les bases de données de fonds. Résultat : l'exposition chiffrée, par ligne, par secteur, en secondes.
+
+**3. L'agent RAG** (Retrieval-Augmented Generation) fouille les emails, PDFs, notes de réunion et one-pagers des 6 derniers mois. Il remonte les signaux qualitatifs que la donnée brute ne voit pas.
+
+**4. L'agent analytics** appelle les modèles propriétaires de JPMorgan — simulation de stress, VaR, scénarios — et génère les visualisations.
+
+**5. Le nœud de réflexion** — un LLM-as-judge — relit la réponse avant qu'elle parte. Si quelque chose manque ou semble incohérent, il relance une boucle.
+
+**6. Si l'enjeu dépasse un seuil critique : le vrai David est impliqué.** L'humain reprend la main.
+
+**Temps total : 8 minutes.**
+
+---
+
+La leçon n'est pas technique. Elle est stratégique :
+
+> *Les systèmes AI de production n'optimisent pas pour l'autonomie. Ils optimisent pour la confiance.*
+
+Demos : "regarde ce que l'IA peut faire seule."
+Systèmes réels : "voici comment l'IA et l'humain travaillent ensemble mieux que chacun séparément."
+
+---
+
+## Acte III — Le signal marché que personne n'a manqué
+
+Le 14 mai 2026, Anthropic annonce 10 agents IA de production pour la finance. Natifs dans Excel, PowerPoint, FactSet, S&P Capital IQ, PitchBook, Moody's. Déployés chez Citadel, Goldman Sachs, BNY Mellon, Carlyle, AIG.
+
+Puis FIS signe un partenariat. FIS, c'est l'infrastructure bancaire qui fait tourner les systèmes de milliers de banques dans le monde — environ 12% de l'économie mondiale. Claude s'embarque dedans.
+
+**FactSet perd 8,1% en une séance.**
+
+Pas à cause d'un profit warning. Pas à cause d'un concurrent. Parce que les marchés ont compris quelque chose de fondamental :
+
+> *Si l'intelligence décide quoi faire avec les données, la donnée brute se commoditise.*
+
+FactSet vend des données. Anthropic vend la décision sur ces données.
+
+La valeur ne disparaît pas — elle se déplace. Elle monte d'un cran dans la stack, vers la couche qui orchestre, qui synthétise, qui agit.
+
+Et Anthropic vient de poser cette couche directement dans le plombier de la finance mondiale.
+
+---
+
+## Acte IV — Ce pattern ne reste pas à Wall Street
+
+L'architecture que JPMorgan a pris des années à construire pour la recherche financière sera disponible pour le mid-market dans 18 à 24 mois.
+
+Même logique. Nouvelles verticales : luxe, retail, distribution, logistique.
+
+Des agents embarqués dans les ERPs, les plateformes e-commerce, les CRMs. Pas un modèle géant qui fait tout — des spécialistes orchestrés, avec des garde-fous, et un humain dans la boucle quand ça compte.
+
+Pour le rendre concret : voici ce que ça donne dans l'univers Retbaa.
+
+---
+
+## Acte V — Une journée ordinaire chez Najaade (avant Retbaa OS)
+
+Najaade est un concept store à Dakar. Partenaire dépôt-vente Retbaa depuis 2025.
+
+Il est 10h. La gérante veut réapprovisionner. Elle envoie un message WhatsApp à Massata : *"Il nous reste 3 Kemia Sable, les eaux de parfum partent bien, on aurait besoin d'un réassort."*
+
+Ce que ça déclenche sans système :
+- Massata cherche dans ses emails la dernière commande Najaade
+- Vérifie le stock disponible dans un fichier Excel
+- Regarde les marges et les conditions commerciales dans un autre fichier
+- Répond manuellement, négocie les délais
+- Crée une entrée dans un troisième tableau pour le suivi
+- Oublie de mettre à jour l'inventaire central
+- Deux semaines plus tard : une autre commande arrive, le stock est surestimé
+
+**Résultat : des heures perdues, des données désynchronisées, et un partenaire qui attend.**
+
+---
+
+## Acte VI — La même journée, avec Retbaa OS
+
+La gérante de Najaade se connecte à **Retbaa Trade** — la plateforme B2B construite pour les partenaires du réseau. Elle voit son stock en temps réel (données remontées depuis **Retbaa Ops**), passe sa commande directement, et choisit ses conditions de livraison.
+
+De l'autre côté, **Retbaa Ops** met à jour automatiquement l'inventaire central. **Retbaa Brain** — la base de données unifiée — synchronise l'information entre toutes les apps. Dans **Retbaa Sales**, le pipeline commercial enregistre la transaction et met à jour les prévisions du marché sénégalais.
+
+Massata ouvre son dashboard le matin. Il voit :
+- Les commandes en cours (Najaade, Minibap, Aby Concept Store en Côte d'Ivoire)
+- Le stock disponible par univers produit
+- Les alertes de rupture anticipée
+- Les performances sell-out par marché
+
+Et si un signal inhabituel apparaît — une demande anormalement forte sur une référence produit (SKU) dans un marché — le système le remonte avant que Massata ait posé la question.
+
+**Même principe qu'Ask D.A.V.I.D. Échelle différente. Logique identique.**
+
+---
+
+## Ce que Retbaa construit
+
+**Retbaa OS** est l'infrastructure opérationnelle et commerciale de la marque — conçue dès le premier jour pour être un écosystème, pas une collection d'outils.
+
+### Apps de l'écosystème
+
+- **Circle** — Portail investisseurs · ✅ Live
+- **Ops** — Cockpit interne (commandes, stock, KPIs) · ✅ Live
+- **Trade** — Plateforme B2B, réseau distributeurs · ✅ Live
+- **Sales** — Pipeline commercial & intelligence marché · 🔄 En construction
+- **Retail** — Vue 360° sell-out (DTC, dépôt-vente, B2B) · ⏳ Prochaine phase
+- **Academy** — Formation distributeurs & ambassadeurs · ⏳ Chantier ouvert
+- **One** — Super-app unifiée par profil utilisateur · ⏳ Dernière brique
+
+Chaque app parle aux autres. Chaque donnée remonte dans **Retbaa Brain**, source de vérité unique. Chaque décision de build respecte une règle : *comment ça s'intègre dans l'OS avant de coder.*
+
+---
+
+## En conclusion
+
+JPMorgan a construit Ask D.A.V.I.D. parce que 80% du temps de ses analystes était perdu à assembler plutôt qu'à analyser.
+
+Anthropic a fait chuter FactSet de 8 milliards parce que les marchés savent que la valeur migre vers la couche qui décide — pas vers la couche qui stocke.
+
+Chez Retbaa, nous avons posé la même question dès le départ : *où sera la valeur dans 5 ans ?*
+
+Dans **la capacité à orchestrer l'ensemble** — partenaires, stock, marchés, données — avec une intelligence au centre.
+
+Nous construisons cette intelligence maintenant, pendant que la fenêtre est encore ouverte.
+
+---
+
+*Retbaa Circle Insights — Mai 2026 · circle@retbaa.com*`,
+  },
   // ─── VEILLE KEMIA — Semaine du 5 mai 2026 ───────────────────
   {
     id: 'luxe-crise-cultural-luxury-2026',
