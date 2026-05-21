@@ -1,7 +1,7 @@
 // pages/DocumentsPage.jsx — Retbaa Circle — Stitch Design System v3
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useUser } from '@clerk/clerk-react'
+import { useAuth } from '../hooks/useAuth'
 import { FileText, Download, Pen, Upload, CheckCircle, Clock, AlertCircle, X, Eye } from 'lucide-react'
 
 // ─── DATA — Documents réels Retbaa Circle ────────────────────────────────────
@@ -1000,8 +1000,8 @@ function DocumentRow({ doc, lang, onAction, onPreview, locked }) {
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function DocumentsPage({ observateur = false, userName = '', isAssistant = false }) {
   const { i18n } = useTranslation()
-  // useUser peut retourner null en mode preview — géré avec userId fallback
-  const { user } = useUser()
+  // useAuth expose user Supabase — géré avec userName fallback en mode preview
+  const { user } = useAuth()
   const userId = user?.id || userName
   const lang = i18n.language?.startsWith('fr') ? 'fr' : 'en'
 
