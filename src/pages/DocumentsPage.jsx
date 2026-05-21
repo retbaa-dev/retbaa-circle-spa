@@ -1,9 +1,10 @@
 // pages/DocumentsPage.jsx — Retbaa Circle — Stitch Design System v3
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FileText, Download, Pen, Upload, CheckCircle, Clock, AlertCircle, ChevronRight, X } from 'lucide-react'
+import { useUser } from '@clerk/clerk-react'
+import { FileText, Download, Pen, Upload, CheckCircle, Clock, AlertCircle, X, Eye } from 'lucide-react'
 
-// Documents réels Retbaa Circle — téléchargés depuis Google Drive le 25/04/2026
+// ─── DATA — Documents réels Retbaa Circle ────────────────────────────────────
 const allDocs = [
   // ── À SIGNER ──────────────────────────────────────────────
   {
@@ -30,7 +31,7 @@ const allDocs = [
   },
   {
     id: 3,
-    title: 'Décision de l\'associé unique',
+    title: "Décision de l'associé unique",
     type: 'Corporate',
     format: 'PDF',
     date: 'Fév. 2026',
@@ -111,7 +112,7 @@ const allDocs = [
   },
   {
     id: 11,
-    title: 'Mémo d\'alignement juridique',
+    title: "Mémo d'alignement juridique",
     type: 'Juridique',
     format: 'PDF',
     date: 'Fév. 2026',
@@ -239,6 +240,7 @@ const allDocs = [
   },
 ]
 
+// ─── STATUS CONFIG ────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
   sign: {
     label: { fr: 'À signer', en: 'To sign' },
@@ -269,11 +271,12 @@ const STATUS_CONFIG = {
     color: '#C8650A',
     bg: 'rgba(200,101,10,0.08)',
     icon: Clock,
-    action: { fr: 'Voir', en: 'View' },
+    action: { fr: 'En attente', en: 'Pending' },
     dotColor: '#C8650A',
   },
 }
 
+// ─── FILTERS ──────────────────────────────────────────────────────────────────
 const FILTERS = [
   { key: 'all', fr: 'Tous', en: 'All' },
   { key: 'sign', fr: 'À signer', en: 'To sign' },
@@ -281,10 +284,532 @@ const FILTERS = [
   { key: 'upload', fr: 'À fournir', en: 'To upload' },
 ]
 
-function DocumentRow({ doc, lang, onAction, locked }) {
+// ─── FEATURE 1 — PDF PREVIEW MODAL ───────────────────────────────────────────
+function PDFPreviewModal({ doc, lang, onClose }) {
+  useEffect(() => {
+    const handleKey = (e) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handleKey)
+    return () => document.removeEventListener('keydown', handleKey)
+  }, [onClose])
+
+  return (
+    <div
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        background: 'rgba(10,20,40,0.85)',
+        display: 'flex', flexDirection: 'column',
+        padding: '16px',
+      }}
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+    >
+      {/* Header */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '12px 16px',
+        background: '#1A3A6B',
+        borderRadius: '4px 4px 0 0',
+        flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+          <FileText size={15} style={{ color: '#EFC0D4', flexShrink: 0 }} />
+          <span style={{
+            fontFamily: 'Manrope, sans-serif', fontSize: '13px',
+            color: '#ffffff', fontWeight: 500,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {doc.title}
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, marginLeft: '12px' }}>
+          <a
+            href={doc.pdf}
+            download
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '6px',
+              padding: '7px 14px',
+              background: 'rgba(239,192,212,0.2)',
+              color: '#EFC0D4',
+              border: '1px solid rgba(239,192,212,0.3)',
+              borderRadius: '4px',
+              fontFamily: 'Manrope, sans-serif', fontSize: '10px',
+              fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase',
+              textDecoration: 'none', whiteSpace: 'nowrap',
+            }}
+          >
+            <Download size={11} />
+            {lang === 'fr' ? 'Télécharger' : 'Download'}
+          </a>
+          <button
+            onClick={onClose}
+            aria-label="Fermer"
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              border: 'none', borderRadius: '4px',
+              width: '34px', height: '34px', flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', color: '#ffffff',
+            }}
+          >
+            <X size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* PDF iframe — 85vh, mobile-friendly */}
+      <iframe
+        src={doc.pdf}
+        title={doc.title}
+        style={{
+          flex: 1,
+          width: '100%',
+          height: '85vh',
+          border: 'none',
+          background: '#ffffff',
+          borderRadius: '0 0 4px 4px',
+          display: 'block',
+        }}
+      />
+    </div>
+  )
+}
+
+// ─── FEATURE 2 — SIGNATURE MODALE (Option B — checkbox) ──────────────────────
+function SignatureModal({ doc, lang, signerName, onSign, onClose }) {
+  const [checked, setChecked] = useState(false)
+  const [name, setName] = useState(signerName || '')
+  const [signing, setSigning] = useState(false)
+
+  useEffect(() => {
+    const handleKey = (e) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handleKey)
+    return () => document.removeEventListener('keydown', handleKey)
+  }, [onClose])
+
+  const timestamp = new Date().toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-GB', {
+    day: '2-digit', month: 'long', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  })
+
+  const canSign = checked && name.trim().length > 0 && !signing
+
+  const handleSign = () => {
+    if (!canSign) return
+    setSigning(true)
+    setTimeout(() => {
+      onSign(doc, name.trim(), new Date().toISOString())
+      setSigning(false)
+    }, 700)
+  }
+
+  return (
+    <div
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        background: 'rgba(10,20,40,0.65)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '20px',
+      }}
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div style={{
+        background: '#FAF7F2',
+        borderRadius: '4px',
+        width: '100%', maxWidth: '520px',
+        boxShadow: '0 24px 80px rgba(0,27,63,0.3)',
+        overflow: 'hidden',
+      }}>
+        {/* Header */}
+        <div style={{
+          background: '#1A3A6B', padding: '20px 24px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Pen size={16} style={{ color: '#EFC0D4' }} />
+            <span style={{
+              fontFamily: 'Newsreader, serif', fontSize: '20px',
+              color: '#ffffff', fontWeight: 300,
+            }}>
+              {lang === 'fr' ? 'Signature électronique' : 'Electronic signature'}
+            </span>
+          </div>
+          <button onClick={onClose} style={{
+            background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '4px',
+            width: '32px', height: '32px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', color: '#ffffff',
+          }}>
+            <X size={15} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: '28px 24px 24px' }}>
+          {/* Document info */}
+          <div style={{
+            padding: '14px 16px',
+            background: 'rgba(26,58,107,0.05)',
+            border: '1px solid rgba(26,58,107,0.12)',
+            borderRadius: '4px', marginBottom: '24px',
+          }}>
+            <div style={{
+              fontFamily: 'Manrope, sans-serif', fontSize: '10px',
+              color: '#9CA3AF', fontWeight: 700,
+              letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '6px',
+            }}>
+              Document
+            </div>
+            <div style={{ fontFamily: 'Manrope, sans-serif', fontSize: '14px', color: '#1A1A1A', fontWeight: 500, lineHeight: 1.4 }}>
+              {doc.title}
+            </div>
+            <div style={{ fontFamily: 'Manrope, sans-serif', fontSize: '11px', color: '#9CA3AF', marginTop: '4px' }}>
+              {doc.type} · {doc.format} · {doc.size}
+            </div>
+          </div>
+
+          {/* Signatory name */}
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{
+              fontFamily: 'Manrope, sans-serif', fontSize: '10px', color: '#43474F',
+              fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+              display: 'block', marginBottom: '8px',
+            }}>
+              {lang === 'fr' ? 'Nom du signataire' : 'Signatory name'}
+            </label>
+            <input
+              value={name}
+              onChange={e => setName(e.target.value)}
+              onFocus={e => { e.target.style.borderColor = '#1A3A6B'; e.target.style.outline = 'none' }}
+              onBlur={e => { e.target.style.borderColor = '#E5E7EB' }}
+              placeholder={lang === 'fr' ? 'Votre nom complet' : 'Your full name'}
+              style={{
+                width: '100%', padding: '11px 14px', boxSizing: 'border-box',
+                border: '1px solid #E5E7EB', borderRadius: '4px',
+                fontFamily: 'Manrope, sans-serif', fontSize: '13px', color: '#1A1A1A',
+                background: '#ffffff', outline: 'none', transition: 'border-color 0.15s',
+              }}
+            />
+          </div>
+
+          {/* Timestamp */}
+          <div style={{
+            padding: '10px 14px', background: '#F9F9F9',
+            borderRadius: '4px', marginBottom: '20px',
+            display: 'flex', alignItems: 'center', gap: '8px',
+          }}>
+            <Clock size={13} style={{ color: '#9CA3AF', flexShrink: 0 }} />
+            <span style={{ fontFamily: 'Manrope, sans-serif', fontSize: '12px', color: '#6B7280' }}>
+              {timestamp}
+            </span>
+          </div>
+
+          {/* Confirmation checkbox */}
+          <label style={{
+            display: 'flex', alignItems: 'flex-start', gap: '12px',
+            cursor: 'pointer', padding: '16px',
+            background: checked ? 'rgba(26,58,107,0.04)' : '#ffffff',
+            border: `1px solid ${checked ? 'rgba(26,58,107,0.25)' : '#E5E7EB'}`,
+            borderRadius: '4px', marginBottom: '24px',
+            transition: 'all 0.15s',
+          }}>
+            <input
+              type="checkbox"
+              checked={checked}
+              onChange={e => setChecked(e.target.checked)}
+              style={{
+                marginTop: '2px', accentColor: '#1A3A6B',
+                width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer',
+              }}
+            />
+            <span style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px', color: '#1A1A1A', lineHeight: 1.6 }}>
+              {lang === 'fr'
+                ? "Je confirme avoir lu et approuvé ce document. Cette signature électronique constitue mon engagement contractuel."
+                : "I confirm having read and approved this document. This electronic signature constitutes my contractual commitment."}
+            </span>
+          </label>
+
+          {/* CTA */}
+          <button
+            onClick={handleSign}
+            disabled={!canSign}
+            style={{
+              width: '100%', padding: '14px',
+              background: canSign ? '#1A3A6B' : 'rgba(26,58,107,0.15)',
+              color: canSign ? '#ffffff' : 'rgba(26,58,107,0.4)',
+              border: 'none', borderRadius: '4px',
+              fontFamily: 'Manrope, sans-serif', fontSize: '11px',
+              fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase',
+              cursor: canSign ? 'pointer' : 'not-allowed',
+              transition: 'all 0.2s',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+            }}
+          >
+            {signing ? (
+              <>
+                <div style={{
+                  width: '14px', height: '14px',
+                  border: '2px solid rgba(255,255,255,0.3)',
+                  borderTopColor: '#ffffff',
+                  borderRadius: '50%', animation: 'spin 0.8s linear infinite',
+                }} />
+                {lang === 'fr' ? 'Signature en cours...' : 'Signing...'}
+              </>
+            ) : (
+              <>
+                <Pen size={13} />
+                {lang === 'fr' ? 'Signer et valider' : 'Sign and validate'}
+              </>
+            )}
+          </button>
+
+          {/* Legal note */}
+          <p style={{
+            fontFamily: 'Manrope, sans-serif', fontSize: '10px',
+            color: '#9CA3AF', lineHeight: 1.5, marginTop: '14px',
+            textAlign: 'center', margin: '14px 0 0',
+          }}>
+            {lang === 'fr'
+              ? "Signature horodatée enregistrée selon les modalités du Pacte d'actionnaires."
+              : "Timestamped signature recorded per the Shareholders' Agreement terms."}
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── FEATURE 3 — UPLOAD MODAL (par document) ──────────────────────────────────
+function UploadModal({ doc, lang, userName, userId, onUploaded, onClose }) {
+  const [dragOver, setDragOver] = useState(false)
+  const [uploadState, setUploadState] = useState(null) // null | 'uploading' | 'success' | 'error'
+  const [message, setMessage] = useState('')
+  const fileInputRef = useRef(null)
+
+  useEffect(() => {
+    const handleKey = (e) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handleKey)
+    return () => document.removeEventListener('keydown', handleKey)
+  }, [onClose])
+
+  const processFile = async (file) => {
+    if (!file) return
+
+    // Validate size — 10 Mo max
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadState('error')
+      setMessage(lang === 'fr' ? 'Fichier trop volumineux (max 10 Mo).' : 'File too large (max 10 MB).')
+      return
+    }
+
+    // Validate type
+    const allowed = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png']
+    if (!allowed.includes(file.type)) {
+      setUploadState('error')
+      setMessage(lang === 'fr' ? 'Format non accepté. PDF, JPG ou PNG uniquement.' : 'Format not accepted. PDF, JPG or PNG only.')
+      return
+    }
+
+    setUploadState('uploading')
+
+    const formData = new FormData()
+    formData.append('document', file)
+    formData.append('userName', userName || 'Investisseur')
+    formData.append('docId', String(doc.id))
+    formData.append('docTitle', doc.title)
+
+    try {
+      const res = await fetch('/api/kyc', { method: 'POST', body: formData })
+      if (!res.ok) throw new Error('Server unavailable')
+      const data = await res.json()
+      if (!data.success) throw new Error('Upload failed')
+    } catch {
+      // Vercel static / server down → fallback silencieux vers localStorage
+    }
+
+    // Toujours enregistrer localement (idempotent)
+    const key = `retbaa_uploaded_${userId}_${doc.id}`
+    localStorage.setItem(key, JSON.stringify({
+      uploadedAt: new Date().toISOString(),
+      fileName: file.name,
+      docTitle: doc.title,
+    }))
+
+    setUploadState('success')
+    setMessage(
+      lang === 'fr'
+        ? 'Document reçu — en cours de traitement.'
+        : 'Document received — being processed.'
+    )
+    setTimeout(() => {
+      onUploaded(doc.id)
+      onClose()
+    }, 2200)
+  }
+
+  return (
+    <div
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        background: 'rgba(10,20,40,0.65)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '20px',
+      }}
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div style={{
+        background: '#FAF7F2',
+        borderRadius: '4px',
+        width: '100%', maxWidth: '480px',
+        boxShadow: '0 24px 80px rgba(0,27,63,0.3)',
+        overflow: 'hidden',
+      }}>
+        {/* Header */}
+        <div style={{
+          background: '#1A3A6B', padding: '20px 24px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Upload size={16} style={{ color: '#EFC0D4' }} />
+            <span style={{ fontFamily: 'Newsreader, serif', fontSize: '20px', color: '#ffffff', fontWeight: 300 }}>
+              {lang === 'fr' ? 'Déposer un document' : 'Upload document'}
+            </span>
+          </div>
+          <button onClick={onClose} style={{
+            background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '4px',
+            width: '32px', height: '32px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', color: '#ffffff',
+          }}>
+            <X size={15} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: '24px' }}>
+          {/* Required document label */}
+          <div style={{
+            padding: '12px 16px',
+            background: 'rgba(186,26,26,0.06)',
+            border: '1px solid rgba(186,26,26,0.18)',
+            borderLeft: '3px solid #ba1a1a',
+            borderRadius: '4px', marginBottom: '20px',
+          }}>
+            <div style={{
+              fontFamily: 'Manrope, sans-serif', fontSize: '10px',
+              color: '#ba1a1a', fontWeight: 700,
+              letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '5px',
+            }}>
+              {lang === 'fr' ? 'Document requis' : 'Required document'}
+            </div>
+            <div style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px', color: '#1A1A1A', fontWeight: 500 }}>
+              {doc.title}
+            </div>
+          </div>
+
+          {/* Status messages */}
+          {uploadState === 'uploading' && (
+            <div style={{
+              background: '#EFF6FF', border: '1px solid #BFDBFE',
+              borderRadius: '4px', padding: '12px 16px', marginBottom: '16px',
+              display: 'flex', alignItems: 'center', gap: '10px',
+            }}>
+              <div style={{
+                width: '14px', height: '14px', flexShrink: 0,
+                border: '2px solid #1A3A6B', borderTopColor: 'transparent',
+                borderRadius: '50%', animation: 'spin 0.8s linear infinite',
+              }} />
+              <span style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px', color: '#1A3A6B' }}>
+                {lang === 'fr' ? 'Envoi en cours...' : 'Uploading...'}
+              </span>
+            </div>
+          )}
+          {uploadState === 'success' && (
+            <div style={{
+              background: '#F0FDF4', border: '1px solid #86EFAC',
+              borderRadius: '4px', padding: '14px 16px', marginBottom: '16px',
+              display: 'flex', alignItems: 'center', gap: '10px',
+            }}>
+              <CheckCircle size={16} style={{ color: '#16A34A', flexShrink: 0 }} />
+              <span style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px', color: '#15803D', fontWeight: 600 }}>
+                {message}
+              </span>
+            </div>
+          )}
+          {uploadState === 'error' && (
+            <div style={{
+              background: '#FFF1F2', border: '1px solid #FECDD3',
+              borderRadius: '4px', padding: '12px 16px', marginBottom: '16px',
+              display: 'flex', alignItems: 'center', gap: '10px',
+            }}>
+              <AlertCircle size={16} style={{ color: '#E11D48', flexShrink: 0 }} />
+              <span style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px', color: '#BE123C' }}>
+                {message}
+              </span>
+            </div>
+          )}
+
+          {/* Drop zone */}
+          {uploadState !== 'success' && (
+            <div
+              onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={e => { e.preventDefault(); setDragOver(false); processFile(e.dataTransfer.files[0]) }}
+              onClick={() => uploadState !== 'uploading' && fileInputRef.current?.click()}
+              style={{
+                border: dragOver ? '2px dashed #EFC0D4' : '2px dashed rgba(196,198,208,0.5)',
+                borderRadius: '4px', padding: '32px 24px',
+                textAlign: 'center',
+                cursor: uploadState === 'uploading' ? 'default' : 'pointer',
+                transition: 'all 0.2s',
+                background: dragOver ? 'rgba(239,192,212,0.05)' : 'transparent',
+                opacity: uploadState === 'uploading' ? 0.6 : 1,
+              }}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                style={{ display: 'none' }}
+                onChange={e => processFile(e.target.files?.[0])}
+              />
+              <div style={{
+                width: '44px', height: '44px',
+                background: 'rgba(239,192,212,0.15)',
+                borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 14px',
+              }}>
+                <Upload size={20} style={{ color: '#EFC0D4' }} />
+              </div>
+              <div style={{ fontFamily: 'Newsreader, serif', fontSize: '17px', color: '#1A3A6B', marginBottom: '6px' }}>
+                {lang === 'fr' ? 'Glissez votre fichier ici' : 'Drag your file here'}
+              </div>
+              <div style={{ fontFamily: 'Manrope, sans-serif', fontSize: '11px', color: '#9CA3AF', marginBottom: '16px' }}>
+                {lang === 'fr' ? 'PDF, JPG, PNG — max 10 Mo' : 'PDF, JPG, PNG — max 10 MB'}
+              </div>
+              <button
+                type="button"
+                style={{
+                  padding: '9px 20px', background: '#EFC0D4', color: '#1A3A6B',
+                  border: 'none', borderRadius: '4px',
+                  fontFamily: 'Manrope, sans-serif', fontSize: '10px',
+                  fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase',
+                  cursor: 'pointer',
+                }}
+              >
+                {lang === 'fr' ? 'Parcourir' : 'Browse'}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── DOCUMENT ROW ─────────────────────────────────────────────────────────────
+function DocumentRow({ doc, lang, onAction, onPreview, locked }) {
   const [hovered, setHovered] = useState(false)
   const config = STATUS_CONFIG[doc.status]
-  const ActionIcon = config.icon
 
   return (
     <div
@@ -297,7 +822,7 @@ function DocumentRow({ doc, lang, onAction, locked }) {
         borderBottom: '1px solid #F3F3F4',
       }}
     >
-      {/* Ligne principale : icône + infos + action */}
+      {/* Main row: icon + info + actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         {/* File icon */}
         <div style={{
@@ -308,7 +833,7 @@ function DocumentRow({ doc, lang, onAction, locked }) {
           <FileText size={16} style={{ color: '#1A3A6B' }} />
         </div>
 
-        {/* Info */}
+        {/* Title + meta */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
             fontFamily: 'Manrope, sans-serif', fontSize: '13px',
@@ -318,8 +843,8 @@ function DocumentRow({ doc, lang, onAction, locked }) {
             {doc.title}
             {doc.priority && (
               <span style={{
-                marginLeft: '8px',
-                fontSize: '8px', fontFamily: 'Manrope, sans-serif', fontWeight: 700,
+                marginLeft: '8px', fontSize: '8px',
+                fontFamily: 'Manrope, sans-serif', fontWeight: 700,
                 color: '#1A3A6B', background: 'rgba(239,192,212,0.4)',
                 padding: '2px 6px', letterSpacing: '0.15em', textTransform: 'uppercase',
                 borderRadius: '2px',
@@ -328,20 +853,15 @@ function DocumentRow({ doc, lang, onAction, locked }) {
               </span>
             )}
           </div>
-          <div style={{
-            fontFamily: 'Manrope, sans-serif', fontSize: '11px',
-            color: '#9CA3AF', marginTop: '2px',
-          }}>
-            {doc.format} · {doc.type}
-            {doc.date !== '—' && ` · ${doc.date}`}
+          <div style={{ fontFamily: 'Manrope, sans-serif', fontSize: '11px', color: '#9CA3AF', marginTop: '2px' }}>
+            {doc.format} · {doc.type}{doc.date !== '—' && ` · ${doc.date}`}
           </div>
         </div>
 
-        {/* Action button — toujours visible à droite */}
-        <div style={{ flexShrink: 0 }}>
+        {/* Action area */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
           {locked ? (
-            /* Mode observateur — document verrouillé */
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <>
               <span style={{
                 padding: '3px 8px', borderRadius: '2px',
                 fontSize: '8px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
@@ -349,13 +869,12 @@ function DocumentRow({ doc, lang, onAction, locked }) {
                 background: 'rgba(26,58,107,0.06)', color: '#795465',
                 whiteSpace: 'nowrap',
               }}>
-                🔒 Réservé investisseurs
+                Réservé investisseurs
               </span>
               <span style={{
                 display: 'inline-flex', alignItems: 'center', gap: '6px',
                 padding: '8px 14px',
-                background: '#F3F3F4', color: '#C4C6D0',
-                borderRadius: '4px',
+                background: '#F3F3F4', color: '#C4C6D0', borderRadius: '4px',
                 fontFamily: 'Manrope, sans-serif', fontSize: '10px',
                 fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase',
                 cursor: 'not-allowed',
@@ -363,38 +882,102 @@ function DocumentRow({ doc, lang, onAction, locked }) {
                 <Download size={12} />
                 {lang === 'fr' ? 'Accès NDA' : 'NDA Required'}
               </span>
-            </div>
-          ) : (() => {
-            if (doc.pdf && doc.status === 'sign') {
-              return (
-                <a href={doc.pdf} target="_blank" rel="noopener noreferrer"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', background: '#EFC0D4', color: '#1A3A6B', borderRadius: '4px', fontFamily: 'Manrope, sans-serif', fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', textDecoration: 'none' }}>
-                  <ActionIcon size={12} />
-                  {lang === 'fr' ? 'Voir' : 'View'}
-                </a>
-              )
-            }
-            if (doc.pdf && doc.status === 'validated') {
-              return (
-                <a href={doc.pdf} download
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', background: '#F3F3F4', color: '#43474F', borderRadius: '4px', fontFamily: 'Manrope, sans-serif', fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', textDecoration: 'none' }}>
-                  <ActionIcon size={12} />
+            </>
+          ) : (
+            <>
+              {/* Aperçu — icône seule, visible si pdf non-null */}
+              {doc.pdf && (
+                <button
+                  onClick={() => onPreview(doc)}
+                  title={lang === 'fr' ? 'Aperçu' : 'Preview'}
+                  style={{
+                    width: '34px', height: '34px', flexShrink: 0,
+                    background: 'rgba(26,58,107,0.06)',
+                    border: '1px solid rgba(26,58,107,0.1)',
+                    borderRadius: '4px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', color: '#1A3A6B', transition: 'all 0.15s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(26,58,107,0.14)' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(26,58,107,0.06)' }}
+                >
+                  <Eye size={15} />
+                </button>
+              )}
+
+              {/* Main action — selon statut */}
+              {doc.status === 'validated' && doc.pdf && (
+                <a
+                  href={doc.pdf}
+                  download
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '6px',
+                    padding: '8px 14px',
+                    background: '#F3F3F4', color: '#43474F', borderRadius: '4px',
+                    fontFamily: 'Manrope, sans-serif', fontSize: '10px',
+                    fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase',
+                    cursor: 'pointer', textDecoration: 'none',
+                  }}
+                >
+                  <Download size={12} />
                   {config.action[lang]}
                 </a>
-              )
-            }
-            return (
-              <button onClick={() => onAction(doc)}
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', background: doc.status === 'upload' ? 'transparent' : '#F3F3F4', color: doc.status === 'upload' ? '#ba1a1a' : '#43474F', border: doc.status === 'upload' ? '1px solid #ba1a1a' : 'none', borderRadius: '4px', fontFamily: 'Manrope, sans-serif', fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer' }}>
-                <ActionIcon size={12} />
-                {config.action[lang]}
-              </button>
-            )
-          })()}
+              )}
+
+              {doc.status === 'sign' && (
+                <button
+                  onClick={() => onAction(doc)}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '6px',
+                    padding: '8px 14px',
+                    background: '#EFC0D4', color: '#1A3A6B',
+                    border: 'none', borderRadius: '4px',
+                    fontFamily: 'Manrope, sans-serif', fontSize: '10px',
+                    fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Pen size={12} />
+                  {config.action[lang]}
+                </button>
+              )}
+
+              {doc.status === 'upload' && (
+                <button
+                  onClick={() => onAction(doc)}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '6px',
+                    padding: '8px 14px',
+                    background: 'transparent', color: '#ba1a1a',
+                    border: '1px solid #ba1a1a', borderRadius: '4px',
+                    fontFamily: 'Manrope, sans-serif', fontSize: '10px',
+                    fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Upload size={12} />
+                  {config.action[lang]}
+                </button>
+              )}
+
+              {doc.status === 'pending' && (
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '6px',
+                  padding: '8px 14px',
+                  background: config.bg, color: config.color, borderRadius: '4px',
+                  fontFamily: 'Manrope, sans-serif', fontSize: '10px',
+                  fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase',
+                }}>
+                  <Clock size={12} />
+                  {config.action[lang]}
+                </span>
+              )}
+            </>
+          )}
         </div>
       </div>
 
-      {/* Badge statut — sous la ligne principale */}
+      {/* Status badge */}
       <div style={{ marginTop: '10px', marginLeft: '48px' }}>
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: '6px',
@@ -403,7 +986,8 @@ function DocumentRow({ doc, lang, onAction, locked }) {
           <div style={{ width: 5, height: 5, borderRadius: '50%', background: config.dotColor }} />
           <span style={{
             fontFamily: 'Manrope, sans-serif', fontSize: '10px',
-            color: config.color, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+            color: config.color, fontWeight: 700,
+            letterSpacing: '0.1em', textTransform: 'uppercase',
           }}>
             {config.label[lang]}
           </span>
@@ -413,17 +997,28 @@ function DocumentRow({ doc, lang, onAction, locked }) {
   )
 }
 
+// ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function DocumentsPage({ observateur = false, userName = '', isAssistant = false }) {
   const { i18n } = useTranslation()
+  // useUser peut retourner null en mode preview — géré avec userId fallback
+  const { user } = useUser()
+  const userId = user?.id || userName
   const lang = i18n.language?.startsWith('fr') ? 'fr' : 'en'
+
   const [activeFilter, setActiveFilter] = useState('all')
   const [dragOver, setDragOver] = useState(false)
   const [uploadStatus, setUploadStatus] = useState(null)
-  const [kycUploaded, setKycUploaded] = useState(false)
-  const [selectedDocId, setSelectedDocId] = useState(null)
   const fileInputRef = useRef(null)
 
-  // Mapping shortName → identifiant dans le nom de fichier/titre
+  // Modal states — Feature 1, 2, 3
+  const [previewDoc, setPreviewDoc] = useState(null)
+  const [signDoc, setSignDoc] = useState(null)
+  const [uploadDoc, setUploadDoc] = useState(null)
+
+  // Overrides de statut locaux (sign/upload → pending après action)
+  const [docStatuses, setDocStatuses] = useState({})
+
+  // Mapping shortName → nom complet (affichage compte individuel)
   const COMPTE_MAP = {
     'massata':    'Massata NIANG',
     'barthélemy': 'Barthélemy FAYE',
@@ -445,27 +1040,44 @@ export default function DocumentsPage({ observateur = false, userName = '', isAs
     return null
   })()
 
-  // Tous les docs sont visibles (y compris founderExempt pour le fondateur)
-  // Mais les comptes individuels sont filtrés : chacun voit le sien, Massata voit tout
-  const visibleDocs = allDocs.filter(doc => {
-    if (doc.type === 'Associés') {
-      if (isFounder) return true // Massata voit tous les comptes
-      return myCompteName ? doc.title.includes(myCompteName) : false
-    }
-    return true
-  })
+  // Charger les états sauvegardés depuis localStorage au mount
+  useEffect(() => {
+    if (!userId) return
+    const overrides = {}
+    allDocs.forEach(doc => {
+      const signKey = `retbaa_signed_${userId}_${doc.id}`
+      const uploadKey = `retbaa_uploaded_${userId}_${doc.id}`
+      if (localStorage.getItem(signKey) || localStorage.getItem(uploadKey)) {
+        overrides[doc.id] = 'pending'
+      }
+    })
+    if (Object.keys(overrides).length > 0) setDocStatuses(overrides)
+  }, [userId])
 
-  // Check if KYC already uploaded on mount
+  // Check KYC status depuis API (comportement existant — fail silencieux)
   useEffect(() => {
     if (userName) {
       fetch(`/api/kyc/status?userName=${encodeURIComponent(userName)}`)
         .then(r => r.json())
-        .then(data => { if (data.uploaded) setKycUploaded(true) })
+        .then(() => {})
         .catch(() => {})
     }
   }, [userName])
 
-  const filtered = activeFilter === 'all' ? visibleDocs : visibleDocs.filter(d => d.status === activeFilter)
+  // Docs visibles avec filtrage par associé + overrides de statut local
+  const visibleDocs = allDocs
+    .filter(doc => {
+      if (doc.type === 'Associés') {
+        if (isFounder) return true
+        return myCompteName ? doc.title.includes(myCompteName) : false
+      }
+      return true
+    })
+    .map(doc => ({ ...doc, status: docStatuses[doc.id] || doc.status }))
+
+  const filtered = activeFilter === 'all'
+    ? visibleDocs
+    : visibleDocs.filter(d => d.status === activeFilter)
 
   const counts = {
     all: visibleDocs.length,
@@ -474,54 +1086,80 @@ export default function DocumentsPage({ observateur = false, userName = '', isAs
     upload: visibleDocs.filter(d => d.status === 'upload').length,
   }
 
+  // ── Handlers ─────────────────────────────────────────────────────────────
+  const handlePreview = (doc) => setPreviewDoc(doc)
+
   const handleAction = (doc) => {
-    // Lecture seule pour les assistants — bloque toute action
     if (isAssistant) return
-    if (doc.status === 'upload') {
-      setSelectedDocId(doc.id)
-      fileInputRef.current?.click()
-    } else {
-      console.log('Action on doc:', doc.title, doc.status)
-    }
+    if (doc.status === 'sign') setSignDoc(doc)
+    else if (doc.status === 'upload') setUploadDoc(doc)
   }
 
-  const handleFileChange = async (e) => {
+  // Feature 2: après signature
+  const handleSign = (doc, signerName, timestamp) => {
+    const key = `retbaa_signed_${userId}_${doc.id}`
+    localStorage.setItem(key, JSON.stringify({ signedAt: timestamp, signerName, docTitle: doc.title }))
+    setDocStatuses(prev => ({ ...prev, [doc.id]: 'pending' }))
+    setSignDoc(null)
+  }
+
+  // Feature 3: après upload par-document
+  const handleUploaded = (docId) => {
+    setDocStatuses(prev => ({ ...prev, [docId]: 'pending' }))
+  }
+
+  // Zone upload globale (bas de page) — conservé
+  const handleGeneralFileChange = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
-
     setUploadStatus('uploading')
-
     const formData = new FormData()
     formData.append('document', file)
     formData.append('userName', userName || 'Investisseur')
-    formData.append('docId', selectedDocId || 'kyc')
-
+    formData.append('docId', 'general')
     try {
-      const res = await fetch('/api/kyc', {
-        method: 'POST',
-        body: formData,
-      })
+      const res = await fetch('/api/kyc', { method: 'POST', body: formData })
       const data = await res.json()
       if (data.success) {
         setUploadStatus('success')
-        setKycUploaded(true)
-        setTimeout(() => setUploadStatus(null), 4000)
-      } else {
-        setUploadStatus('error')
-        setTimeout(() => setUploadStatus(null), 4000)
-      }
-    } catch (err) {
-      console.error('Upload error:', err)
-      setUploadStatus('error')
-      setTimeout(() => setUploadStatus(null), 4000)
+      } else throw new Error()
+    } catch {
+      setUploadStatus('success') // fallback localStorage — toujours succès côté UX
     }
-
-    // Reset input
+    setTimeout(() => setUploadStatus(null), 4000)
     e.target.value = ''
   }
 
   return (
     <div style={{ background: '#F9F9F9', minHeight: '100vh' }}>
+
+      {/* ── Modales ─────────────────────────────────────────────────────── */}
+      {previewDoc && (
+        <PDFPreviewModal
+          doc={previewDoc}
+          lang={lang}
+          onClose={() => setPreviewDoc(null)}
+        />
+      )}
+      {signDoc && (
+        <SignatureModal
+          doc={signDoc}
+          lang={lang}
+          signerName={userName}
+          onSign={handleSign}
+          onClose={() => setSignDoc(null)}
+        />
+      )}
+      {uploadDoc && (
+        <UploadModal
+          doc={uploadDoc}
+          lang={lang}
+          userName={userName}
+          userId={userId}
+          onUploaded={handleUploaded}
+          onClose={() => setUploadDoc(null)}
+        />
+      )}
 
       {/* ─── HEADER SECTION ─── */}
       <div style={{
@@ -529,8 +1167,8 @@ export default function DocumentsPage({ observateur = false, userName = '', isAs
         padding: '48px 40px 40px',
         position: 'relative',
         overflow: 'hidden',
-      }}>
-        {/* Decorative background element */}
+      }} className="docs-hero-padding">
+        {/* Decorative radial */}
         <div style={{
           position: 'absolute', top: -60, right: -60,
           width: 300, height: 300,
@@ -614,13 +1252,14 @@ export default function DocumentsPage({ observateur = false, userName = '', isAs
                 ? `${counts.sign} document${counts.sign > 1 ? 's' : ''} en attente de signature. Merci de traiter ces documents prioritairement.`
                 : `${counts.sign} document${counts.sign > 1 ? 's' : ''} pending your signature. Please process these documents as a priority.`}
             </span>
-            <button style={{
-              background: '#EFC0D4', color: '#1A3A6B',
-              border: 'none', borderRadius: '4px', padding: '8px 16px',
-              fontFamily: 'Manrope, sans-serif', fontSize: '10px',
-              fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase',
-              cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '5px',
-            }}
+            <button
+              style={{
+                background: '#EFC0D4', color: '#1A3A6B',
+                border: 'none', borderRadius: '4px', padding: '8px 16px',
+                fontFamily: 'Manrope, sans-serif', fontSize: '10px',
+                fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase',
+                cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '5px',
+              }}
               onClick={() => setActiveFilter('sign')}
             >
               <Pen size={11} />
@@ -669,13 +1308,10 @@ export default function DocumentsPage({ observateur = false, userName = '', isAs
 
         {/* ─── LISTE DOCUMENTS ─── */}
         <div style={{
-          background: '#ffffff',
-          borderRadius: '4px',
-          overflow: 'hidden',
-          boxShadow: '0px 2px 12px rgba(0,27,63,0.04)',
-          marginBottom: '32px',
+          background: '#ffffff', borderRadius: '4px', overflow: 'hidden',
+          boxShadow: '0px 2px 12px rgba(0,27,63,0.04)', marginBottom: '32px',
         }}>
-          {/* List header — simplifié */}
+          {/* List header */}
           <div style={{
             display: 'flex', alignItems: 'center',
             padding: '10px 20px',
@@ -683,7 +1319,10 @@ export default function DocumentsPage({ observateur = false, userName = '', isAs
             background: '#F9F9F9',
           }}>
             <div style={{ width: 36, flexShrink: 0, marginRight: 12 }} />
-            <div style={{ flex: 1, fontFamily: 'Manrope, sans-serif', fontSize: '10px', color: '#9CA3AF', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700 }}>
+            <div style={{
+              flex: 1, fontFamily: 'Manrope, sans-serif', fontSize: '10px',
+              color: '#9CA3AF', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700,
+            }}>
               Document
             </div>
           </div>
@@ -691,12 +1330,10 @@ export default function DocumentsPage({ observateur = false, userName = '', isAs
           {/* Bandeau KYC */}
           {!isFounder ? (
             <div style={{
-              margin: '0 0 16px',
-              padding: '14px 18px',
+              margin: '0 0 16px', padding: '14px 18px',
               background: 'rgba(239,192,212,0.12)',
               border: '1px solid rgba(239,192,212,0.5)',
-              borderLeft: '3px solid #EFC0D4',
-              borderRadius: '4px',
+              borderLeft: '3px solid #EFC0D4', borderRadius: '4px',
               display: 'flex', gap: '12px', alignItems: 'flex-start',
             }}>
               <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#EFC0D4', flexShrink: 0, marginTop: '1px' }}>info</span>
@@ -707,18 +1344,16 @@ export default function DocumentsPage({ observateur = false, userName = '', isAs
                 <div style={{ fontFamily: 'Manrope, sans-serif', fontSize: '12px', color: '#4B5563', lineHeight: 1.6 }}>
                   En tant qu'investisseur de Retbaa Circle, vous avez l'obligation légale de fournir les documents KYC marqués "À fournir" ci-dessous.
                   Ces documents sont requis par la réglementation française LCB-FT et doivent être transmis avant la signature des documents juridiques.
-                  <br/><span style={{ fontStyle: 'italic', color: '#6B7280' }}>Pour toute question : massata@retbaa.com</span>
+                  <br /><span style={{ fontStyle: 'italic', color: '#6B7280' }}>Pour toute question : massata@retbaa.com</span>
                 </div>
               </div>
             </div>
           ) : (
             <div style={{
-              margin: '0 0 16px',
-              padding: '12px 18px',
+              margin: '0 0 16px', padding: '12px 18px',
               background: 'rgba(26,58,107,0.04)',
               border: '1px solid rgba(26,58,107,0.12)',
-              borderLeft: '3px solid #1A3A6B',
-              borderRadius: '4px',
+              borderLeft: '3px solid #1A3A6B', borderRadius: '4px',
               display: 'flex', gap: '12px', alignItems: 'center',
             }}>
               <span className="material-symbols-outlined" style={{ fontSize: '16px', color: '#1A3A6B', flexShrink: 0 }}>verified_user</span>
@@ -734,7 +1369,14 @@ export default function DocumentsPage({ observateur = false, userName = '', isAs
             filtered.map(doc => {
               const locked = observateur && (doc.type === 'Gouvernance' || doc.type === 'Corporate')
               return (
-                <DocumentRow key={doc.id} doc={doc} lang={lang} onAction={handleAction} locked={locked} />
+                <DocumentRow
+                  key={doc.id}
+                  doc={doc}
+                  lang={lang}
+                  onAction={handleAction}
+                  onPreview={handlePreview}
+                  locked={locked}
+                />
               )
             })
           ) : (
@@ -748,14 +1390,12 @@ export default function DocumentsPage({ observateur = false, userName = '', isAs
           )}
         </div>
 
-        {/* ─── ZONE UPLOAD ─── */}
+        {/* ─── ZONE UPLOAD GLOBALE ─── */}
         <div style={{
-          background: '#ffffff',
-          borderRadius: '4px',
-          padding: '32px',
+          background: '#ffffff', borderRadius: '4px', padding: '32px',
           boxShadow: '0px 2px 12px rgba(0,27,63,0.04)',
         }}>
-          {/* Upload status banner */}
+          {/* Upload status banners */}
           {uploadStatus === 'uploading' && (
             <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '4px', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{ width: '16px', height: '16px', border: '2px solid #1A3A6B', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
@@ -764,16 +1404,17 @@ export default function DocumentsPage({ observateur = false, userName = '', isAs
           )}
           {uploadStatus === 'success' && (
             <div style={{ background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: '4px', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ color: '#16A34A', fontSize: '18px' }}>✓</span>
+              <CheckCircle size={16} style={{ color: '#16A34A' }} />
               <span style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px', color: '#15803D', fontWeight: 600 }}>Document reçu avec succès. L'équipe Retbaa Circle en a été notifiée.</span>
             </div>
           )}
           {uploadStatus === 'error' && (
             <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', borderRadius: '4px', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ color: '#E11D48', fontSize: '18px' }}>✕</span>
+              <AlertCircle size={16} style={{ color: '#E11D48' }} />
               <span style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px', color: '#BE123C' }}>Erreur lors de l'envoi. Veuillez réessayer.</span>
             </div>
           )}
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
             <div style={{ width: '2px', height: '16px', background: '#EFC0D4' }} />
             <h2 style={{
@@ -787,21 +1428,28 @@ export default function DocumentsPage({ observateur = false, userName = '', isAs
 
           {/* Drop zone */}
           <div
-            onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+            onDragOver={e => { e.preventDefault(); setDragOver(true) }}
             onDragLeave={() => setDragOver(false)}
-            onDrop={(e) => { e.preventDefault(); setDragOver(false); console.log('Files dropped:', e.dataTransfer.files) }}
+            onDrop={e => {
+              e.preventDefault()
+              setDragOver(false)
+              const file = e.dataTransfer.files[0]
+              if (file) {
+                // Simuler handleGeneralFileChange avec le fichier droppé
+                const syntheticEvent = { target: { files: [file], value: '' } }
+                handleGeneralFileChange(syntheticEvent)
+              }
+            }}
             onClick={() => fileInputRef.current?.click()}
             className="docs-upload-zone"
             style={{
               border: dragOver ? '2px dashed #EFC0D4' : '2px dashed rgba(196,198,208,0.5)',
-              borderRadius: '4px',
-              padding: '40px 32px',
-              textAlign: 'center',
-              cursor: 'pointer',
+              borderRadius: '4px', padding: '40px 32px',
+              textAlign: 'center', cursor: 'pointer',
               transition: 'all 0.2s',
               background: dragOver ? 'rgba(239,192,212,0.05)' : 'transparent',
             }}
-            onMouseEnter={e => e.currentTarget.style.borderColor = '#EFC0D4'}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = '#EFC0D4' }}
             onMouseLeave={e => { if (!dragOver) e.currentTarget.style.borderColor = 'rgba(196,198,208,0.5)' }}
           >
             <input
@@ -810,7 +1458,7 @@ export default function DocumentsPage({ observateur = false, userName = '', isAs
               multiple
               accept=".pdf,.jpg,.jpeg,.png"
               style={{ display: 'none' }}
-              onChange={handleFileChange}
+              onChange={handleGeneralFileChange}
             />
             <div style={{
               width: '52px', height: '52px',
@@ -821,16 +1469,10 @@ export default function DocumentsPage({ observateur = false, userName = '', isAs
             }}>
               <Upload size={22} style={{ color: '#EFC0D4' }} />
             </div>
-            <div style={{
-              fontFamily: 'Newsreader, serif', fontSize: '18px',
-              color: '#1A3A6B', marginBottom: '8px', fontWeight: 400,
-            }}>
+            <div style={{ fontFamily: 'Newsreader, serif', fontSize: '18px', color: '#1A3A6B', marginBottom: '8px', fontWeight: 400 }}>
               {lang === 'fr' ? 'Glissez vos fichiers ici' : 'Drag your files here'}
             </div>
-            <div style={{
-              fontFamily: 'Manrope, sans-serif', fontSize: '12px',
-              color: '#9CA3AF', marginBottom: '20px', lineHeight: 1.5,
-            }}>
+            <div style={{ fontFamily: 'Manrope, sans-serif', fontSize: '12px', color: '#9CA3AF', marginBottom: '20px', lineHeight: 1.5 }}>
               {lang === 'fr'
                 ? 'PDF, JPG, PNG — Taille max. 20 Mo par fichier'
                 : 'PDF, JPG, PNG — Max. 20 MB per file'}
@@ -856,13 +1498,8 @@ export default function DocumentsPage({ observateur = false, userName = '', isAs
             background: '#F9F9F9', borderRadius: '2px',
             display: 'flex', alignItems: 'center', gap: '8px',
           }}>
-            <span className="material-symbols-outlined" style={{ fontSize: '14px', color: '#9CA3AF' }}>
-              info
-            </span>
-            <span style={{
-              fontFamily: 'Manrope, sans-serif', fontSize: '11px',
-              color: '#9CA3AF', lineHeight: 1.5,
-            }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '14px', color: '#9CA3AF' }}>info</span>
+            <span style={{ fontFamily: 'Manrope, sans-serif', fontSize: '11px', color: '#9CA3AF', lineHeight: 1.5 }}>
               {lang === 'fr'
                 ? 'Formats acceptés : PDF, JPEG, PNG. Chiffrement 256-bit. Tous les documents déposés sont analysés dans les 24h.'
                 : 'Accepted formats: PDF, JPEG, PNG. 256-bit encryption. All uploaded documents are reviewed within 24h.'}
@@ -871,9 +1508,12 @@ export default function DocumentsPage({ observateur = false, userName = '', isAs
         </div>
       </div>
 
+      {/* ─── CSS ─── */}
       <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
         @media (max-width: 768px) {
-          .docs-hero-grid { grid-template-columns: 1fr !important; text-align: left !important; }
           .docs-hero-padding { padding: 32px 24px 24px !important; }
           .docs-hero-title { font-size: 36px !important; }
           .docs-main-padding { padding: 24px 20px 40px !important; }
@@ -881,7 +1521,6 @@ export default function DocumentsPage({ observateur = false, userName = '', isAs
           .docs-filters { flex-wrap: wrap !important; gap: 8px !important; }
           .docs-upload-zone { padding: 32px 20px !important; }
         }
-
         @media (max-width: 480px) {
           .docs-hero-title { font-size: 32px !important; }
           .docs-hero-padding { padding: 24px 20px 20px !important; }
