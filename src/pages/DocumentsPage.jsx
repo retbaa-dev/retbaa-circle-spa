@@ -9,18 +9,18 @@ const allDocs = [
   // ── À SIGNER ──────────────────────────────────────────────
   {
     id: 1,
-    title: "Pacte d'actionnaires V2",
+    title: "Pacte d'actionnaires V3",
     type: 'Gouvernance',
     format: 'PDF',
-    date: 'Fév. 2026',
-    size: '5,4 Mo',
+    date: 'Mai 2026',
+    size: '0,1 Mo',
     status: 'sign',
     priority: true,
-    pdf: '/docs/legal/pacte-actionnaires-v2.pdf',
+    pdf: '/docs/legal/pacte-actionnaires-v3.pdf',
   },
   {
     id: 2,
-    title: 'Nouveaux statuts (post-augmentation)',
+    title: 'Statuts consolidés (post-augmentation)',
     type: 'Corporate',
     format: 'PDF',
     date: 'Fév. 2026',
