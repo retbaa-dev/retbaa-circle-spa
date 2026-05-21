@@ -1,25 +1,23 @@
 // pages/AdminPage.jsx — Panel de validation des investisseurs
 import { useState, useEffect } from 'react'
-import { useUser, useAuth } from '@clerk/clerk-react'
+import { useAuth } from '../hooks/useAuth'
 
 const ADMIN_EMAILS = ['massata@retbaa.com', 'massata+1@retbaa.com']
 
 export default function AdminPage() {
-  const { isLoaded: authLoaded, isSignedIn, getToken } = useAuth()
-  const { user, isLoaded: userLoaded } = useUser()
+  const { user, session, isLoaded, isSignedIn, role } = useAuth()
   const [pendingUsers, setPendingUsers] = useState([])
   const [loadingUsers, setLoadingUsers] = useState(false)
   const [actionMsg, setActionMsg] = useState('')
 
-  const isLoaded = authLoaded && userLoaded
-  const userEmail = user?.emailAddresses?.[0]?.emailAddress
+  const userEmail = user?.email
   const isAdmin = isLoaded && isSignedIn && (
-    user?.publicMetadata?.role === 'admin' || ADMIN_EMAILS.includes(userEmail)
+    role === 'founder' || ADMIN_EMAILS.includes(userEmail)
   )
 
-  // Helper : requête admin avec token Clerk
+  // Helper : requête admin avec access_token Supabase
   const adminFetch = async (url, options = {}) => {
-    const token = await getToken()
+    const token = session?.access_token
     return fetch(url, {
       ...options,
       headers: {
@@ -58,7 +56,7 @@ export default function AdminPage() {
         setActionMsg('✅ Accès accordé')
         fetchPending()
       }
-    } catch (e) {
+    } catch {
       setActionMsg('❌ Erreur')
     }
   }
@@ -74,7 +72,7 @@ export default function AdminPage() {
         setActionMsg('⏸️ Suspendu')
         fetchPending()
       }
-    } catch (e) {
+    } catch {
       setActionMsg('❌ Erreur')
     }
   }
@@ -89,7 +87,7 @@ export default function AdminPage() {
       if (data.inviteUrl) {
         setActionMsg(`✅ Invitation créée : ${data.inviteUrl}`)
       }
-    } catch (e) {
+    } catch {
       setActionMsg('❌ Erreur invitation')
     }
   }

@@ -1,27 +1,9 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { ClerkProvider } from '@clerk/clerk-react'
+import { AuthProvider } from './hooks/useAuth'
 import './index.css'
 import './i18n/index.js'
 import App from './App.jsx'
-
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
-
-const frFR = {
-  socialButtonsBlockButton: 'Continuer avec {{provider|titleize}}',
-  dividerText: 'ou',
-  formFieldLabel__emailAddress: 'Adresse e-mail',
-  formFieldInputPlaceholder__emailAddress: 'Entrez votre adresse e-mail',
-  formButtonPrimary: 'Continuer',
-  signIn: {
-    start: {
-      title: 'Bienvenue',
-      subtitle: 'Connectez-vous pour accéder à votre espace privé.',
-      actionText: 'Pas encore de compte ?',
-      actionLink: 'Demander un accès',
-    },
-  },
-}
 
 const rootEl = document.getElementById('root')
 
@@ -40,8 +22,8 @@ window.addEventListener('unhandledrejection', (e) => {
 
 createRoot(rootEl).render(
   <StrictMode>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/" localization={frFR}>
+    <AuthProvider>
       <App />
-    </ClerkProvider>
+    </AuthProvider>
   </StrictMode>,
 )
