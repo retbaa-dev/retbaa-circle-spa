@@ -62,11 +62,16 @@ const PREVIEW_USERS = {
   cathy: 'Cathy',
   raphael: 'Raphaël',
 }
+const PREVIEW_SECRET = import.meta.env.VITE_PREVIEW_TOKEN || ''
 
 function getPreviewUser() {
   try {
+    if (!PREVIEW_SECRET) return null
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     const params = new URLSearchParams(window.location.search)
     const key = params.get('preview')?.toLowerCase()
+    const token = params.get('token')
+    if (!isLocalhost && token !== PREVIEW_SECRET) return null
     return key ? (PREVIEW_USERS[key] || null) : null
   } catch {
     return null
