@@ -1,9 +1,8 @@
 // pages/PendingPage.jsx — Écran d'attente après création de compte
-import { useClerk, useUser } from '@clerk/clerk-react'
+import { useAuth } from '../hooks/useAuth'
 
 export default function PendingPage() {
-  const { signOut } = useClerk()
-  const { user } = useUser()
+  const { signOut, profile } = useAuth()
 
   const S = {
     page: { minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f9f9f9', fontFamily: 'Manrope, sans-serif', padding: '24px' },
@@ -31,11 +30,11 @@ export default function PendingPage() {
           Votre demande d'accès est en cours de traitement. Vous recevrez un email de confirmation dès que Massata Niang aura validé votre compte.
         </p>
 
-        {/* Ref investisseur */}
-        {user?.publicMetadata?.investorRef && (
+        {/* Ref investisseur depuis profil Supabase */}
+        {profile?.investor_ref && (
           <div style={{ display: 'inline-block', padding: '6px 16px', backgroundColor: 'rgba(239,192,212,0.1)', border: '1px solid rgba(239,192,212,0.4)', borderRadius: '2px', marginBottom: '32px' }}>
             <span style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#1A3A6B', fontWeight: 700 }}>
-              Réf. {user.publicMetadata.investorRef}
+              Réf. {profile.investor_ref}
             </span>
           </div>
         )}

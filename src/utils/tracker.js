@@ -1,31 +1,38 @@
 // utils/tracker.js — Retbaa Circle Analytics
-const ENDPOINT = '/api/track'
+// Remplace fetch /api/track par supabase.from('page_views').insert()
+import { supabase } from '../lib/supabase'
 
 export function track(investor, page, extra = {}) {
   try {
-    const payload = {
-      investor,
-      page,
-      type: 'pageview',
-      ua: navigator.userAgent,
-      ...extra,
-    }
-    fetch(ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      keepalive: true,
-    }).catch(() => {}) // silencieux
-  } catch {}
+    supabase
+      .from('page_views')
+      .insert({
+        investor,
+        page,
+        type: 'pageview',
+        ua: navigator.userAgent,
+        ...extra,
+      })
+      .then(() => {})
+  } catch {
+    // silencieux — le tracking ne doit jamais bloquer l'UX
+  }
 }
 
+// Pour les podcasts : on stocke l'épisode dans `page` (format "episode_title")
+// avec type = 'podcast_play' — récupérable dans AnalyticsPage via filtrage sur type
 export function trackPodcast(investor, episode) {
   try {
-    fetch(ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ investor, type: 'podcast_play', episode, page: 'podcast' }),
-      keepalive: true,
-    }).catch(() => {})
-  } catch {}
+    supabase
+      .from('page_views')
+      .insert({
+        investor,
+        page: episode,          // nom de l'épisode
+        type: 'podcast_play',
+        ua: navigator.userAgent,
+      })
+      .then(() => {})
+  } catch {
+    // silencieux
+  }
 }

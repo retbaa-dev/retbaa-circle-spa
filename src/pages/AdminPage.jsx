@@ -1,22 +1,32 @@
 // pages/AdminPage.jsx — Panel de validation des investisseurs
 import { useState, useEffect } from 'react'
-import { useUser, useAuth } from '@clerk/clerk-react'
+import { useAuth } from '../hooks/useAuth'
 
-const ADMIN_EMAILS = ['massata.niang@retbaa-circle.fr', 'massata@retbaa.com', 'massata+1@retbaa.com']
-const ADMIN_SECRET = import.meta.env.VITE_ADMIN_SECRET || ''
+const ADMIN_EMAILS = ['massata@retbaa.com', 'massata+1@retbaa.com']
 
 export default function AdminPage() {
-  const { isLoaded: authLoaded, isSignedIn } = useAuth()
-  const { user, isLoaded: userLoaded } = useUser()
+  const { user, session, isLoaded, isSignedIn, role } = useAuth()
   const [pendingUsers, setPendingUsers] = useState([])
   const [loadingUsers, setLoadingUsers] = useState(false)
   const [actionMsg, setActionMsg] = useState('')
 
-  const isLoaded = authLoaded && userLoaded
-  const userEmail = user?.emailAddresses?.[0]?.emailAddress
+  const userEmail = user?.email
   const isAdmin = isLoaded && isSignedIn && (
-    user?.publicMetadata?.role === 'admin' || ADMIN_EMAILS.includes(userEmail)
+    role === 'founder' || ADMIN_EMAILS.includes(userEmail)
   )
+
+  // Helper : requête admin avec access_token Supabase
+  const adminFetch = async (url, options = {}) => {
+    const token = session?.access_token
+    return fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        ...(options.headers || {}),
+      },
+    })
+  }
 
   useEffect(() => {
     if (isAdmin) fetchPending()
@@ -25,7 +35,7 @@ export default function AdminPage() {
   const fetchPending = async () => {
     setLoadingUsers(true)
     try {
-      const res = await fetch(`/api/admin/users/pending?adminSecret=${ADMIN_SECRET}`)
+      const res = await adminFetch('/api/admin/users/pending')
       const data = await res.json()
       setPendingUsers(Array.isArray(data) ? data : [])
     } catch (e) {
@@ -35,216 +45,119 @@ export default function AdminPage() {
     }
   }
 
-  const approve = async (userId, name) => {
+  const approveUser = async (userId) => {
     try {
-      await fetch(`/api/admin/users/${userId}/approve`, {
+      const res = await adminFetch(`/api/admin/users/${userId}/approve`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminSecret: ADMIN_SECRET }),
-      })
-      setActionMsg(`✅ ${name} validé(e) avec succès`)
-      fetchPending()
-    } catch (e) {
-      setActionMsg('Erreur lors de la validation')
-    }
-  }
-
-  const suspend = async (userId, name) => {
-    if (!confirm(`Suspendre l'accès de ${name} ?`)) return
-    try {
-      await fetch(`/api/admin/users/${userId}/suspend`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminSecret: ADMIN_SECRET }),
-      })
-      setActionMsg(`⏸ ${name} suspendu(e)`)
-      fetchPending()
-    } catch (e) {
-      setActionMsg('Erreur')
-    }
-  }
-
-  const S = {
-    page: { minHeight: '100vh', backgroundColor: '#f9f9f9', fontFamily: 'Manrope, sans-serif', padding: '40px' },
-    title: { fontFamily: 'Newsreader, serif', fontSize: '32px', fontStyle: 'italic', fontWeight: 300, color: '#1A3A6B' },
-    card: { backgroundColor: '#fff', borderRadius: '4px', boxShadow: '0 4px 24px rgba(26,58,107,0.08)', overflow: 'hidden', marginBottom: '24px' },
-    cardHeader: { padding: '20px 28px', borderBottom: '1px solid rgba(196,198,208,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-    cardTitle: { fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#1A3A6B', fontWeight: 700 },
-    table: { width: '100%', borderCollapse: 'collapse' },
-    th: { padding: '12px 28px', fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#9CA3AF', textAlign: 'left', fontWeight: 700, borderBottom: '1px solid rgba(196,198,208,0.2)' },
-    td: { padding: '16px 28px', fontSize: '13px', color: '#1A1C1C', borderBottom: '1px solid rgba(196,198,208,0.1)' },
-    btnApprove: { padding: '7px 16px', backgroundColor: '#EFC0D4', color: '#1A3A6B', border: 'none', borderRadius: '2px', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700, cursor: 'pointer', marginRight: '8px' },
-    btnSuspend: { padding: '7px 16px', backgroundColor: 'transparent', color: '#9CA3AF', border: '1px solid rgba(196,198,208,0.5)', borderRadius: '2px', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer' },
-    center: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f9f9f9' },
-  }
-
-  // Chargement
-  if (!isLoaded) {
-    return (
-      <div style={S.center}>
-        <p style={{ fontFamily: 'Newsreader, serif', fontStyle: 'italic', color: '#1A3A6B', opacity: 0.5 }}>Chargement…</p>
-      </div>
-    )
-  }
-
-  // Pas connecté
-  if (!isSignedIn) {
-    window.location.href = '/'
-    return null
-  }
-
-  // Pas admin
-  if (!isAdmin) {
-    return (
-      <div style={S.center}>
-        <div style={{ textAlign: 'center' }}>
-          <p style={{ fontFamily: 'Newsreader, serif', fontStyle: 'italic', color: '#1A3A6B', fontSize: '20px' }}>Accès réservé aux administrateurs</p>
-          <p style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '8px' }}>Email détecté : {userEmail}</p>
-          <p style={{ fontSize: '11px', color: '#9CA3AF' }}>Rôle : {user?.publicMetadata?.role || 'aucun'}</p>
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div style={S.page}>
-      <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-        <div style={{ marginBottom: '40px' }}>
-          <div style={{ fontSize: '10px', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#EFC0D4', fontWeight: 700, marginBottom: '8px' }}>
-            Retbaa Circle — Administration
-          </div>
-          <div style={S.title}>Validation des investisseurs</div>
-        </div>
-
-        {actionMsg && (
-          <div style={{ padding: '12px 20px', backgroundColor: 'rgba(239,192,212,0.15)', border: '1px solid #EFC0D4', borderRadius: '4px', marginBottom: '24px', fontSize: '13px', color: '#1A3A6B' }}>
-            {actionMsg}
-          </div>
-        )}
-
-        <div style={S.card}>
-          <div style={S.cardHeader}>
-            <span style={S.cardTitle}>En attente de validation</span>
-            <button onClick={fetchPending} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', color: '#9CA3AF', letterSpacing: '0.1em' }}>
-              ↻ Actualiser
-            </button>
-          </div>
-
-          {loadingUsers ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#9CA3AF', fontStyle: 'italic' }}>Chargement…</div>
-          ) : pendingUsers.length === 0 ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#9CA3AF' }}>
-              Aucun investisseur en attente de validation.
-            </div>
-          ) : (
-            <table style={S.table}>
-              <thead>
-                <tr>
-                  <th style={S.th}>Nom</th>
-                  <th style={S.th}>Email</th>
-                  <th style={S.th}>Réf.</th>
-                  <th style={S.th}>Date</th>
-                  <th style={S.th}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pendingUsers.map(u => (
-                  <tr key={u.id}>
-                    <td style={S.td}>{u.name || '—'}</td>
-                    <td style={S.td}>{u.email}</td>
-                    <td style={{ ...S.td, fontWeight: 700, color: '#EFC0D4' }}>{u.ref || '—'}</td>
-                    <td style={{ ...S.td, color: '#9CA3AF', fontSize: '11px' }}>
-                      {new Date(u.createdAt).toLocaleDateString('fr-FR')}
-                    </td>
-                    <td style={S.td}>
-                      <button style={S.btnApprove} onClick={() => approve(u.id, u.name)}>✓ Valider</button>
-                      <button style={S.btnSuspend} onClick={() => suspend(u.id, u.name)}>Suspendre</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-
-        <InviteLinkGenerator />
-      </div>
-    </div>
-  )
-}
-
-// Composant pour générer les liens d'invitation
-function InviteLinkGenerator() {
-  const [selectedInvestor, setSelectedInvestor] = useState('')
-  const [generatedLink, setGeneratedLink] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [copied, setCopied] = useState(false)
-
-  const investors = [
-    { key: 'barthelemy', label: 'Barthélemy Faye (RC-9921)' },
-    { key: 'pape', label: 'Pape Amadou Ngom (RC-0042)' },
-    { key: 'cathy', label: 'Cathy Muiza (RC-0078)' },
-    { key: 'raphael', label: 'Raphaël Perdrix (RC-0093)' },
-  ]
-
-  const generate = async () => {
-    if (!selectedInvestor) return
-    setLoading(true)
-    setGeneratedLink('')
-    try {
-      const res = await fetch('/api/admin/invite', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ investorKey: selectedInvestor, adminSecret: ADMIN_SECRET }),
+        body: JSON.stringify({}),
       })
       const data = await res.json()
-      setGeneratedLink(data.link)
-    } catch (e) {
-      alert('Erreur lors de la génération du lien')
-    } finally {
-      setLoading(false)
+      if (data.ok) {
+        setActionMsg('✅ Accès accordé')
+        fetchPending()
+      }
+    } catch {
+      setActionMsg('❌ Erreur')
     }
   }
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(generatedLink)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  const suspendUser = async (userId) => {
+    try {
+      const res = await adminFetch(`/api/admin/users/${userId}/suspend`, {
+        method: 'POST',
+        body: JSON.stringify({}),
+      })
+      const data = await res.json()
+      if (data.ok) {
+        setActionMsg('⏸️ Suspendu')
+        fetchPending()
+      }
+    } catch {
+      setActionMsg('❌ Erreur')
+    }
   }
 
-  const S2 = {
-    card: { backgroundColor: '#fff', borderRadius: '4px', boxShadow: '0 4px 24px rgba(26,58,107,0.08)', overflow: 'hidden' },
-    body: { padding: '28px' },
-    select: { width: '100%', padding: '12px 16px', border: '1px solid rgba(196,198,208,0.5)', borderRadius: '4px', fontFamily: 'Manrope, sans-serif', fontSize: '13px', color: '#1A1C1C', marginBottom: '16px', outline: 'none' },
-    btn: { padding: '12px 28px', backgroundColor: '#EFC0D4', color: '#1A3A6B', border: 'none', borderRadius: '2px', fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 700, cursor: 'pointer' },
-    linkBox: { marginTop: '20px', padding: '16px', backgroundColor: '#F9F9F9', borderRadius: '4px', border: '1px solid rgba(196,198,208,0.3)' },
+  const sendInvite = async (investorKey) => {
+    try {
+      const res = await adminFetch('/api/admin/invite', {
+        method: 'POST',
+        body: JSON.stringify({ investorKey }),
+      })
+      const data = await res.json()
+      if (data.inviteUrl) {
+        setActionMsg(`✅ Invitation créée : ${data.inviteUrl}`)
+      }
+    } catch {
+      setActionMsg('❌ Erreur invitation')
+    }
   }
+
+  if (!isLoaded) return <div style={{ padding: '40px', fontFamily: 'Manrope, sans-serif' }}>Chargement…</div>
+  if (!isAdmin) return (
+    <div style={{ padding: '40px', fontFamily: 'Manrope, sans-serif', color: '#ba1a1a' }}>
+      Accès refusé — réservé à l'administration Retbaa.
+    </div>
+  )
 
   return (
-    <div style={S2.card}>
-      <div style={{ padding: '20px 28px', borderBottom: '1px solid rgba(196,198,208,0.2)' }}>
-        <span style={{ fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#1A3A6B', fontWeight: 700 }}>
-          Générer un lien d'invitation
-        </span>
-      </div>
-      <div style={S2.body}>
-        <select style={S2.select} value={selectedInvestor} onChange={e => { setSelectedInvestor(e.target.value); setGeneratedLink('') }}>
-          <option value="">Sélectionner un investisseur…</option>
-          {investors.map(i => <option key={i.key} value={i.key}>{i.label}</option>)}
-        </select>
-        <button style={S2.btn} onClick={generate} disabled={loading || !selectedInvestor}>
-          {loading ? 'Génération…' : 'Générer le lien →'}
-        </button>
-        {generatedLink && (
-          <div style={S2.linkBox}>
-            <p style={{ fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9CA3AF', marginBottom: '8px' }}>Lien à envoyer à l'investisseur :</p>
-            <p style={{ fontSize: '13px', color: '#1A3A6B', wordBreak: 'break-all', fontWeight: 500 }}>{generatedLink}</p>
-            <button onClick={copyLink} style={{ marginTop: '10px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px', color: '#EFC0D4', fontFamily: 'Manrope, sans-serif', letterSpacing: '0.1em' }}>
-              {copied ? '✓ Copié !' : 'Copier le lien'}
+    <div style={{ padding: '40px', fontFamily: 'Manrope, sans-serif', maxWidth: '800px' }}>
+      <h1 style={{ fontFamily: 'Newsreader, serif', fontSize: '28px', color: '#1A3A6B', marginBottom: '8px' }}>
+        Panel Admin
+      </h1>
+      <p style={{ color: '#6B7280', fontSize: '13px', marginBottom: '32px' }}>
+        Gestion des accès investisseurs Retbaa Circle
+      </p>
+
+      {actionMsg && (
+        <div style={{ padding: '12px 16px', background: 'rgba(26,58,107,0.06)', borderRadius: '4px', marginBottom: '24px', fontSize: '13px', color: '#1A3A6B' }}>
+          {actionMsg}
+        </div>
+      )}
+
+      {/* Invitations */}
+      <section style={{ marginBottom: '40px' }}>
+        <h2 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1A3A6B', marginBottom: '16px' }}>
+          Créer une invitation
+        </h2>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          {['barthelemy', 'pape', 'cathy', 'raphael'].map(key => (
+            <button key={key} onClick={() => sendInvite(key)} style={{
+              padding: '8px 16px', background: '#1A3A6B', color: '#fff',
+              border: 'none', borderRadius: '4px', cursor: 'pointer',
+              fontFamily: 'Manrope, sans-serif', fontSize: '12px', fontWeight: 600,
+            }}>
+              {key.charAt(0).toUpperCase() + key.slice(1)}
             </button>
-          </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Utilisateurs en attente */}
+      <section>
+        <h2 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1A3A6B', marginBottom: '16px' }}>
+          Comptes en attente de validation {loadingUsers ? '…' : `(${pendingUsers.length})`}
+        </h2>
+        {pendingUsers.length === 0 ? (
+          <p style={{ color: '#9CA3AF', fontSize: '13px' }}>Aucun compte en attente.</p>
+        ) : (
+          pendingUsers.map(u => (
+            <div key={u.id} style={{ padding: '16px', border: '1px solid #E5E7EB', borderRadius: '4px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontWeight: 600, fontSize: '14px', color: '#1A1C1C' }}>{u.firstName} {u.lastName}</div>
+                <div style={{ fontSize: '12px', color: '#6B7280' }}>{u.email} · {u.investorKey || 'inconnu'}</div>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button onClick={() => approveUser(u.id)} style={{ padding: '6px 14px', background: '#1E6B4A', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}>
+                  Approuver
+                </button>
+                <button onClick={() => suspendUser(u.id)} style={{ padding: '6px 14px', background: '#ba1a1a', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}>
+                  Suspendre
+                </button>
+              </div>
+            </div>
+          ))
         )}
-      </div>
+      </section>
     </div>
   )
 }

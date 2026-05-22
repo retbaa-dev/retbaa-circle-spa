@@ -1,7 +1,8 @@
 // pages/AnalyticsPage.jsx — Dashboard admin Retbaa Circle
-import { useState, useEffect } from 'react'
+// Analytics via Supabase (remplace fetch /api/stats)
+import { useState, useEffect, Fragment } from 'react'
+import { supabase } from '../lib/supabase'
 
-const TOKEN = 'retbaa2026'
 const INVESTOR_LABELS = {
   massata: 'Massata NIANG',
   barthelemy: 'Barthélemy FAYE',
@@ -39,26 +40,87 @@ function StatCard({ label, value, icon, sub }) {
   )
 }
 
+// ── Calcul des stats côté client depuis les raw rows Supabase ──────────────
+function computeStats(rows) {
+  // rows: [{ investor, page, type, ua, created_at }, ...]
+  const investors = {}
+
+  for (const row of rows) {
+    const inv = row.investor || 'anonymous'
+
+    if (!investors[inv]) {
+      investors[inv] = { name: inv, visits: 0, pages: {}, podcasts: {}, lastSeen: null }
+    }
+
+    const entry = investors[inv]
+
+    // Mise à jour lastSeen
+    if (!entry.lastSeen || row.created_at > entry.lastSeen) {
+      entry.lastSeen = row.created_at
+    }
+
+    if (row.type === 'podcast_play') {
+      // page = nom de l'épisode pour les podcasts
+      const ep = row.page || 'inconnu'
+      entry.podcasts[ep] = (entry.podcasts[ep] || 0) + 1
+    } else {
+      // pageview standard
+      entry.visits += 1
+      const p = row.page || 'inconnu'
+      entry.pages[p] = (entry.pages[p] || 0) + 1
+    }
+  }
+
+  // Top pages (tous investisseurs confondus, hors podcasts)
+  const pageCount = {}
+  for (const row of rows) {
+    if (row.type !== 'podcast_play') {
+      const p = row.page || 'inconnu'
+      pageCount[p] = (pageCount[p] || 0) + 1
+    }
+  }
+  const top_pages = Object.entries(pageCount).sort((a, b) => b[1] - a[1])
+
+  // Top podcasts (tous investisseurs)
+  const podcastCount = {}
+  for (const row of rows) {
+    if (row.type === 'podcast_play') {
+      const ep = row.page || 'inconnu'
+      podcastCount[ep] = (podcastCount[ep] || 0) + 1
+    }
+  }
+  const top_podcasts = Object.entries(podcastCount).sort((a, b) => b[1] - a[1])
+
+  return { investors, top_pages, top_podcasts }
+}
+
 export default function AnalyticsPage() {
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [activeInv, setActiveInv] = useState(null)
 
-  useEffect(() => {
-    fetch(`/api/stats?token=${TOKEN}`)
-      .then(r => r.json())
-      .then(data => { setStats(data); setLoading(false) })
-      .catch(e => { setError(e.message); setLoading(false) })
-  }, [])
-
-  const refresh = () => {
+  const fetchStats = async () => {
     setLoading(true)
-    fetch(`/api/stats?token=${TOKEN}`)
-      .then(r => r.json())
-      .then(data => { setStats(data); setLoading(false) })
-      .catch(e => { setError(e.message); setLoading(false) })
+    setError(null)
+    try {
+      const { data, error: err } = await supabase
+        .from('page_views')
+        .select('investor, page, type, created_at')
+        .order('created_at', { ascending: false })
+
+      if (err) throw err
+      setStats(computeStats(data || []))
+    } catch (e) {
+      setError(e.message || 'Erreur Supabase')
+    } finally {
+      setLoading(false)
+    }
   }
+
+  useEffect(() => {
+    fetchStats()
+  }, [])
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
@@ -94,7 +156,7 @@ export default function AnalyticsPage() {
               Analytics
             </h1>
           </div>
-          <button onClick={refresh} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 20px', background: 'none', border: '1px solid #EFC0D4', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Manrope, sans-serif', fontSize: '10px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#795465' }}>
+          <button onClick={fetchStats} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 20px', background: 'none', border: '1px solid #EFC0D4', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Manrope, sans-serif', fontSize: '10px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#795465' }}>
             <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>refresh</span>
             Actualiser
           </button>
@@ -104,7 +166,7 @@ export default function AnalyticsPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '40px' }} className="kpi-grid">
           <StatCard label="Visites totales" value={totalVisits} icon="visibility" />
           <StatCard label="Investisseurs actifs" value={invList.filter(i => i.name !== 'anonymous').length} icon="group" />
-          <StatCard label="Écoutes podcast" value={topPodcasts.reduce((s, [,n]) => s + n, 0)} icon="headphones" />
+          <StatCard label="Écoutes podcast" value={topPodcasts.reduce((s, [, n]) => s + n, 0)} icon="headphones" />
           <StatCard label="Pages distinctes" value={topPages.length} icon="article" sub="pages visitées" />
         </div>
 
@@ -127,20 +189,19 @@ export default function AnalyticsPage() {
               <tbody>
                 {invList.map(inv => {
                   const label = INVESTOR_LABELS[inv.name] || inv.name
-                  const totalPages = Object.values(inv.pages).reduce((s, n) => s + n, 0)
-                  const totalPodcasts = Object.values(inv.podcasts).reduce((s, n) => s + n, 0)
+                  const totalPages = Object.values(inv.pages || {}).reduce((s, n) => s + n, 0)
+                  const totalPodcasts = Object.values(inv.podcasts || {}).reduce((s, n) => s + n, 0)
                   const isActive = activeInv === inv.name
                   return (
-                    <>
+                    <Fragment key={inv.name}>
                       <tr
-                        key={inv.name}
                         onClick={() => setActiveInv(isActive ? null : inv.name)}
                         style={{ cursor: 'pointer', background: isActive ? 'rgba(239,192,212,0.08)' : '#ffffff', borderBottom: '1px solid #F3F3F4', transition: 'background 0.15s' }}
                       >
                         <td style={{ padding: '16px 20px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(239,192,212,0.2)', border: '2px solid #EFC0D4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                              <span style={{ fontFamily: 'Newsreader, serif', fontSize: '11px', color: '#795465', fontWeight: 600 }}>{label.slice(0,2).toUpperCase()}</span>
+                              <span style={{ fontFamily: 'Newsreader, serif', fontSize: '11px', color: '#795465', fontWeight: 600 }}>{label.slice(0, 2).toUpperCase()}</span>
                             </div>
                             <span style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px', fontWeight: 600, color: '#1A3A6B' }}>{label}</span>
                           </div>
@@ -163,7 +224,7 @@ export default function AnalyticsPage() {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                               <div>
                                 <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#9CA3AF', marginBottom: '12px' }}>PAGES VISITÉES</div>
-                                {Object.entries(inv.pages).sort((a,b) => b[1]-a[1]).map(([p, n]) => (
+                                {Object.entries(inv.pages).sort((a, b) => b[1] - a[1]).map(([p, n]) => (
                                   <div key={p} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #F3F3F4', fontSize: '12px' }}>
                                     <span style={{ color: '#43474F' }}>{PAGE_LABELS[p] || p}</span>
                                     <span style={{ fontWeight: 700, color: '#1A3A6B' }}>{n}×</span>
@@ -173,7 +234,7 @@ export default function AnalyticsPage() {
                               </div>
                               <div>
                                 <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#9CA3AF', marginBottom: '12px' }}>PODCASTS ÉCOUTÉS</div>
-                                {Object.entries(inv.podcasts).sort((a,b) => b[1]-a[1]).map(([ep, n]) => (
+                                {Object.entries(inv.podcasts).sort((a, b) => b[1] - a[1]).map(([ep, n]) => (
                                   <div key={ep} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #F3F3F4', fontSize: '12px' }}>
                                     <span style={{ color: '#43474F' }}>{ep}</span>
                                     <span style={{ fontWeight: 700, color: '#1A3A6B' }}>{n}×</span>
@@ -185,7 +246,7 @@ export default function AnalyticsPage() {
                           </td>
                         </tr>
                       )}
-                    </>
+                    </Fragment>
                   )
                 })}
                 {invList.length === 0 && (

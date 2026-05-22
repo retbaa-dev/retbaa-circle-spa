@@ -29,41 +29,38 @@ const docs = [
 
 // ─── ACTUALITÉS ──────────────────────────────────────────────
 const news = [
-  {
-    tag: 'Marché Luxe',
-    date: '7 Avr 2026',
-    title: 'LVMH, Kering, Hermès : les résultats T1 tombent cette semaine',
-    summary: "Le secteur luxe sous les projecteurs : LVMH (lundi 13), Kering (mardi 14), Hermès (mercredi 15). Après un T4 2025 difficile pour les géants, le marché attend des signaux sur la reprise chinoise et l'impact des droits de douane américains.",
-    analysis: "Si Hermès publie encore une croissance positive, ça confirme que le luxe intégral tient. Retbaa est exactement sur ce positionnement — artisanal, rare, sans compromis.",
-    img: '/retbaa-photos/retbaa_11.jpg',
-  },
-  {
-    tag: 'Stratégie',
-    date: '31 Mar 2026',
-    title: "L'Oréal rachète Kering Beauté (dont Creed) pour 4 Mds€",
-    summary: "Plus grosse acquisition de l'histoire de L'Oréal. Kering cède tout son pôle olfactif pour se recentrer sur la mode. Une recomposition majeure du marché de la parfumerie niche.",
-    analysis: "La cession de Creed redistribue les cartes dans la parfumerie niche. Le terrain se restructure — une fenêtre s'ouvre pour les acteurs africains du luxe sensoriel comme Retbaa.",
-    img: '/retbaa-photos/retbaa_12.jpg',
-  },
-  {
-    tag: 'Opportunité',
-    date: '1 Avr 2026',
-    title: "Luxe MEA : +10,6% de croissance annuelle attendue d'ici 2031",
-    summary: "Le marché du luxe Moyen-Orient & Afrique devrait passer de 19,8 Mds$ à 36,2 Mds$ d'ici 2031. La classe HNW africaine atteindra 198 000 personnes en 2026.",
-    analysis: "Retbaa entre sur ce marché au moment exact où il prend de la vitesse. L'avantage du premier entrant — africain et authentique — ne durera pas indéfiniment.",
-    img: '/retbaa-photos/retbaa_13.jpg',
-  },
+  { tag: 'Marché Luxe', date: '17 Avr 2026', title: "Luxe africain : 32,97 milliards de dollars attendus d'ici 2030", summary: "Le marché du luxe africain entre dans une phase d'accélération majeure, porté par une clientèle premium connectée et une classe aisée en forte croissance. Une fenêtre d'entrée historique pour les marques africaines authentiques.", img: '/retbaa-photos/retbaa_11.jpg' },
+  { tag: 'Stratégie', date: '19 Avr 2026', title: "Résultats Q1 2026 : Hermès +6% confirme la résilience du luxe artisanal", summary: "Pendant que LVMH recule de 6% et Kering chute de 10%, Hermès affiche une croissance de +6% — preuve que le luxe intégral, rare et artisanal résiste aux turbulences macro. Exactement le positionnement de Retbaa.", img: '/retbaa-photos/retbaa_12.jpg' },
+  { tag: 'Opportunité', date: '28 Fév 2026', title: "Parfumerie niche : CAGR +9,1% jusqu'en 2033, Moyen-Orient à 8 Mds$ en 2035", summary: "Le marché mondial de la parfumerie niche devrait croître à un rythme de +9,1% par an jusqu'en 2033. Au Moyen-Orient, le segment atteindra 8 milliards de dollars d'ici 2035, porté par la demande de formules haute concentration et d'identités olfactives uniques.", img: '/retbaa-photos/retbaa_13.jpg' },
 ]
 
 // ─── CAROUSEL BLOCKS ─────────────────────────────────────────
+// ─── LATEST CONTENT (branché sur les vrais articles/podcasts) ───
+const LATEST_INSIGHT = {
+  title: 'Retbaa Community : La Philosophie de l\'Expérience',
+  date: 'Avril 2026',
+  tag: 'Vision · Stratégie',
+}
+const LATEST_INSIGHT_2 = {
+  title: 'Cultural Luxury: The Retbaa Vision',
+  date: 'Avril 2026',
+  tag: 'Vision',
+}
+const LATEST_PODCAST = {
+  number: 'EP. 06',
+  title: 'Cultural Luxury: The Retbaa Thesis',
+  date: 'April 2026',
+}
+
 const carouselBlocks = [
   {
     id: 'insights',
     icon: 'insights',
-    tag: 'Editorial',
+    tag: 'Editorial · ' + LATEST_INSIGHT.tag,
     title: 'Retbaa Insights',
-    subtitle: 'Études & analyses du marché du luxe africain',
-    preview: '"The Rise of African Artisanal Perfumery"',
+    subtitle: 'Études & analyses — marché du luxe',
+    preview: '"' + LATEST_INSIGHT.title + '"',
+    previewMeta: LATEST_INSIGHT.date,
     cta: 'Explore',
     ctaIcon: 'east',
     bg: '#1A3A6B',
@@ -77,10 +74,11 @@ const carouselBlocks = [
   {
     id: 'podcast',
     icon: 'mic',
-    tag: 'Audio',
+    tag: 'Audio · ' + LATEST_PODCAST.number,
     title: 'Retbaa Podcast',
-    subtitle: 'Les coulisses de la marque',
-    preview: '"Episode 12: Crafting Scented Memories"',
+    subtitle: 'Analyses audio pour investisseurs',
+    preview: '"' + LATEST_PODCAST.title + '"',
+    previewMeta: LATEST_PODCAST.date,
     cta: 'Listen',
     ctaIcon: 'play_circle',
     bg: '#EFC0D4',
@@ -98,6 +96,7 @@ const carouselBlocks = [
     title: 'Retbaa Inner Circle',
     subtitle: 'Espace exclusif investisseurs',
     preview: 'Message privé de Massata — 2 avr. 2026',
+    previewMeta: null,
     cta: 'Enter',
     ctaIcon: 'lock_open',
     bg: '#001026',
@@ -181,6 +180,16 @@ function CarouselCard({ block, onClick }) {
           }}>
             {block.preview}
           </p>
+          {block.previewMeta && (
+            <p style={{
+              fontFamily: 'Manrope, sans-serif', fontSize: '10px',
+              letterSpacing: '0.1em', textTransform: 'uppercase',
+              color: block.previewColor, opacity: 0.6, margin: '6px 0 0',
+              fontStyle: 'normal',
+            }}>
+              {block.previewMeta}
+            </p>
+          )}
         </div>
       </div>
 
@@ -200,6 +209,74 @@ function CarouselCard({ block, onClick }) {
             {block.ctaIcon}
           </span>
         </button>
+      </div>
+    </div>
+  )
+}
+
+// ─── CAROUSEL — composant dédié, useState au top-level (Rules of Hooks) ─────
+function Carousel({ blocks, onNavigate }) {
+  const [carIdx, setCarIdx] = useState(0)
+  const total = blocks.length
+  const prev = () => setCarIdx(i => (i - 1 + total) % total)
+  const next = () => setCarIdx(i => (i + 1) % total)
+
+  return (
+    <div style={{ position: 'relative', padding: '0 48px', width: '100%', boxSizing: 'border-box' }} className="carousel-container">
+      <button onClick={prev} className="carousel-arrow carousel-arrow-left" style={{
+        position: 'absolute', left: '0', top: '50%',
+        transform: 'translateY(-50%)', zIndex: 10,
+        width: '40px', height: '40px', borderRadius: '50%',
+        background: '#ffffff', border: '1px solid rgba(239,192,212,0.4)',
+        boxShadow: '0 2px 12px rgba(0,27,63,0.1)',
+        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'all 0.2s',
+      }}
+        onMouseEnter={e => e.currentTarget.style.background = '#EFC0D4'}
+        onMouseLeave={e => e.currentTarget.style.background = '#ffffff'}
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#1A3A6B' }}>chevron_left</span>
+      </button>
+
+      <div style={{ overflow: 'hidden', borderRadius: '4px' }}>
+        <div style={{
+          display: 'flex',
+          transform: `translateX(-${carIdx * 100}%)`,
+          transition: 'transform 0.35s cubic-bezier(0.4,0,0.2,1)',
+        }} className="carousel-row">
+          {blocks.map(block => (
+            <div key={block.id} style={{ minWidth: '100%', flexShrink: 0 }}>
+              <CarouselCard block={block} onClick={() => onNavigate(block.id)} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <button onClick={next} className="carousel-arrow carousel-arrow-right" style={{
+        position: 'absolute', right: '0', top: '50%',
+        transform: 'translateY(-50%)', zIndex: 10,
+        width: '40px', height: '40px', borderRadius: '50%',
+        background: '#ffffff', border: '1px solid rgba(239,192,212,0.4)',
+        boxShadow: '0 2px 12px rgba(0,27,63,0.1)',
+        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'all 0.2s',
+      }}
+        onMouseEnter={e => e.currentTarget.style.background = '#EFC0D4'}
+        onMouseLeave={e => e.currentTarget.style.background = '#ffffff'}
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#1A3A6B' }}>chevron_right</span>
+      </button>
+
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '16px' }}>
+        {blocks.map((_, i) => (
+          <button key={i} onClick={() => setCarIdx(i)} style={{
+            width: i === carIdx ? '24px' : '8px',
+            height: '8px', borderRadius: '4px',
+            background: i === carIdx ? '#EFC0D4' : 'rgba(239,192,212,0.3)',
+            border: 'none', cursor: 'pointer', padding: 0,
+            transition: 'all 0.25s ease',
+          }} />
+        ))}
       </div>
     </div>
   )
@@ -257,7 +334,7 @@ function KpiCard({ label, value, sub, icon, subIcon, subColor }) {
   )
 }
 
-export default function Dashboard({ userName = 'Investisseur', setActivePage, onNavigate }) {
+export default function Dashboard({ userName = 'Investisseur', setActivePage, onNavigate, isAssistant = false }) {
   const { t, i18n } = useTranslation()
   const lang = i18n.language?.startsWith('fr') ? 'fr' : 'en'
   const [footerModal, setFooterModal] = useState(null)
@@ -293,11 +370,20 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage, on
   const isFounder = userName === 'Massata'
   // Trouver le profil de l'utilisateur connecté par shortName
   // Match robuste : shortName exact, ou userName contient le shortName (ex: "Pape Amadou Ngom" → "Pape Amadou")
-  const myRow = CAP_TABLE.find(r =>
-    r.shortName === userName ||
-    userName?.includes(r.shortName) ||
-    r.shortName?.includes(userName?.split(' ')[0])
-  ) || CAP_TABLE[0]
+  // Guard : userName vide ne doit PAS fallback sur Massata ('' .includes('') === true)
+  const myRow = (userName && userName.trim())
+    ? CAP_TABLE.find(r => {
+        const firstToken = userName.split(' ')[0]
+        return (
+          r.shortName === userName ||
+          userName.includes(r.shortName) ||
+          (firstToken && r.shortName?.includes(firstToken))
+        )
+      }) || null
+    : null
+
+  const myShares = myRow?.shares ?? 0
+  const myPct = myRow?.pct ?? 0
 
   const navigate = (page) => {
     if (setActivePage) setActivePage(page)
@@ -361,7 +447,7 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage, on
                 fontFamily: 'Manrope, sans-serif', fontSize: '11px',
                 color: '#1A3A6B', letterSpacing: '0.08em', fontWeight: 600,
               }}>
-                Closing Tranche 1 · Clôturé
+                Tranche 1 — Closing Finalisé ✓
               </span>
             </div>
           </div>
@@ -372,21 +458,28 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage, on
       <section style={{ background: '#ffffff', boxShadow: '0px 20px 40px rgba(0,27,63,0.06)' }}>
         <div style={{
           maxWidth: '1400px', margin: '0 auto',
-          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+          display: 'grid',
+          // Assistant : 2 KPIs non-financiers seulement
+          gridTemplateColumns: isAssistant ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
         }} className="kpi-grid">
-          <KpiCard
-            label={lang === 'fr' ? 'Valorisation post-money' : 'Post-money valuation'}
-            value="3 M€"
-            sub={lang === 'fr' ? 'Pre-money : 2,4 M€ · Tranche 1 : 360 K€' : 'Pre-money: €2.4M · Tranche 1: €360K'}
-            icon="account_balance"
-            subColor="#9CA3AF"
-          />
-          <KpiCard
-            label={lang === 'fr' ? 'Participation' : 'Shareholding %'}
-            value={myRow?.pct ? `${myRow.pct.toFixed(2).replace('.', ',')} %` : '—'}
-            sub={lang === 'fr' ? 'Post-augmentation' : 'Post-raise'}
-            icon="pie_chart"
-          />
+          {/* Montant investi + participation masqués pour les assistants */}
+          {!isAssistant && (
+            <KpiCard
+              label={lang === 'fr' ? 'Valorisation post-money' : 'Post-money valuation'}
+              value="3 M€"
+              sub={lang === 'fr' ? 'Pre-money : 2,4 M€ · Tranche 1 : 360 K€' : 'Pre-money: €2.4M · Tranche 1: €360K'}
+              icon="account_balance"
+              subColor="#9CA3AF"
+            />
+          )}
+          {!isAssistant && (
+            <KpiCard
+              label={lang === 'fr' ? 'Participation' : 'Shareholding %'}
+              value={myRow?.pct ? `${myRow.pct.toFixed(2).replace('.', ',')} %` : '—'}
+              sub={lang === 'fr' ? 'Post-augmentation' : 'Post-raise'}
+              icon="pie_chart"
+            />
+          )}
           <KpiCard
             label={lang === 'fr' ? 'Documents' : 'Documents'}
             value="03"
@@ -423,77 +516,8 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage, on
             </span>
           </div>
 
-          {/* Carrousel avec flèches + dots */}
-          {(() => {
-            const [carIdx, setCarIdx] = useState(0)
-            const total = carouselBlocks.length
-            const prev = () => setCarIdx(i => (i - 1 + total) % total)
-            const next = () => setCarIdx(i => (i + 1) % total)
-            return (
-              <div style={{ position: 'relative', padding: '0 48px', width: '100%', boxSizing: 'border-box' }} className="carousel-container">
-                {/* Flèche gauche */}
-                <button onClick={prev} className="carousel-arrow carousel-arrow-left" style={{
-                  position: 'absolute', left: '0', top: '50%',
-                  transform: 'translateY(-50%)', zIndex: 10,
-                  width: '40px', height: '40px', borderRadius: '50%',
-                  background: '#ffffff', border: '1px solid rgba(239,192,212,0.4)',
-                  boxShadow: '0 2px 12px rgba(0,27,63,0.1)',
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'all 0.2s',
-                }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#EFC0D4'}
-                  onMouseLeave={e => e.currentTarget.style.background = '#ffffff'}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#1A3A6B' }}>chevron_left</span>
-                </button>
-
-                {/* Carte active */}
-                <div style={{ overflow: 'hidden', borderRadius: '4px' }}>
-                  <div style={{
-                    display: 'flex',
-                    transform: `translateX(-${carIdx * 100}%)`,
-                    transition: 'transform 0.35s cubic-bezier(0.4,0,0.2,1)',
-                  }} className="carousel-row">
-                    {carouselBlocks.map(block => (
-                      <div key={block.id} style={{ minWidth: '100%', flexShrink: 0 }}>
-                        <CarouselCard block={block} onClick={() => navigate(block.id)} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Flèche droite */}
-                <button onClick={next} className="carousel-arrow carousel-arrow-right" style={{
-                  position: 'absolute', right: '0', top: '50%',
-                  transform: 'translateY(-50%)', zIndex: 10,
-                  width: '40px', height: '40px', borderRadius: '50%',
-                  background: '#ffffff', border: '1px solid rgba(239,192,212,0.4)',
-                  boxShadow: '0 2px 12px rgba(0,27,63,0.1)',
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'all 0.2s',
-                }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#EFC0D4'}
-                  onMouseLeave={e => e.currentTarget.style.background = '#ffffff'}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#1A3A6B' }}>chevron_right</span>
-                </button>
-
-                {/* Dots */}
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '16px' }}>
-                  {carouselBlocks.map((_, i) => (
-                    <button key={i} onClick={() => setCarIdx(i)} style={{
-                      width: i === carIdx ? '24px' : '8px',
-                      height: '8px',
-                      borderRadius: '4px',
-                      background: i === carIdx ? '#EFC0D4' : 'rgba(239,192,212,0.3)',
-                      border: 'none', cursor: 'pointer', padding: 0,
-                      transition: 'all 0.25s ease',
-                    }} />
-                  ))}
-                </div>
-              </div>
-            )
-          })()}
+          {/* Carousel — composant dédié, useState au top-level (Rules of Hooks) */}
+          <Carousel blocks={carouselBlocks} onNavigate={navigate} />
         </section>
 
         {/* ─── CORPS : Gouvernance (Documents + Actualités) + Droite (Timeline + Mon investissement) ─── */}

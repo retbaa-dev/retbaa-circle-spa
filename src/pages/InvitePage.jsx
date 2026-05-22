@@ -1,18 +1,16 @@
 // pages/InvitePage.jsx — Page d'accueil d'une invitation unique
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useSignUp } from '@clerk/clerk-react'
+import { supabase } from '../lib/supabase'
 
 export default function InvitePage() {
   const { token } = useParams()
   const navigate = useNavigate()
-  const { signUp, setActive, isLoaded } = useSignUp()
 
-  const [step, setStep] = useState('loading') // loading | valid | form | code | error
+  const [step, setStep] = useState('loading') // loading | valid | form | sent | error
   const [investorData, setInvestorData] = useState(null)
   const [errorMsg, setErrorMsg] = useState('')
   const [form, setForm] = useState({ email: '', password: '', firstName: '', lastName: '' })
-  const [verificationCode, setVerificationCode] = useState('')
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -35,42 +33,41 @@ export default function InvitePage() {
 
   const handleCreateAccount = async (e) => {
     e.preventDefault()
-    if (!isLoaded) return
     setLoading(true)
+    setErrorMsg('')
     try {
-      await signUp.create({
-        emailAddress: form.email,
-        password: form.password,
-        firstName: form.firstName,
-        lastName: form.lastName,
-      })
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
-      setStep('code')
-    } catch (err) {
-      setErrorMsg(err.errors?.[0]?.message || 'Erreur lors de la création du compte')
-    } finally {
-      setLoading(false)
-    }
-  }
+      const fullName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim()
 
-  const handleVerify = async (e) => {
-    e.preventDefault()
-    if (!isLoaded) return
-    setLoading(true)
-    try {
-      const result = await signUp.attemptEmailAddressVerification({ code: verificationCode })
-      if (result.status === 'complete') {
-        // Marquer le token comme utilisé + ajouter metadata
-        await fetch(`/api/admin/invite/${token}/use`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ clerkUserId: result.createdUserId }),
-        })
-        await setActive({ session: result.createdSessionId })
-        navigate('/')
+      // Créer le compte via Supabase Auth
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+        email: form.email.trim().toLowerCase(),
+        password: form.password,
+        options: {
+          data: { full_name: fullName },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+
+      if (signUpError) {
+        setErrorMsg(signUpError.message || 'Erreur lors de la création du compte')
+        setLoading(false)
+        return
       }
+
+      // Marquer le token comme utilisé côté serveur
+      await fetch(`/api/admin/invite/${token}/use`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          supabaseUserId: authData?.user?.id,
+          email: form.email.trim().toLowerCase(),
+          fullName,
+        }),
+      }).catch(() => {}) // non bloquant
+
+      setStep('sent')
     } catch (err) {
-      setErrorMsg(err.errors?.[0]?.message || 'Code invalide')
+      setErrorMsg(err.message || 'Erreur inattendue')
     } finally {
       setLoading(false)
     }
@@ -108,22 +105,20 @@ export default function InvitePage() {
     </div>
   )
 
-  if (step === 'code') return (
+  if (step === 'sent') return (
     <div style={S.page}>
-      <div style={S.card}>
-        <div style={{ marginBottom: '8px', fontSize: '10px', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#EFC0D4', fontWeight: 700 }}>Retbaa Circle</div>
+      <div style={{ ...S.card, textAlign: 'center' }}>
+        <span className="material-symbols-outlined" style={{ fontSize: '40px', color: '#EFC0D4', display: 'block', marginBottom: '16px' }}>
+          mark_email_read
+        </span>
         <div style={S.title}>Vérifiez votre email</div>
-        <p style={S.sub}>Un code de vérification a été envoyé à <strong>{form.email}</strong></p>
-        {errorMsg && <div style={S.error}>{errorMsg}</div>}
-        <form onSubmit={handleVerify}>
-          <div style={S.field}>
-            <label style={S.label}>Code de vérification</label>
-            <input style={{ ...S.input, fontSize: '24px', letterSpacing: '0.3em', textAlign: 'center' }} type="text" value={verificationCode} onChange={e => setVerificationCode(e.target.value)} placeholder="000000" maxLength={6} required />
-          </div>
-          <button type="submit" style={S.btn} disabled={loading}>
-            {loading ? 'Vérification…' : 'Confirmer mon compte'}
-          </button>
-        </form>
+        <p style={S.sub}>
+          Un lien de confirmation a été envoyé à <strong>{form.email}</strong>.<br />
+          Cliquez dessus pour activer votre compte.
+        </p>
+        <p style={{ fontSize: '11px', color: '#9CA3AF' }}>
+          Votre accès sera activé par Massata Niang après confirmation.
+        </p>
       </div>
     </div>
   )
