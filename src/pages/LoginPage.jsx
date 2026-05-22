@@ -1,4 +1,4 @@
-// pages/LoginPage.jsx — Retbaa Circle — Magic Link + Google OAuth (Supabase)
+// pages/LoginPage.jsx — Retbaa Circle — Password + Magic Link + Google OAuth (Supabase)
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
@@ -6,24 +6,49 @@ import { supabase } from '../lib/supabase'
 export default function LoginPage() {
   const { t, i18n } = useTranslation()
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [emailFocus, setEmailFocus] = useState(false)
+  const [passwordFocus, setPasswordFocus] = useState(false)
   const [status, setStatus] = useState('idle') // idle | loading | sent | error
   const [errorMsg, setErrorMsg] = useState('')
 
-  // ── Magic Link ──────────────────────────────────────────────────
-  const handleMagicLink = async (e) => {
+  // ── Connexion mot de passe ──────────────────────────────────────
+  const handlePassword = async (e) => {
     e.preventDefault()
-    if (!email.trim()) return
+    if (!email.trim() || !password) return
     setStatus('loading')
     setErrorMsg('')
 
-    const redirectTo = `${window.location.origin}/auth/callback`
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
+    })
+
+    if (error) {
+      const msg = error.message?.includes('Invalid login credentials')
+        ? 'Email ou mot de passe incorrect. Vérifiez vos identifiants.'
+        : error.message || 'Erreur de connexion.'
+      setErrorMsg(msg)
+      setStatus('error')
+    }
+    // Si succès : onAuthStateChange dans AuthProvider redirect automatiquement
+  }
+
+  // ── Magic Link OTP ──────────────────────────────────────────────
+  const handleMagicLink = async () => {
+    if (!email.trim()) {
+      setErrorMsg('Entrez votre adresse email d\'abord.')
+      setStatus('error')
+      return
+    }
+    setStatus('loading')
+    setErrorMsg('')
 
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim().toLowerCase(),
       options: {
-        emailRedirectTo: redirectTo,
-        shouldCreateUser: false, // seuls les comptes existants peuvent se connecter
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        shouldCreateUser: false,
       },
     })
 
@@ -40,9 +65,7 @@ export default function LoginPage() {
     setErrorMsg('')
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     })
     if (error) setErrorMsg(error.message || 'Erreur Google OAuth')
   }
@@ -69,8 +92,7 @@ export default function LoginPage() {
 
       {/* Top Nav */}
       <nav style={{
-        position: 'fixed', top: 0, left: 0, right: 0,
-        height: '64px', padding: '0 48px',
+        position: 'fixed', top: 0, left: 0, right: 0, height: '64px', padding: '0 48px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         zIndex: 50, backdropFilter: 'blur(8px)',
       }}>
@@ -166,7 +188,7 @@ export default function LoginPage() {
         }} className="login-form-col">
 
           {/* Heading */}
-          <div style={{ marginBottom: '40px' }}>
+          <div style={{ marginBottom: '36px' }}>
             <h3 style={{ fontFamily: 'Newsreader, serif', fontSize: '32px', fontStyle: 'italic', fontWeight: 300, color: '#1A3A6B', marginBottom: '8px', lineHeight: 1.2 }}>
               {t('login.welcome', 'Bienvenue')}
             </h3>
@@ -196,7 +218,7 @@ export default function LoginPage() {
                 Le lien expire dans 1 heure · Vérifiez vos spams
               </p>
               <button
-                onClick={() => { setStatus('idle'); setEmail('') }}
+                onClick={() => { setStatus('idle'); setPassword('') }}
                 style={{
                   marginTop: '24px', background: 'none', border: 'none',
                   fontFamily: 'Manrope, sans-serif', fontSize: '10px',
@@ -204,7 +226,7 @@ export default function LoginPage() {
                   color: '#EFC0D4', fontWeight: 700, cursor: 'pointer',
                 }}
               >
-                ← Utiliser un autre email
+                ← Retour à la connexion
               </button>
             </div>
           ) : (
@@ -241,8 +263,10 @@ export default function LoginPage() {
                 <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(196,198,208,0.4)' }} />
               </div>
 
-              {/* Magic Link Form */}
-              <form onSubmit={handleMagicLink} style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              {/* ── Formulaire email + mot de passe ── */}
+              <form onSubmit={handlePassword} style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+
+                {/* Email */}
                 <div>
                   <label style={{ display: 'block', fontSize: '10px', fontFamily: 'Manrope, sans-serif', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#1A3A6B', fontWeight: 700, marginBottom: '10px' }}>
                     {t('login.email', 'Adresse email')}
@@ -262,17 +286,39 @@ export default function LoginPage() {
                       fontFamily: 'Manrope, sans-serif', color: '#1A1C1C', transition: 'border-color 0.25s',
                     }}
                   />
-                  <p style={{ marginTop: '8px', fontFamily: 'Manrope, sans-serif', fontSize: '11px', color: '#9CA3AF', letterSpacing: '0.03em' }}>
-                    Vous recevrez un lien de connexion sécurisé par email.
-                  </p>
                 </div>
 
-                <div style={{ paddingTop: '8px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  {status === 'error' && (
-                    <div style={{ padding: '10px 14px', background: 'rgba(239,192,212,0.15)', borderLeft: '2px solid #EFC0D4', fontFamily: 'Manrope, sans-serif', fontSize: '12px', color: '#1A3A6B' }}>
-                      {errorMsg}
-                    </div>
-                  )}
+                {/* Mot de passe */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '10px', fontFamily: 'Manrope, sans-serif', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#1A3A6B', fontWeight: 700, marginBottom: '10px' }}>
+                    {t('login.password', "Clé d'accès")}
+                  </label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onFocus={() => setPasswordFocus(true)}
+                    onBlur={() => setPasswordFocus(false)}
+                    placeholder="••••••••"
+                    required
+                    style={{
+                      width: '100%', background: 'transparent', border: 'none',
+                      borderBottom: passwordFocus ? '2px solid #EFC0D4' : '1px solid rgba(196,198,208,0.7)',
+                      outline: 'none', padding: '12px 0', fontSize: '14px',
+                      fontFamily: 'Manrope, sans-serif', color: '#1A1C1C', transition: 'border-color 0.25s',
+                    }}
+                  />
+                </div>
+
+                {/* Erreur */}
+                {status === 'error' && errorMsg && (
+                  <div style={{ padding: '10px 14px', background: 'rgba(239,192,212,0.15)', borderLeft: '2px solid #EFC0D4', fontFamily: 'Manrope, sans-serif', fontSize: '12px', color: '#1A3A6B', marginTop: '-8px' }}>
+                    {errorMsg}
+                  </div>
+                )}
+
+                {/* CTA principal — Se connecter */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingTop: '4px' }}>
                   <button
                     type="submit"
                     disabled={status === 'loading'}
@@ -288,8 +334,29 @@ export default function LoginPage() {
                     onMouseEnter={(e) => { if (status !== 'loading') { e.currentTarget.style.backgroundColor = '#E5B4CA'; e.currentTarget.style.transform = 'translateY(-1px)' }}}
                     onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#EFC0D4'; e.currentTarget.style.transform = 'translateY(0)' }}
                   >
-                    {status === 'loading' ? '…' : t('login.submit', "Recevoir mon lien d'accès")}
-                    {status !== 'loading' && <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>send</span>}
+                    {status === 'loading' ? '…' : t('login.submit', 'Accéder à mon espace')}
+                    {status !== 'loading' && <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>arrow_forward</span>}
+                  </button>
+
+                  {/* CTA secondaire — Recevoir un lien */}
+                  <button
+                    type="button"
+                    onClick={handleMagicLink}
+                    disabled={status === 'loading'}
+                    style={{
+                      width: '100%', backgroundColor: 'transparent', color: '#1A3A6B',
+                      padding: '14px 32px', fontSize: '10px', fontFamily: 'Manrope, sans-serif',
+                      letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 700,
+                      border: '1px solid rgba(196,198,208,0.5)', borderRadius: '4px',
+                      cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#EFC0D4'; e.currentTarget.style.backgroundColor = 'rgba(239,192,212,0.05)' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(196,198,208,0.5)'; e.currentTarget.style.backgroundColor = 'transparent' }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '14px', color: '#EFC0D4' }}>send</span>
+                    Recevoir un lien de connexion
                   </button>
                 </div>
               </form>
@@ -297,7 +364,7 @@ export default function LoginPage() {
           )}
 
           {/* Trust Block */}
-          <div style={{ marginTop: '48px', paddingTop: '28px', borderTop: '1px solid rgba(196,198,208,0.25)' }}>
+          <div style={{ marginTop: '40px', paddingTop: '24px', borderTop: '1px solid rgba(196,198,208,0.25)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
               <div style={{ width: '44px', height: '44px', overflow: 'hidden', border: '1px solid rgba(239,192,212,0.3)', flexShrink: 0, borderRadius: '2px' }}>
                 <img src="/retbaa-photos/retbaa_01.jpg" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(100%)', opacity: 0.45 }} />
