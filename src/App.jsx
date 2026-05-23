@@ -246,6 +246,28 @@ function InvestisseurApp() {
     return <LoginPage />
   }
 
+  // ── Accès Circle refusé par app_access ──
+  if (isSignedIn && role === 'no_access') {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: '#FAF7F2' }}>
+        <div style={{ textAlign: 'center', padding: '40px' }}>
+          <div style={{ fontFamily: 'Newsreader, serif', fontSize: '32px', fontWeight: 300, color: '#1A3A6B', fontStyle: 'italic', marginBottom: '12px' }}>
+            Accès non autorisé
+          </div>
+          <div style={{ fontFamily: 'Manrope, sans-serif', fontSize: '14px', color: '#6B7280', marginBottom: '32px' }}>
+            Votre compte n'a pas accès à Retbaa Circle.
+          </div>
+          <button
+            onClick={signOut}
+            style={{ fontFamily: 'Manrope, sans-serif', fontSize: '12px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#1A3A6B', background: 'none', border: '1px solid #1A3A6B', padding: '10px 24px', cursor: 'pointer' }}
+          >
+            Se déconnecter
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   // ── Compte en attente de validation ──
   if (isSignedIn && profile?.role === 'pending') {
     return <PendingPage />

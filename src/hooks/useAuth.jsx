@@ -22,6 +22,7 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
   const [isLoaded, setIsLoaded] = useState(false)
+  const [circleAccess, setCircleAccess] = useState(true) // fail open par défaut
 
   const fetchProfile = async (userId) => {
     try {
@@ -38,6 +39,16 @@ export function AuthProvider({ children }) {
     }
   }
 
+  const checkCircleAccess = async () => {
+    try {
+      const { data, error } = await supabase.rpc('has_app_access', { app_name: 'circle' })
+      if (!error) setCircleAccess(!!data)
+      // Si erreur réseau → fail open (circleAccess reste true)
+    } catch {
+      // Erreur réseau — fail open
+    }
+  }
+
   useEffect(() => {
     // Session initiale
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -45,6 +56,7 @@ export function AuthProvider({ children }) {
       setUser(session?.user ?? null)
       if (session?.user) {
         fetchProfile(session.user.id)
+        checkCircleAccess()
       } else {
         setIsLoaded(true)
       }
@@ -56,8 +68,10 @@ export function AuthProvider({ children }) {
       setUser(session?.user ?? null)
       if (session?.user) {
         fetchProfile(session.user.id)
+        checkCircleAccess()
       } else {
         setProfile(null)
+        setCircleAccess(true)
         setIsLoaded(true)
       }
     })
@@ -69,8 +83,10 @@ export function AuthProvider({ children }) {
     await supabase.auth.signOut()
   }
 
-  // Rôle mappé (founder / active / assistant / pending / null)
-  const role = profile?.role ? (ROLE_MAP[profile.role] ?? profile.role) : null
+  // Rôle mappé (founder / active / assistant / pending / no_access / null)
+  const rawRole = profile?.role ? (ROLE_MAP[profile.role] ?? profile.role) : null
+  // no_access : accès refusé par app_access — sauf founder (accès total)
+  const role = (!circleAccess && rawRole !== 'founder') ? 'no_access' : rawRole
 
   const value = {
     user,           // user Supabase Auth (id, email, …)
@@ -78,7 +94,7 @@ export function AuthProvider({ children }) {
     profile,        // ligne user_profiles (full_name, role, linked_to)
     isLoaded,
     isSignedIn: !!user,
-    role,
+    role,           // founder / active / assistant / pending / no_access / null
     signOut,
   }
 
