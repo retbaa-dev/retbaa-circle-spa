@@ -35,7 +35,7 @@ export default function BienvenueOnboarding() {
       }
 
       if (data.fallback && data.magicLink) {
-        // Email Clerk indisponible → afficher le lien directement
+        // Email gsk indisponible → afficher le lien directement
         setMagicLink(data.magicLink)
         setStatus('fallback')
       } else {
