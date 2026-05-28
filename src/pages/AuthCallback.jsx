@@ -4,6 +4,10 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
+// Timeout de sécurité : si aucun event auth n'arrive dans ce délai,
+// on considère le lien invalide/expiré et on redirige vers le login.
+const AUTH_TIMEOUT_MS = 8000
+
 export default function AuthCallback() {
   const navigate = useNavigate()
   const [error, setError] = useState(null)
@@ -32,7 +36,15 @@ export default function AuthCallback() {
       }
     })
 
-    return () => subscription.unsubscribe()
+    // Timeout de sécurité — évite un écran bloqué si aucun event n'arrive
+    const timeout = setTimeout(() => {
+      setError('Lien expiré ou déjà utilisé. Veuillez demander un nouveau lien.')
+    }, AUTH_TIMEOUT_MS)
+
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(timeout)
+    }
   }, [navigate])
 
   if (error) {
