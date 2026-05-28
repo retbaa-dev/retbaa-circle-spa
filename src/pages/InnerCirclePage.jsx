@@ -27,40 +27,11 @@ Thank you for being part of this.
 
 Massata.`,
     hasAudio: true,
-    audioSrc: '/podcasts/inner_circle_ep3.mp3',
-    audioDuration: '~1 min',
+    audioSrc: '/podcasts/podcast_ep3_en.mp3',
+    audioDuration: '~11 min',
     hasPdf: true,
     pdfLabel: 'Note Stratégique — Sales Intelligence System v1.0',
-    pdfPath: '/docs/Retbaa_Sales_Intelligence_Note_Strategique_v1.pdf',
-    comments: 0,
-  },
-  {
-    id: 5,
-    body: `Welcome back.
-
-Over the past two letters, I've shared how we think about markets, and why Cultural Luxury is our compass.
-
-Today, I want to tell you what we're building to execute on that vision.
-
-We are building the third pillar of the Retbaa digital ecosystem. Not another CRM. A strategic command center — with real-time intelligence across fifteen markets simultaneously, automated prospecting calibrated for luxury, and a pipeline that connects our B2C, B2B, and institutional channels in one place.
-
-The AI works around the clock. I step in only for the qualified decisions.
-
-The full strategic document is attached to this letter. Eleven pages. Nine sections. The doctrine, the market map, the risk framework — including everything we learned from Dubai.
-
-This document is alive. I will update it with every major pivot.
-
-You are the first to read it.
-
-Thank you for being part of this.
-
-Massata.`,
-    hasAudio: true,
-    audioSrc: '/podcasts/inner_circle_ep3.mp3',
-    audioDuration: '~1 min 30',
-    hasPdf: true,
-    pdfLabel: 'Note Stratégique — Sales Intelligence System v1.0',
-    pdfPath: '/docs/Retbaa_Sales_Intelligence_Note_Strategique_v1.pdf',
+    pdfPath: '/docs/Retbaa_Etude_Marche_Luxe_2026.pdf',
     comments: 0,
   },
   {
@@ -92,8 +63,8 @@ This is how we think about global expansion. Not geography. Not diaspora. Cultur
 
 Next letter: what we're actually building to make this happen.`,
     hasAudio: true,
-    audioSrc: '/podcasts/inner_circle_ep2.mp3',
-    audioDuration: '~1 min 30',
+    audioSrc: '/podcasts/podcast_ep2_en.mp3',
+    audioDuration: '~12 min',
     hasPdf: false,
     comments: 0,
   },
@@ -122,8 +93,8 @@ That's what this series of letters is about.
 
 See you in the next one.`,
     hasAudio: true,
-    audioSrc: '/podcasts/inner_circle_ep1.mp3',
-    audioDuration: '~1 min 30',
+    audioSrc: '/podcasts/podcast_ep1_en.mp3',
+    audioDuration: '~10 min',
     hasPdf: false,
     comments: 0,
   },
