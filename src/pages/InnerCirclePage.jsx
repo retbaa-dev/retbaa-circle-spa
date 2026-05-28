@@ -99,38 +99,7 @@ See you in the next one.`,
     comments: 0,
   },
   {
-    id: 1,
-    body: `Chers investisseurs,
-
-Il y a quelques semaines, en regardant des outils de vente IA — SalesCloser, Apollo, Gong — j'ai eu une pensée qui ne m'a pas quitté : aucun de ces outils n'a été conçu pour ce que nous faisons.
-
-Pas parce qu'ils sont mauvais. Parce qu'ils sont pensés pour un monde où la vente est une question de volume, de séquences automatisées, de "dark funnel". Retbaa joue une autre partie.
-
-Nous ne vendons pas un produit à des inconnus. Nous partageons une façon d'habiter le monde avec des gens qui la reconnaissent — à Tokyo, à Riyad, à Varsovie, à Lagos. Ce que j'appelle le Cultural Luxury : non pas "nous venons d'Afrique", mais "nous partageons les mêmes valeurs — la sensorialité, le rituel, l'artisanat authentique."
-
-Ce filtre change tout. Il ouvre le Japon (wabi-sabi, céramique, rituel du parfum — ADN quasi-identique à Kemia). Il ouvre l'Arabie Saoudite (oud, hospitalité olfactive, l'objet offert comme acte de culture). Il ouvre la Scandinavie, l'Italie, la Corée. Il ferme les marchés où l'on achète des logos, pas des significations.
-
-J'ai donc décidé de ne pas acheter ces outils. J'ai décidé d'en construire un — propriétaire, calibré pour Retbaa, pensé pour aller global depuis le premier jour.
-
-sales.retbaa.com sera la troisième brique de notre écosystème, après ops et trade. Pas un CRM de plus. Une tour de contrôle commerciale et stratégique — Intelligence & Prospection, Engagement Multicanal, Pipeline & Closing, et surtout : Market Intelligence en temps réel sur 15 marchés simultanément.
-
-L'IA travaille 24h/24. Je n'interviens que sur les décisions qualifiées.
-
-J'ai rédigé une note stratégique complète — 11 pages, 9 parties — qui pose la doctrine, la carte des marchés, les phases d'entrée, le framework d'exécution et la gestion des risques (y compris les "Cygnes Noirs" comme Dubai). Elle vous est partagée en exclusivité.
-
-Ce document est vivant. Je le mettrai à jour à chaque pivot stratégique majeur.
-
-Massata`,
-    hasPdf: true,
-    pdfLabel: 'Note Stratégique — Sales Intelligence System v1.0',
-    pdfPath: '/docs/Retbaa_Sales_Intelligence_Note_Strategique_v1.pdf',
-    hasAudio: true,
-    audioSrc: '/podcasts/inner_circle_letter_avril2026.mp3',
-    audioDuration: '~3 min',
-    comments: 0,
-  },
-  {
-    id: 1,
+    id: 7,
     date: '7 Avril 2026',
     tag: 'EXCLUSIVE · INNER CIRCLE',
     category: 'Private Log',
