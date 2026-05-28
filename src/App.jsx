@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 import './i18n/index.js'
@@ -15,15 +15,29 @@ import Dashboard from './pages/Dashboard'
 import ObservateurDashboard from './pages/ObservateurDashboard'
 import CataloguePage from './pages/CataloguePage'
 import DocumentsPage from './pages/DocumentsPage'
-import InsightsPage from './pages/InsightsPage'
-import InnerCirclePage from './pages/InnerCirclePage'
-import Tranche2Page from './pages/Tranche2Page'
-import MonInvestissementPage from './pages/MonInvestissementPage'
-import PodcastPage from './pages/PodcastPage'
-import BienvenueOnboarding from './pages/BienvenueOnboarding'
-import AnalyticsPage from './pages/AnalyticsPage'
 import { track } from './utils/tracker'
 import './index.css'
+
+// ── Lazy imports — pages lourdes chargées à la demande ──────────────────────
+// Réduit le bundle initial (InnerCircle ~180KB, Podcast ~140KB, Insights ~100KB)
+const InsightsPage = lazy(() => import('./pages/InsightsPage'))
+const InnerCirclePage = lazy(() => import('./pages/InnerCirclePage'))
+const PodcastPage = lazy(() => import('./pages/PodcastPage'))
+const Tranche2Page = lazy(() => import('./pages/Tranche2Page'))
+const MonInvestissementPage = lazy(() => import('./pages/MonInvestissementPage'))
+const BienvenueOnboarding = lazy(() => import('./pages/BienvenueOnboarding'))
+const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'))
+
+// Fallback spinner partagé pour le lazy loading
+function PageLoader() {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+      <div style={{ fontFamily: 'Newsreader, serif', fontSize: '16px', fontStyle: 'italic', color: '#1A3A6B', opacity: 0.4 }}>
+        Chargement…
+      </div>
+    </div>
+  )
+}
 
 // Placeholder pages pour navigation carousel
 function PlaceholderPage({ title, subtitle, onBack }) {
@@ -111,7 +125,7 @@ export default function App() {
         <Route path="/auth/callback" element={<AuthCallback />} />
 
         {/* Onboarding investisseur — sans auth */}
-        <Route path="/bienvenue" element={<BienvenueOnboarding />} />
+        <Route path="/bienvenue" element={<Suspense fallback={<PageLoader />}><BienvenueOnboarding /></Suspense>} />
 
         {/* Invitation unique */}
         <Route path="/invite/:token" element={<InvitePage />} />
@@ -172,15 +186,17 @@ function PreviewApp({ userName }) {
       <div style={{ flex: 1, marginLeft: isMobile ? 0 : '288px', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Header userName={userName} activePage={activePage} isMobile={isMobile} onMenuClick={() => setSidebarOpen(o => !o)} />
         <main style={{ flex: 1, padding: isMobile ? '80px 0 0' : '80px 0 0' }}>
-          {activePage === 'dashboard' && <Dashboard userName={userName} setActivePage={handleSetActivePage} />}
-          {activePage === 'documents' && <DocumentsPage userName={userName} />}
-          {activePage === 'insights' && <InsightsPage />}
-          {activePage === 'catalogue' && <CataloguePage />}
-          {activePage === 'investissement' && <MonInvestissementPage userName={userName} setActivePage={handleSetActivePage} />}
-          {activePage === 'tranche2' && <Tranche2Page />}
-          {activePage === 'inner-circle' && <InnerCirclePage />}
-          {activePage === 'podcast' && <PodcastPage userName={userName} />}
-          {activePage === 'roadmap' && <PlaceholderPage title="Roadmap" subtitle="Feuille de route produit" onBack={() => handleSetActivePage('dashboard')} />}
+          <Suspense fallback={<PageLoader />}>
+            {activePage === 'dashboard' && <Dashboard userName={userName} setActivePage={handleSetActivePage} />}
+            {activePage === 'documents' && <DocumentsPage userName={userName} />}
+            {activePage === 'insights' && <InsightsPage />}
+            {activePage === 'catalogue' && <CataloguePage />}
+            {activePage === 'investissement' && <MonInvestissementPage userName={userName} setActivePage={handleSetActivePage} />}
+            {activePage === 'tranche2' && <Tranche2Page />}
+            {activePage === 'inner-circle' && <InnerCirclePage />}
+            {activePage === 'podcast' && <PodcastPage userName={userName} />}
+            {activePage === 'roadmap' && <PlaceholderPage title="Roadmap" subtitle="Feuille de route produit" onBack={() => handleSetActivePage('dashboard')} />}
+          </Suspense>
         </main>
         <Footer />
       </div>
@@ -330,31 +346,33 @@ function InvestisseurApp() {
         <Header activePage={activePage} userName={userName} isMobile={isMobile} onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
         <main style={{ flex: 1, padding: '0', backgroundColor: '#F9F9F9', overflow: 'hidden', minWidth: 0 }}>
-          {activePage === 'dashboard' && (
-            isObservateur
-              ? <ObservateurDashboard />
-              : <Dashboard userName={isAssistant ? linkedUserName : userName} onNavigate={handleSetActivePage} isAssistant={isAssistant} />
-          )}
-          {activePage === 'products' && <CataloguePage userName={userName} />}
-          {activePage === 'documents' && <DocumentsPage userName={isAssistant ? linkedUserName : userName} isAssistant={isAssistant} />}
-          {activePage === 'insights' && <InsightsPage />}
-          {(activePage === 'innercircle' || activePage === 'inner-circle') && (
-            isAssistant
-              ? <PlaceholderPage title="Accès restreint" subtitle="Cette section est réservée aux investisseurs" onBack={goToDashboard} />
-              : <InnerCirclePage />
-          )}
-          {activePage === 'tranche2' && <Tranche2Page userName={isAssistant ? linkedUserName : userName} />}
-          {(activePage === 'investissement' || activePage === 'mon-investissement') && (
-            <MonInvestissementPage userName={isAssistant ? linkedUserName : userName} isAssistant={isAssistant} setActivePage={handleSetActivePage} />
-          )}
-          {activePage === 'podcast' && <PodcastPage userName={isAssistant ? linkedUserName : userName} />}
-          {activePage === 'analytics' && (
-            isAdmin
-              ? <AnalyticsPage />
-              : <PlaceholderPage title="Accès restreint" subtitle="Cette section est réservée à l'administration" onBack={goToDashboard} />
-          )}
-          {activePage === 'roadmap' && <PlaceholderPage title="Roadmap" subtitle="Feuille de route produit" onBack={goToDashboard} />}
-          {activePage === 'calendar' && <PlaceholderPage title="Calendrier" subtitle="Événements & jalons" onBack={goToDashboard} />}
+          <Suspense fallback={<PageLoader />}>
+            {activePage === 'dashboard' && (
+              isObservateur
+                ? <ObservateurDashboard />
+                : <Dashboard userName={isAssistant ? linkedUserName : userName} onNavigate={handleSetActivePage} isAssistant={isAssistant} />
+            )}
+            {activePage === 'products' && <CataloguePage userName={userName} />}
+            {activePage === 'documents' && <DocumentsPage userName={isAssistant ? linkedUserName : userName} isAssistant={isAssistant} />}
+            {activePage === 'insights' && <InsightsPage />}
+            {(activePage === 'innercircle' || activePage === 'inner-circle') && (
+              isAssistant
+                ? <PlaceholderPage title="Accès restreint" subtitle="Cette section est réservée aux investisseurs" onBack={goToDashboard} />
+                : <InnerCirclePage />
+            )}
+            {activePage === 'tranche2' && <Tranche2Page userName={isAssistant ? linkedUserName : userName} />}
+            {(activePage === 'investissement' || activePage === 'mon-investissement') && (
+              <MonInvestissementPage userName={isAssistant ? linkedUserName : userName} isAssistant={isAssistant} setActivePage={handleSetActivePage} />
+            )}
+            {activePage === 'podcast' && <PodcastPage userName={isAssistant ? linkedUserName : userName} />}
+            {activePage === 'analytics' && (
+              isAdmin
+                ? <AnalyticsPage />
+                : <PlaceholderPage title="Accès restreint" subtitle="Cette section est réservée à l'administration" onBack={goToDashboard} />
+            )}
+            {activePage === 'roadmap' && <PlaceholderPage title="Roadmap" subtitle="Feuille de route produit" onBack={goToDashboard} />}
+            {activePage === 'calendar' && <PlaceholderPage title="Calendrier" subtitle="Événements & jalons" onBack={goToDashboard} />}
+          </Suspense>
         </main>
 
         <Footer />
