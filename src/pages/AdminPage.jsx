@@ -2,18 +2,14 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 
-const ADMIN_EMAILS = ['massata@retbaa.com', 'massata+1@retbaa.com']
-
 export default function AdminPage() {
-  const { user, session, isLoaded, isSignedIn, role } = useAuth()
+  const { session, isLoaded, isSignedIn, role } = useAuth()
   const [pendingUsers, setPendingUsers] = useState([])
   const [loadingUsers, setLoadingUsers] = useState(false)
   const [actionMsg, setActionMsg] = useState('')
 
-  const userEmail = user?.email
-  const isAdmin = isLoaded && isSignedIn && (
-    role === 'founder' || ADMIN_EMAILS.includes(userEmail)
-  )
+  // Admin = role 'founder' uniquement — source de vérité : user_profiles Supabase
+  const isAdmin = isLoaded && isSignedIn && role === 'founder'
 
   // Helper : requête admin avec access_token Supabase
   const adminFetch = async (url, options = {}) => {

@@ -189,7 +189,8 @@ function PreviewApp({ userName }) {
 }
 
 // ── InvestisseurApp — app principale avec Supabase auth ────────────────────
-const ADMIN_EMAILS = ['massata@retbaa.com', 'massata+1@retbaa.com']
+// ADMIN_EMAILS retiré — l'accès admin est déterminé uniquement par role === 'founder'
+// dans user_profiles. Aucune liste d'emails hardcodée côté client.
 
 const LINKED_NAMES = {
   cathy: 'Cathy',
@@ -224,7 +225,8 @@ function InvestisseurApp() {
   const isObservateur = !!sessionStorage.getItem('retbaa_prospect')
 
   // founder = admin (accès total + analytics)
-  const isAdmin = isSignedIn && (role === 'founder' || ADMIN_EMAILS.includes(user?.email))
+  // Admin = uniquement role 'founder' depuis user_profiles (source de vérité Supabase)
+  const isAdmin = isSignedIn && role === 'founder'
 
   // assistant : accès délégué, lecture seule, sans données financières
   const isAssistant = role === 'assistant'
