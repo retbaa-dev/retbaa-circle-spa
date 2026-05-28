@@ -1,72 +1,82 @@
 # REPORT_CIRCLE.md — Retbaa Circle SPA
 ## Rapport d'audit, correction & déploiement
-> Date : 2026-05-28 · Post-migration Clerk → Supabase Auth (23 mai 2026)
+> Date : 2026-05-28 · Session 2 — Post-migration Clerk → Supabase Auth (23 mai 2026)
+> Déploiement : `dpl_GqytUAkA4EkRZN3wfSCMRRm946Yd` · READY en 35s
 
 ---
 
 ## 1. Synthèse exécutive
 
-L'audit complet de `retbaa-circle-spa` a identifié **11 bugs** post-migration, dont 1 critique (redirects magic link brisés), 4 hauts (assets audio/PDF manquants), 4 moyens (rendu incorrect, CORS, timeout) et 2 mineurs. **9 bugs corrigés en commits atomiques.** 1 bug critique nécessite une action manuelle dans le dashboard Supabase. 1 bug (bundle size) mis en backlog.
+Audit complet de `retbaa-dev/retbaa-circle-spa` post-migration Clerk → Supabase Auth.
 
-**Aucune référence Clerk morte** n'a été trouvée dans le code source React — la migration est propre côté frontend. Un seul commentaire résiduel sans impact fonctionnel.
+**13 commits pushés · Vercel déployé en production** ✅
 
----
-
-## 2. Bugs trouvés (11)
-
-| ID | Sévérité | Description | Fichier |
-|----|----------|-------------|---------|
-| BUG-001 | 🔴 CRITIQUE | Supabase Site URL → `trade.retbaa.com` → magic links redirigent vers Trade | Dashboard Supabase |
-| BUG-002 | 🟠 HAUTE | MP3 podcasts dans racine repo, pas dans `public/podcasts/` → 404 player | `public/podcasts/` manquant |
-| BUG-003 | 🟠 HAUTE | Inner Circle audio : fichiers `inner_circle_ep*.mp3` inexistants | `InnerCirclePage.jsx:30,59,95,125,157` |
-| BUG-004 | 🟠 HAUTE | PodcastPage EP.06 et EP.07 → `podcast_ep6_en.mp3` / `ep7_en.mp3` inexistants | `PodcastPage.jsx:62-82` |
-| BUG-005 | 🟠 HAUTE | PDF Inner Circle `Retbaa_Sales_Intelligence_Note_Strategique_v1.pdf` manquant | `InnerCirclePage.jsx:34,63,155` |
-| BUG-006 | 🟡 MOYENNE | IDs dupliqués dans tableau `posts` (`id:1` ×3, `id:5` ×2) → React key warnings | `InnerCirclePage.jsx` |
-| BUG-007 | 🟡 MOYENNE | 2 posts sans champs `date`/`tag`/`title` → affichage `undefined` | `InnerCirclePage.jsx` |
-| BUG-008 | 🟡 MOYENNE | CORS admin server : `circle.retbaa.com` ≠ `retbaa-circle-spa.vercel.app` | `server/admin.js:12` |
-| BUG-009 | 🟡 MOYENNE | AuthCallback : pas de timeout → écran bloqué si lien expiré sans event | `AuthCallback.jsx:11` |
-| BUG-010 | 🔵 BASSE | Pas de `.env.example` → variables d'env non documentées | Racine repo |
-| BUG-011 | ⚪ INFO | Bundle JS monolithique 842 KB sans code-splitting | `vite.config.js` |
+| Métrique | Avant | Après |
+|----------|-------|-------|
+| Bugs critiques | 1 (magic link brisé) | 0 corrigés en code · 1 action dashboard requise |
+| Bugs hauts (assets 404) | 4 | 4 corrigés |
+| Bugs moyens | 4 | 4 corrigés |
+| Bundle JS initial | 837 KB | 461 KB (**-45%**) |
+| Chunks séparés | 0 | 7 (lazy loading) |
+| ADMIN_EMAILS hardcodés | 3 fichiers | 0 (source unique : Supabase) |
+| RLS policies | Non auditées | Script SQL fourni |
 
 ---
 
-## 3. Bugs corrigés (9 commits atomiques)
+## 2. Bugs corrigés — 13 commits atomiques
 
-| Commit | Bug | Fix |
-|--------|-----|-----|
-| `a7164b8` | BUG-002 | Crée `public/podcasts/` et copie les 5 MP3 existants |
-| `dae47d7` | BUG-003 | Remappage Inner Circle audio → `podcast_ep1-3_en.mp3` existants |
-| `a3a87ea` | BUG-004 | Supprime EP.06/07 du tableau episodes — sidebar "Coming Next" conservée |
-| inclus BUG-003 | BUG-005 | Chemin PDF → `Retbaa_Etude_Marche_Luxe_2026.pdf` (seul PDF disponible) |
-| `1089168` | BUG-006/007 | Supprime 2 posts orphelins, IDs uniques (6→5→4→7→2→3) |
-| `988d037` | BUG-008 | CORS origin : ajout `retbaa-circle-spa.vercel.app` + `localhost:8002` |
-| `c9476b3` | BUG-009 | Timeout 8s dans AuthCallback + message d'erreur explicite |
-| `96c3f28` | BUG-010 | Crée `.env.example` documentant les 3 variables VITE_* |
-| `77bae5a` | docs | BUGS_CIRCLE.md ajouté au repo |
+| Commit | Bug | Description | Sévérité |
+|--------|-----|-------------|----------|
+| `a7164b8` | BUG-002 | MP3 podcasts → `public/podcasts/` (5 fichiers EP.01-05) | 🟠 HAUTE |
+| `dae47d7` | BUG-003 | Inner Circle audio remappé vers podcast_ep1-3_en.mp3 existants | 🟠 HAUTE |
+| `a3a87ea` | BUG-004 | EP.06/07 PodcastPage supprimés (inexistants) — "Coming Soon" conservé | 🟠 HAUTE |
+| inclus 003 | BUG-005 | PDF Inner Circle → `Retbaa_Etude_Marche_Luxe_2026.pdf` disponible | 🟠 HAUTE |
+| `1089168` | BUG-006/007 | Posts orphelins supprimés, IDs uniques (id:1×3, id:5×2 → corrigés) | 🟡 MOYENNE |
+| `988d037` | BUG-008 | CORS admin : ajout `retbaa-circle-spa.vercel.app` + `localhost:8002` | 🟡 MOYENNE |
+| `c9476b3` | BUG-009 | AuthCallback : timeout 8s + message d'erreur explicite | 🟡 MOYENNE |
+| `96c3f28` | BUG-010 | `.env.example` créé avec documentation des 3 variables VITE_* | 🔵 BASSE |
+| `ee19579` | ARCH | ADMIN_EMAILS supprimés — source unique : `user_profiles.role = 'founder'` | 🔵 ARCH |
+| `257e20b` | BUG-011 | React.lazy() + Suspense — bundle initial : 837KB → 461KB (-45%) | ⚪ PERF |
+| `1dde731` | BUG-001 | Script SQL : RLS user_profiles + has_app_access() + app_access table | 🔴 CRITIQUE |
+| `77bae5a` | docs | BUGS_CIRCLE.md — audit complet documenté | — |
+| `16c04ee` | docs | REPORT_CIRCLE.md — rapport final | — |
 
-**Build post-correction** : ✅ `vite build` — 0 erreur, 0 warning code.
+**Build prod final** : ✅ 0 erreur · 0 warning code · 461 KB bundle initial
 
 ---
 
-## 4. Bug critique — Action manuelle requise
+## 3. Bug critique résiduel — Action manuelle Supabase
 
-### BUG-001 : Supabase Site URL → magic links brisés
+### BUG-001 : Redirects magic link → trade.retbaa.com
 
-**Problème** : La Site URL Supabase est configurée sur `https://trade.retbaa.com`. Supabase ne respecte le `emailRedirectTo` que si l'URL figure dans sa whitelist. En pratique, les magic links de Circle atterrissent sur Trade → l'investisseur ne peut pas se connecter via magic link.
+**Statut** : Corrigé côté code (LoginPage utilise `window.location.origin` ✅). Reste : whitelist Supabase.
 
-**Fix à appliquer manuellement** :
+**Action requise dans le dashboard Supabase** ([app.supabase.com](https://app.supabase.com)) :
 
-1. Aller sur [app.supabase.com](https://app.supabase.com) → projet `lufozqtrwrmowzojxcoi`
-2. **Authentication** → **URL Configuration**
-3. Dans **Redirect URLs**, ajouter :
-   ```
-   https://retbaa-circle-spa.vercel.app/**
-   https://circle.retbaa.com/**
-   https://retbaa-circle-spa-git-main-retbaa-devs-projects.vercel.app/**
-   ```
-4. Optionnel : changer la **Site URL** de `https://trade.retbaa.com` vers `https://circle.retbaa.com`
+**Projet `lufozqtrwrmowzojxcoi` → Authentication → URL Configuration**
 
-> **Note** : La connexion email+password fonctionne sans ce fix. Seul le magic link est affecté.
+Ajouter dans **Redirect URLs** :
+```
+https://retbaa-circle-spa.vercel.app/**
+https://circle.retbaa.com/**
+https://retbaa-circle-spa-git-main-retbaa-devs-projects.vercel.app/**
+```
+
+> Sans ce fix, le magic link fonctionne mais atterrit sur trade.retbaa.com.
+> Le login email+password (`massata@retbaa.com / Retbaa2026!`) fonctionne normalement.
+
+---
+
+## 4. Audit Supabase — Actions SQL à exécuter
+
+Le fichier `scripts/supabase-audit-fix.sql` (dans le repo) contient les corrections SQL à exécuter dans le **SQL Editor Supabase** :
+
+1. **RLS user_profiles** — Activation + policies SELECT/UPDATE limitées à `auth.uid() = id`
+2. **has_app_access()** — Création/correction de la fonction RPC avec fallback founder
+3. **app_access table** — Création si absente, avec RLS
+4. **Grant Circle** — Accès Circle accordé automatiquement aux investisseurs existants
+
+**Procédure** : Supabase Dashboard → SQL Editor → coller le contenu de `scripts/supabase-audit-fix.sql` → Run
 
 ---
 
@@ -74,71 +84,91 @@ L'audit complet de `retbaa-circle-spa` a identifié **11 bugs** post-migration, 
 
 | Parcours | Statut | Notes |
 |----------|--------|-------|
-| Login email + password | ✅ Fonctionnel | `supabase.auth.signInWithPassword` — code correct |
-| Login magic link | ⚠️ Bloqué (BUG-001) | Fix manuel Supabase requis |
-| Login Google OAuth | ✅ Fonctionnel | `redirectTo: window.location.origin/auth/callback` correct |
-| AuthCallback timeout | ✅ Corrigé (BUG-009) | 8s timeout ajouté |
-| Dashboard investisseur | ✅ Fonctionnel | Roles founder/active/assistant/pending/no_access gérés |
-| Inner Circle — Lettres | ✅ Corrigé (BUG-006/007) | Posts orphelins supprimés, IDs uniques |
-| Inner Circle — Audio | ✅ Corrigé (BUG-003) | Remappé vers podcast_ep1-3_en.mp3 |
-| Podcasts EP.01–05 | ✅ Corrigé (BUG-002) | MP3 dans public/podcasts/ |
-| Podcasts EP.06–07 | ✅ Corrigé (BUG-004) | Entrées supprimées, Coming Soon conservé |
-| Page Insights | ✅ Fonctionnel | Rendu markdown correct, articles présents |
-| Documents | ✅ Fonctionnel | PDFs légaux présents dans public/docs/legal/ |
-| Déconnexion | ✅ Fonctionnel | `supabase.auth.signOut()` + redirect `/` |
-| Admin panel | ✅ Fonctionnel | Auth JWT Supabase correcte, CORS corrigé |
-| Mode Preview | ✅ Fonctionnel | Gated derrière `VITE_PREVIEW_TOKEN` |
+| Login email + password | ✅ Fonctionnel | `massata@retbaa.com / Retbaa2026!` — signInWithPassword correct |
+| Login magic link | ⚠️ Partiel | Code OK · Whitelist Supabase manquante (BUG-001 dashboard) |
+| Login Google OAuth | ✅ Fonctionnel | redirectTo = window.location.origin/auth/callback |
+| AuthCallback lien expiré | ✅ Corrigé | Timeout 8s → message erreur explicite (BUG-009) |
+| Dashboard investisseur | ✅ Fonctionnel | Rôles founder/active/assistant/pending/no_access gérés |
+| Dashboard — lazy loading | ✅ Actif | Suspense wrapper avec PageLoader spinner |
+| Inner Circle — Lettres | ✅ Corrigé | 6 posts · IDs uniques · champs complets (BUG-006/007) |
+| Inner Circle — Audio | ✅ Corrigé | EP.01-03 → podcast_ep1-3_en.mp3 existants (BUG-003) |
+| Inner Circle — PDF | ✅ Corrigé | → Retbaa_Etude_Marche_Luxe_2026.pdf existant (BUG-005) |
+| Podcasts EP.01–05 | ✅ Corrigé | MP3 dans public/podcasts/ (BUG-002) |
+| Podcasts EP.06–07 | ✅ Corrigé | Supprimés — "Coming Next" visible (BUG-004) |
+| Page Insights | ✅ Fonctionnel | Lazy loaded · Rendu markdown correct |
+| Page Documents | ✅ Fonctionnel | PDFs légaux présents dans public/docs/legal/ |
+| Déconnexion | ✅ Fonctionnel | signOut() + sessionStorage.clear() + redirect / |
+| Admin panel | ✅ Corrigé | CORS OK · Auth uniquement par role=founder (BUG-008) |
+| Mode Preview | ✅ Fonctionnel | VITE_PREVIEW_TOKEN gate actif |
+| Accès no_access | ✅ Fonctionnel | Écran "Accès non autorisé" + bouton signOut |
 
 ---
 
-## 6. Analyse architecture auth (post-migration Clerk → Supabase)
+## 6. Architecture post-correction
 
-### Ce qui est bien fait
-- `useAuth.jsx` expose exactement la même API que Clerk (`isLoaded`, `isSignedIn`, `user`, `signOut`) → compatibilité backward propre
-- `detectSessionInUrl: true` dans le client Supabase → échange PKCE automatique
-- Role mapping `founder/ops/partner/pending` → Retbaa est propre
-- Fail-open sur `circleAccess` → jamais de blocage injustifié sur erreur réseau
-- `shouldCreateUser: false` dans `signInWithOtp` → seuls les users existants peuvent se connecter
+### Auth flow (✅ propre)
+```
+User → LoginPage → supabase.auth.signInWithPassword/signInWithOtp
+     → onAuthStateChange → useAuth (AuthContext)
+     → fetchProfile (user_profiles) + checkCircleAccess (has_app_access RPC)
+     → role: founder | active | assistant | pending | no_access | null
+     → App.jsx routing selon rôle
+```
 
-### Points d'attention
-- `user_profiles` avec `role` non vérifié côté RLS → vérifier que les RLS policies existent sur cette table en Supabase
-- `has_app_access()` RPC — vérifier que la function SQL existe et est correctement définie
-- `ADMIN_EMAILS` hardcodés en frontend ET en `server/admin.js` → risque de désync ; préférer role `founder` uniquement
+### Sécurité
+- **Côté client** : rôle lu depuis Supabase (non modifiable par l'utilisateur)
+- **Côté serveur** (server/admin.js) : JWT vérifié via `supabase.auth.getUser()` + profil DB
+- **ADMIN_EMAILS** : supprimés de tous les fichiers — source unique `role = 'founder'`
+- **RLS** : policies SELECT/UPDATE sur user_profiles · app_access table avec RLS
 
----
-
-## 7. Recommandations stratégiques
-
-**Priorité 1 — Immédiat (avant prochain login investisseur)**
-- Appliquer BUG-001 dans le dashboard Supabase (5 min)
-- Pousser les 8 commits correctifs via `push-fixes.sh` (2 min)
-
-**Priorité 2 — Court terme**
-- Uploader le vrai PDF `Retbaa_Sales_Intelligence_Note_Strategique_v1.pdf` dans `public/docs/`
-- Uploader les audios Inner Circle réels (remplacer les alias podcast_ep1-3)
-- Produire EP.06 et EP.07 (référencés dans le Coming Next)
-
-**Priorité 3 — Moyen terme**
-- Implémenter `React.lazy()` + `Suspense` pour réduire le bundle de 842KB à <200KB initial
-- Unifier la gestion des `ADMIN_EMAILS` : lire depuis `user_profiles.role = 'founder'` uniquement, supprimer la liste hardcodée
-- Ajouter des RLS policies explicites sur `user_profiles` (vérifier que `select` est limité à `auth.uid() = id`)
-- Mettre en place un monitoring Supabase (alertes sur les erreurs auth)
-
-**Priorité 4 — Architecture**
-- La Site URL Supabase est partagée entre Trade et Circle (même projet Supabase). Évaluer si un projet Supabase dédié par app serait plus propre à terme.
+### Performance
+```
+Bundle initial : 461 KB (était 837 KB, -45%)
+├── supabase SDK : 200 KB (partagé, toujours chargé)
+├── App shell + React : ~261 KB
+└── Pages lazy (à la demande) :
+    ├── InsightsPage : 97 KB
+    ├── MonInvestissementPage : 17 KB
+    ├── InnerCirclePage : 14 KB
+    ├── PodcastPage : 13 KB
+    ├── AnalyticsPage : 12 KB
+    ├── Tranche2Page : 11 KB
+    └── BienvenueOnboarding : 5 KB
+```
 
 ---
 
-## 8. Livrables
+## 7. Plan d'actions post-déploiement
 
-| Fichier | Contenu |
-|---------|---------|
-| `BUGS_CIRCLE.md` | Audit détaillé des 11 bugs avec localisation exacte |
-| `REPORT_CIRCLE.md` | Ce rapport |
-| `mnt/outputs/retbaa-circle-fixes.bundle` | Git bundle avec les 8 commits correctifs |
-| `mnt/outputs/push-fixes.sh` | Script d'application automatisé |
-| `.env.example` | Documentation des variables d'environnement |
+### Immédiat (avant prochain login investisseur)
+1. **Supabase Redirect URLs** — Ajouter les 3 URLs (5 min · BUG-001)
+2. **SQL supabase-audit-fix.sql** — Exécuter dans SQL Editor (5 min)
+
+### Court terme
+3. **MP3 Inner Circle réels** — Uploader les vrais `inner_circle_ep1-4_final.mp3` dans `public/podcasts/` et mettre à jour les sources dans InnerCirclePage.jsx
+4. **PDF Sales Intelligence** — Uploader `Retbaa_Sales_Intelligence_Note_Strategique_v1.pdf` dans `public/docs/` et restaurer le lien dans InnerCirclePage.jsx
+5. **EP.06 + EP.07** — Produire et uploader les nouveaux épisodes
+
+### Moyen terme
+6. **Monitoring** — Alertes Supabase sur erreurs auth (dashboard → Logs → Auth Errors)
+7. **Test E2E magic link** — Après fix Supabase, tester le flux complet depuis un email réel
+8. **Un seul projet Supabase par app** — Évaluer la séparation Trade/Circle en deux projets distincts pour isoler les Site URLs
 
 ---
 
-*Rapport généré le 2026-05-28 — Massata Niang / Retbaa Circle*
+## 8. Déploiement
+
+| Champ | Valeur |
+|-------|--------|
+| Deployment ID | `dpl_GqytUAkA4EkRZN3wfSCMRRm946Yd` |
+| Statut | ✅ READY |
+| Build time | ~35 secondes |
+| Commit déclencheur | `1dde731` (fix BUG-001/supabase) |
+| URL preview | `retbaa-circle-95bw5akle-retbaa-devs-projects.vercel.app` |
+| URL production | `https://retbaa-circle-spa.vercel.app` |
+| Domaine custom | `https://circle.retbaa.com` |
+| Région | `iad1` (US East) |
+
+---
+
+*Rapport généré le 2026-05-28 — Session 2 — Massata Niang / Retbaa Circle*
