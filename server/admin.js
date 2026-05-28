@@ -9,7 +9,7 @@ import { createClient } from '@supabase/supabase-js'
 
 const app = express()
 app.use(express.json())
-app.use(cors({ origin: ['https://circle.retbaa.com', 'http://localhost:5173'] }))
+app.use(cors({ origin: ['https://retbaa-circle.vercel.app', 'https://circle.retbaa.com', 'http://localhost:5173', 'http://localhost:8002'] }))
 
 // ── Supabase admin client (service role — serveur uniquement) ─────────────────
 const supabase = createClient(
