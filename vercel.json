@@ -5,8 +5,7 @@
       "headers": [
         { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://accounts.google.com; frame-src https://accounts.google.com;" }
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
       ]
     },
     {
@@ -21,35 +20,28 @@
         { "key": "Content-Type", "value": "application/pdf" },
         { "key": "Cache-Control", "value": "public, max-age=86400" }
       ]
-    },
-    {
-      "source": "/podcasts/(.*)\\.mp3",
-      "headers": [
-        { "key": "Content-Type", "value": "audio/mpeg" },
-        { "key": "Cache-Control", "value": "public, max-age=86400" }
-      ]
     }
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/docs/(.*)",
-      "destination": "/docs/$1"
+      "src": "/docs/(.*\\.pdf)",
+      "dest": "/docs/$1"
     },
     {
-      "source": "/podcasts/(.*)",
-      "destination": "/podcasts/$1"
+      "src": "/podcasts/(.*\\.mp3)",
+      "dest": "/podcasts/$1"
     },
     {
-      "source": "/assets/(.*)",
-      "destination": "/assets/$1"
+      "src": "^/assets/(.*)",
+      "dest": "/assets/$1"
     },
     {
-      "source": "/(.*\\.(png|jpg|jpeg|svg|ico|webp|gif))",
-      "destination": "/$1"
+      "src": "^/(.+\\.(png|jpg|jpeg|svg|ico|webp|gif|json|txt|xml))",
+      "dest": "/$1"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
