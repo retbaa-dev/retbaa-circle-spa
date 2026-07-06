@@ -1752,9 +1752,6 @@ export default function InsightsPage() {
     loadArticles()
     return () => { mounted = false }
   }, [])
-    return () => { mounted = false }
-  }, [])
-
   const filteredArticles = activeFilter === 'Tout'
     ? articles
     : articles.filter(a => (a.category || 'Article') === activeFilter)
