@@ -1,6 +1,7 @@
 // pages/InsightsPage.jsx — Retbaa Circle — Revue éditoriale investisseurs
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
 
 // Rendu markdown simple (gras, italique, titres, listes, images [[IMG:url|caption]])
 function renderMarkdown(text) {
@@ -99,8 +100,8 @@ function ArticleModal({ article, onClose }) {
   )
 }
 
-// ─── DONNÉES ARTICLES ──────────────────────────────────────────
-const articles = [
+// ─── FALLBACK — articles en cache local (utilisés si Supabase indisponible) ─
+const FALLBACK_ARTICLES = [
   {
     id: 'bifurcation-hermes-lvmh-2026',
     tag: 'Signal Marché',
@@ -1702,21 +1703,61 @@ export default function InsightsPage() {
   const { i18n } = useTranslation()
   const [activeFilter, setActiveFilter] = useState('Tout')
   const [selectedArticle, setSelectedArticle] = useState(null)
+  const [articles, setArticles] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  // Charger les articles depuis Supabase, fallback sur les données en cache
+  useEffect(() => {
+    let mounted = true
+    async function loadArticles() {
+      try {
+        const { data, error } = await supabase
+          .from('insights')
+          .select('*')
+          .eq('published', true)
+          .order('date', { ascending: false })
+
+        if (error) throw error
+
+        if (mounted) {
+          if (data && data.length > 0) {
+            // Mapper les champs Supabase vers le format attendu par le renderer
+            const mapped = data.map(a => ({
+              ...a,
+              content: a.content_md || a.content_markdown || '',
+              img: a.img || null,
+            }))
+            setArticles(mapped)
+          } else {
+            // Fallback : utiliser les données en cache local
+            setArticles(FALLBACK_ARTICLES)
+          }
+        }
+      } catch (e) {
+        console.warn('[Insights] Supabase indisponible, utilisation du fallback', e)
+        if (mounted) setArticles(FALLBACK_ARTICLES)
+      } finally {
+        if (mounted) setLoading(false)
+      }
+    }
+    loadArticles()
+    return () => { mounted = false }
+  }, [])
 
   const filteredArticles = activeFilter === 'Tout'
     ? articles
-    : articles.filter(a => a.category === activeFilter)
+    : articles.filter(a => (a.category || 'Article') === activeFilter)
 
   const featuredArticle = filteredArticles.find(a => a.featured) || filteredArticles[0]
   const gridArticles = filteredArticles.filter(a => a.id !== featuredArticle?.id)
 
-  // Documents de référence (tous les articles avec PDF)
-  const docsRef = articles.map(a => ({
+  // Documents de référence (articles avec PDF uniquement)
+  const docsRef = articles.filter(a => a.pdf).map(a => ({
     title: a.title,
     subtitle: a.subtitle,
     date: a.date,
     pdf: a.pdf,
-    tag: a.tag,
+    tag: a.tag || a.category,
   }))
 
   return (
@@ -1819,8 +1860,24 @@ export default function InsightsPage() {
       {/* ─── CONTENU PRINCIPAL ─────────────────────────────── */}
       <div className="insights-main-container" style={{ maxWidth: '1400px', margin: '0 auto', padding: '56px 48px 80px' }}>
 
+        {/* Loading state */}
+        {loading && (
+          <div style={{ textAlign: 'center', padding: '120px 0' }}>
+            <div style={{
+              width: '32px', height: '32px', border: '3px solid rgba(239,192,212,0.2)',
+              borderTopColor: '#EFC0D4', borderRadius: '50%',
+              animation: 'insights-spin 0.8s linear infinite',
+              margin: '0 auto 16px',
+            }} />
+            <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px', color: '#9CA3AF' }}>
+              Chargement des articles…
+            </p>
+            <style>{`@keyframes insights-spin { to { transform: rotate(360deg) } }`}</style>
+          </div>
+        )}
+
         {/* Article featured */}
-        {featuredArticle && filteredArticles.length > 0 && (
+        {!loading && featuredArticle && filteredArticles.length > 0 && (
           <FeaturedArticle article={featuredArticle} onOpen={() => setSelectedArticle(featuredArticle)} />
         )}
 
@@ -1856,7 +1913,7 @@ export default function InsightsPage() {
         )}
 
         {/* Aucun résultat */}
-        {filteredArticles.length === 0 && (
+        {!loading && filteredArticles.length === 0 && (
           <div style={{
             textAlign: 'center', padding: '80px 0',
           }}>
