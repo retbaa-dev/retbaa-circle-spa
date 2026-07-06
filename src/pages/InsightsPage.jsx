@@ -1713,34 +1713,45 @@ export default function InsightsPage() {
       try {
         const { data, error } = await supabase
           .from('insights')
-          .select('*')
-          .eq('published', true)
-          .order('date', { ascending: false })
+          .select('id, title, slug, content_type, tags, content_short, content_long, author, published_at')
+          .eq('status', 'published')
+          .order('published_at', { ascending: false })
 
         if (error) throw error
 
         if (mounted) {
           if (data && data.length > 0) {
-            // Mapper les champs Supabase vers le format attendu par le renderer
             const mapped = data.map(a => ({
-              ...a,
-              content: a.content_md || a.content_markdown || '',
-              img: a.img || null,
+              id: a.slug,
+              tag: a.content_type === 'paper' ? '📄 Retbaa Insights' : (a.tags?.[0] || 'Article'),
+              title: a.title,
+              date: new Date(a.published_at).toLocaleDateString('fr-FR', {
+                day: 'numeric', month: 'long', year: 'numeric'
+              }),
+              author: a.author || 'Kemia',
+              source: '',
+              sourceUrl: null,
+              summary: a.content_short || '',
+              img: null,
+              content: a.content_long || '',
+              category: a.content_type === 'paper' ? '📄 Retbaa Insights' : (a.tags?.[0] || 'Article'),
+              featured: false,
             }))
             setArticles(mapped)
           } else {
-            // Fallback : utiliser les données en cache local
             setArticles(FALLBACK_ARTICLES)
           }
         }
       } catch (e) {
-        console.warn('[Insights] Supabase indisponible, utilisation du fallback', e)
+        console.warn('[Insights] Erreur Supabase, fallback', e)
         if (mounted) setArticles(FALLBACK_ARTICLES)
       } finally {
         if (mounted) setLoading(false)
       }
     }
     loadArticles()
+    return () => { mounted = false }
+  }, [])
     return () => { mounted = false }
   }, [])
 
