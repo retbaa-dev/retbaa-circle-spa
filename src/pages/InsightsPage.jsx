@@ -2,6 +2,7 @@
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import { STATIC_ARTICLES } from '../data/articles.js'
 
 // Client Supabase local — fallback garanti si env vars absentes
 const _sb = createClient(
@@ -108,8 +109,8 @@ function ArticleModal({ article, onClose }) {
 }
 
 
-// ─── FALLBACK — tableau vide si Supabase indisponible ─
-const FALLBACK_ARTICLES = []
+// ─── FALLBACK — articles statiques (snapshot Supabase du 12/07/2026) ─
+const FALLBACK_ARTICLES = STATIC_ARTICLES
 
 
 const FILTERS = ['Tout', 'Vision', 'Veille Marché', 'Afrique', 'Marché Luxe', 'Stratégie', 'Géopolitique', 'Tech & IA', 'Distribution']
