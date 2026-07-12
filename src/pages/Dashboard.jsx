@@ -1,17 +1,18 @@
 // pages/Dashboard.jsx — Retbaa Circle — Stitch Design System v4
 // Complete redesign: Stitch-faithful + personalized hero + functional carousel
 import { useTranslation } from 'react-i18next'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Timeline from '../components/Timeline'
-import { CAP_TABLE as CAP_TABLE_DATA, COMPANY_INFO } from '../data/captable.js'
+import { COMPANY_INFO } from '../data/captable.js'
+import { supabase } from '../lib/supabase'
 
-// ─── CAP TABLE — données officielles post-closing Tranche 1 (5 fév 2026) ───
-const CAP_TABLE = [
-  { name: 'Massata NIANG',    shortName: 'Massata',      invested: 1000,   shares: 100000, pct: 86.9565, founder: true  },
-  { name: 'Barthélemy FAYE',  shortName: 'Barthélemy',   invested: 150000, shares: 6250,   pct: 5.4348,  founder: false },
-  { name: 'Pape Amadou NGOM', shortName: 'Pape Amadou',  invested: 150000, shares: 6250,   pct: 5.4348,  founder: false },
-  { name: 'Cathy MUIZA',      shortName: 'Cathy',        invested: 30000,  shares: 1250,   pct: 1.087,   founder: false },
-  { name: 'Raphaël PERDRIX',  shortName: 'Raphaël',      invested: 30000,  shares: 1250,   pct: 1.087,   founder: false },
+// ─── CAP TABLE — fallback statique si Supabase indisponible ───
+const CAP_TABLE_FALLBACK = [
+  { name: 'Massata NIANG',    short_name: 'Massata',      invested: 1000,   actions: 100000, pct: 86.9565, type: 'fondateur' },
+  { name: 'Barthélemy FAYE',  short_name: 'Barthélemy',   invested: 150000, actions: 6250,   pct: 5.4348,  type: 'investisseur' },
+  { name: 'Pape Amadou NGOM', short_name: 'Pape Amadou',  invested: 150000, actions: 6250,   pct: 5.4348,  type: 'investisseur' },
+  { name: 'Cathy MUIZA',      short_name: 'Cathy',        invested: 30000,  actions: 1250,   pct: 1.087,   type: 'investisseur' },
+  { name: 'Raphaël PERDRIX',  short_name: 'Raphaël',      invested: 30000,  actions: 1250,   pct: 1.087,   type: 'investisseur' },
 ]
 
 // Prix de souscription officiel : 24 € / action (post-closing 5 fév 2026)
@@ -340,6 +341,17 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage, on
   const [footerModal, setFooterModal] = useState(null)
   const [uploadStatus, setUploadStatus] = useState({}) // { docId: 'uploading'|'done'|'error' }
   const fileInputRefs = useRef({})
+  const [CAP_TABLE, setCapTable] = useState(CAP_TABLE_FALLBACK)
+
+  useEffect(() => {
+    supabase
+      .from('cap_table')
+      .select('name, short_name, role, type, actions, pct, invested, email')
+      .order('sort_order')
+      .then(({ data, error }) => {
+        if (!error && data && data.length > 0) setCapTable(data)
+      })
+  }, [])
 
   const handleUpload = async (docId, docTitle, file) => {
     if (!file) return
@@ -375,14 +387,14 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage, on
     ? CAP_TABLE.find(r => {
         const firstToken = userName.split(' ')[0]
         return (
-          r.shortName === userName ||
-          userName.includes(r.shortName) ||
-          (firstToken && r.shortName?.includes(firstToken))
+          r.short_name === userName ||
+          userName.includes(r.short_name) ||
+          (firstToken && r.short_name?.includes(firstToken))
         )
       }) || null
     : null
 
-  const myShares = myRow?.shares ?? 0
+  const myShares = myRow?.actions ?? 0
   const myPct = myRow?.pct ?? 0
 
   const navigate = (page) => {
@@ -889,16 +901,16 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage, on
                       <div>
                         <span style={{
                           fontFamily: 'Manrope, sans-serif', fontSize: '11px',
-                          color: row.founder ? '#1A3A6B' : '#43474F',
-                          fontWeight: row.founder ? 700 : 400,
+                          color: row.type === 'fondateur' ? '#1A3A6B' : '#43474F',
+                          fontWeight: row.type === 'fondateur' ? 700 : 400,
                         }}>
-                          {row.shortName}{row.founder ? ' ★' : ''}
+                          {row.short_name}{row.type === 'fondateur' ? ' ★' : ''}
                         </span>
                         <span style={{
                           fontFamily: 'Manrope, sans-serif', fontSize: '10px',
                           color: '#9CA3AF', marginLeft: '6px',
                         }}>
-                          {row.shares?.toLocaleString('fr-FR')} actions
+                          {row.actions?.toLocaleString('fr-FR')} actions
                         </span>
                       </div>
                       <div style={{ textAlign: 'right' }}>
