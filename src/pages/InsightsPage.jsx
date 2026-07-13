@@ -84,7 +84,7 @@ function ArticleModal({ article, onClose }) {
             {article.summary}
           </p>
           <div style={{ borderTop: '1px solid #F3F4F6', paddingTop: '20px' }}>
-            {renderMarkdown(article.content)}
+            {renderMarkdown(article.content_md)}
           </div>
           {article.sourceUrl && (
             <div style={{ marginTop: '32px', paddingTop: '16px', borderTop: '1px solid #F3F4F6' }}>
