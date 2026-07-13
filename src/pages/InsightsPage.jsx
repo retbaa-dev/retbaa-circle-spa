@@ -378,6 +378,7 @@ export default function InsightsPage() {
   const [selectedArticle, setSelectedArticle] = useState(null)
   const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
+  const [availableFilters, setAvailableFilters] = useState(FILTERS)
 
   // Charger les articles depuis Supabase — table publique, pas de dépendance à session
   useEffect(() => {
@@ -394,30 +395,67 @@ export default function InsightsPage() {
 
         if (mounted) {
           if (data && data.length > 0) {
-            const mapped = data.map(a => ({
-              id: a.slug,
-              tag: a.content_type === 'paper' ? '📄 Retbaa Insights' : (a.tags?.[0] || 'Article'),
-              title: a.title,
-              date: new Date(a.published_at).toLocaleDateString('fr-FR', {
-                day: 'numeric', month: 'long', year: 'numeric'
-              }),
-              author: a.author || 'Kemia',
-              source: '',
-              sourceUrl: null,
-              summary: a.content_short || '',
-              img: null,
-              content: a.content_long || '',
-              category: a.content_type === 'paper' ? '📄 Retbaa Insights' : (a.tags?.[0] || 'Article'),
-              featured: false,
-            }))
+            const mapped = data.map(a => {
+              // Déterminer la catégorie/tag principal avec fallback cohérent
+              let displayTag = 'Article'
+              let filterCategory = 'Article'
+
+              if (a.content_type === 'paper') {
+                displayTag = '📄 Retbaa Insights'
+                filterCategory = '📄 Retbaa Insights'
+              } else if (a.tags && Array.isArray(a.tags) && a.tags.length > 0) {
+                // Utiliser le premier tag s'il existe
+                displayTag = a.tags[0]
+                filterCategory = a.tags[0]
+              }
+
+              return {
+                id: a.slug,
+                tag: displayTag,
+                title: a.title,
+                date: new Date(a.published_at).toLocaleDateString('fr-FR', {
+                  day: 'numeric', month: 'long', year: 'numeric'
+                }),
+                author: a.author || 'Kemia',
+                source: '',
+                sourceUrl: null,
+                summary: a.content_short || '',
+                img: null,
+                content: a.content_long || '',
+                category: filterCategory,
+                featured: false,
+              }
+            })
             setArticles(mapped)
+
+            // Générer les filtres disponibles depuis les catégories réelles des articles
+            const uniqueCategories = new Set(['Tout'])
+            mapped.forEach(a => {
+              if (a.category && a.category !== 'Article') {
+                uniqueCategories.add(a.category)
+              }
+            })
+            // Fusionner avec les filtres par défaut, en préservant l'ordre des défauts
+            const mergedFilters = ['Tout']
+            FILTERS.slice(1).forEach(filter => {
+              if (uniqueCategories.has(filter)) mergedFilters.push(filter)
+            })
+            // Ajouter les catégories non-prédéfinies trouvées dans les données
+            uniqueCategories.forEach(cat => {
+              if (!mergedFilters.includes(cat)) mergedFilters.push(cat)
+            })
+            setAvailableFilters(mergedFilters.length > 1 ? mergedFilters : FILTERS)
           } else {
             setArticles(FALLBACK_ARTICLES)
+            setAvailableFilters(FILTERS)
           }
         }
       } catch (e) {
         console.warn('[Insights] Erreur Supabase, fallback', e)
-        if (mounted) setArticles(FALLBACK_ARTICLES)
+        if (mounted) {
+          setArticles(FALLBACK_ARTICLES)
+          setAvailableFilters(FILTERS)
+        }
       } finally {
         if (mounted) setLoading(false)
       }
@@ -507,7 +545,7 @@ export default function InsightsPage() {
           display: 'flex', gap: '8px', alignItems: 'center',
           overflowX: 'auto',
         }} className="no-scrollbar insights-filters">
-          {FILTERS.map(filter => (
+          {availableFilters.map(filter => (
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
