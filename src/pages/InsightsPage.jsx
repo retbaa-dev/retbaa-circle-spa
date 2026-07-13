@@ -1,15 +1,7 @@
 // pages/InsightsPage.jsx — Retbaa Circle — Revue éditoriale investisseurs
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
-import { createClient } from '@supabase/supabase-js'
-
-
-// Client Supabase local — fallback garanti si env vars absentes
-const _sb = createClient(
-  import.meta.env.VITE_SUPABASE_URL || 'https://lufozqtrwrmowzojxcoi.supabase.co',
-  import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1Zm96cXRyd3Jtb3d6b2p4Y29pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyOTcwNjMsImV4cCI6MjA5Mjg3MzA2M30._-jdklZKN7xAc4M9A55A5qqyVml5gkXU3URe_EyM9k4'
-)
-const supabase = _sb
+import { supabase } from '../lib/supabase'
 
 // Rendu markdown simple (gras, italique, titres, listes, images [[IMG:url|caption]])
 function renderMarkdown(text) {
