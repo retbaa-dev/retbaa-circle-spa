@@ -102,7 +102,22 @@ function ArticleModal({ article, onClose }) {
 
 
 // ─── FALLBACK — articles statiques (snapshot Supabase du 12/07/2026) ─
-const FALLBACK_ARTICLES = []
+const FALLBACK_ARTICLES = [
+  {
+    id: 'luxe-sous-tension-s1-2026',
+    tag: 'Signal Marché',
+    title: 'Luxe sous tension : ce que les résultats S1 2026 disent de la résilience du secteur',
+    date: '6 juillet 2026',
+    author: 'Kemia',
+    source: '',
+    sourceUrl: null,
+    summary: 'Les semestriels S1 2026 confirment une bifurcation structurante entre LVMH et Hermès.',
+    img: null,
+    content: '## Contexte\n\nLes trois grands conglomérats du luxe publient leurs résultats semestriels.',
+    category: 'Signal Marché',
+    featured: false,
+  }
+]
 
 
 const FILTERS = ['Tout', 'Vision', 'Veille Marché', 'Afrique', 'Marché Luxe', 'Stratégie', 'Géopolitique', 'Tech & IA', 'Distribution']
@@ -384,19 +399,40 @@ export default function InsightsPage() {
   useEffect(() => {
     let mounted = true
     let retryTimer = null
+    let retryCount = 0
 
     async function loadArticles() {
       try {
-        console.log('[Insights] Chargement articles...')
-        const { data, error } = await supabase
+        console.log('[Insights] Chargement articles (tentative', retryCount + 1, ')...')
+
+        // Tentative 1: avec les noms de colonnes attendus (status, published_at)
+        let { data, error } = await supabase
           .from('insights')
           .select('id, title, slug, content_type, tags, content_short, content_long, author, published_at')
           .eq('status', 'published')
           .order('published_at', { ascending: false })
 
-        if (error) throw error
+        // Fallback: si la colonne s'appelle 'published' au lieu de 'status'
+        if (!error && (!data || data.length === 0)) {
+          console.log('[Insights] Aucun article avec status=published, essai avec published=true')
+          const { data: data2, error: error2 } = await supabase
+            .from('insights')
+            .select('id, title, slug, content_type, tags, content_short, content_long, author, published_at')
+            .eq('published', true)
+            .order('published_at', { ascending: false })
 
-        console.log('[Insights] Résultat:', data?.length ?? 0, 'articles')
+          if (!error2) {
+            data = data2
+            error = null
+          }
+        }
+
+        if (error) {
+          console.error('[Insights] Erreur requête Supabase:', error)
+          throw error
+        }
+
+        console.log('[Insights] Résultat:', data?.length ?? 0, 'articles', data ? data.slice(0, 2) : 'null')
 
         if (mounted) {
           if (data && data.length > 0) {
@@ -431,6 +467,7 @@ export default function InsightsPage() {
                 featured: false,
               }
             })
+            console.log('[Insights] Succès: mappé', mapped.length, 'articles')
             setArticles(mapped)
 
             // Générer les filtres disponibles depuis les catégories réelles des articles
@@ -450,20 +487,30 @@ export default function InsightsPage() {
               if (!mergedFilters.includes(cat)) mergedFilters.push(cat)
             })
             setAvailableFilters(mergedFilters.length > 1 ? mergedFilters : FILTERS)
+            setLoading(false)
           } else {
-            // Retry une fois après 2s si vide (session en cours d'initialisation)
-            console.warn('[Insights] Aucun article retourné, retry dans 2s')
-            retryTimer = setTimeout(loadArticles, 2000)
+            // Retry une fois après 2s si vide
+            if (retryCount < 1) {
+              retryCount++
+              console.warn('[Insights] Aucun article retourné, retry dans 2s')
+              retryTimer = setTimeout(loadArticles, 2000)
+            } else {
+              // Après 1 retry, utiliser le fallback
+              console.warn('[Insights] Toujours aucun article après retry, utilisation du fallback')
+              setArticles(FALLBACK_ARTICLES)
+              setAvailableFilters(FILTERS)
+              setLoading(false)
+            }
           }
         }
       } catch (e) {
-        console.error('[Insights] Erreur Supabase:', e)
+        console.error('[Insights] Erreur Supabase:', e?.message || e)
         if (mounted) {
+          console.log('[Insights] Utilisation du fallback après erreur')
           setArticles(FALLBACK_ARTICLES)
           setAvailableFilters(FILTERS)
+          setLoading(false)
         }
-      } finally {
-        if (mounted) setLoading(false)
       }
     }
 
