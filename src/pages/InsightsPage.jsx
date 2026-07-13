@@ -382,8 +382,11 @@ export default function InsightsPage() {
   // Charger les articles depuis Supabase — table publique, pas de dépendance à session
   useEffect(() => {
     let mounted = true
+    let retryTimer = null
+
     async function loadArticles() {
       try {
+        console.log('[Insights] Chargement articles...')
         const { data, error } = await supabase
           .from('insights')
           .select('id, title, slug, content_type, tags, content_short, content_long, author, published_at')
@@ -392,10 +395,12 @@ export default function InsightsPage() {
 
         if (error) throw error
 
+        console.log('[Insights] Résultat:', data?.length ?? 0, 'articles')
+
         if (mounted) {
           if (data && data.length > 0) {
             const mapped = data.map(a => ({
-              id: a.slug,
+              id: a.slug || a.id,
               tag: a.content_type === 'paper' ? '📄 Retbaa Insights' : (a.tags?.[0] || 'Article'),
               title: a.title,
               date: new Date(a.published_at).toLocaleDateString('fr-FR', {
@@ -411,19 +416,27 @@ export default function InsightsPage() {
               featured: false,
             }))
             setArticles(mapped)
+            setLoading(false)
           } else {
-            setArticles(FALLBACK_ARTICLES)
+            // Retry une fois après 2s si vide (session en cours d'initialisation)
+            console.warn('[Insights] Aucun article retourné, retry dans 2s')
+            retryTimer = setTimeout(loadArticles, 2000)
           }
         }
       } catch (e) {
-        console.warn('[Insights] Erreur Supabase, fallback', e)
-        if (mounted) setArticles(FALLBACK_ARTICLES)
-      } finally {
-        if (mounted) setLoading(false)
+        console.error('[Insights] Erreur Supabase:', e)
+        if (mounted) {
+          setArticles(FALLBACK_ARTICLES)
+          setLoading(false)
+        }
       }
     }
+
     loadArticles()
-    return () => { mounted = false }
+    return () => {
+      mounted = false
+      if (retryTimer) clearTimeout(retryTimer)
+    }
   }, [])
   const filteredArticles = activeFilter === 'Tout'
     ? articles
