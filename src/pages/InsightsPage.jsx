@@ -405,12 +405,12 @@ export default function InsightsPage() {
       try {
         console.log('[Insights] Chargement articles (tentative', retryCount + 1, ')...')
 
-        // select('*') pour éviter tout problème de nom de colonne inconnu
-        // filtre sur status='published' (valeur confirmée par l'utilisateur)
-        // tri sur published_at DESC (colonne confirmée par Supabase)
+        // Schéma réel confirmé :
+        //   id, title, slug, content_type, tags (ARRAY),
+        //   content_short, content_long, author, status, published_at
         const { data, error } = await supabase
           .from('insights')
-          .select('*')
+          .select('id, title, slug, content_type, tags, content_short, content_long, author, status, published_at')
           .eq('status', 'published')
           .order('published_at', { ascending: false })
 
@@ -425,21 +425,20 @@ export default function InsightsPage() {
           if (data && data.length > 0) {
             const mapped = data.map(a => ({
               id: a.slug || a.id,
-              tag: a.tag || a.category || a.content_type || 'Veille Marché',
+              tag: (Array.isArray(a.tags) && a.tags[0]) || a.content_type || 'Veille Marché',
               title: a.title,
-              subtitle: a.subtitle || '',
-              // date : champ texte direct, ou formaté depuis published_at
-              date: a.date || (a.published_at
+              subtitle: '',
+              date: a.published_at
                 ? new Date(a.published_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-                : ''),
+                : '',
               author: a.author || 'Kemia',
-              source: a.source || a.source_name || '',
-              sourceUrl: a.source_url || a.sourceUrl || null,
-              summary: a.summary || a.content_short || a.description || '',
-              img: a.img || a.image || a.cover_url || null,
-              content: a.content_md || a.content || a.content_long || '',
-              category: a.category || a.tag || a.content_type || 'Veille Marché',
-              featured: a.featured || false,
+              source: '',
+              sourceUrl: null,
+              summary: a.content_short || '',
+              img: null,
+              content: a.content_long || '',
+              category: (Array.isArray(a.tags) && a.tags[0]) || a.content_type || 'Veille Marché',
+              featured: false,
             }))
             console.log('[Insights] Succès: mappé', mapped.length, 'articles')
             setArticles(mapped)
