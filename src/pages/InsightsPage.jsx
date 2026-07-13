@@ -405,68 +405,41 @@ export default function InsightsPage() {
       try {
         console.log('[Insights] Chargement articles (tentative', retryCount + 1, ')...')
 
-        // Tentative 1: avec les noms de colonnes attendus (status, published_at)
-        let { data, error } = await supabase
+        // Schéma réel de la table insights :
+        //   id uuid, slug text, tag text, title text, subtitle text,
+        //   date text, author text, source text, source_url text,
+        //   summary text, img text, content_md text, featured boolean,
+        //   category text, published boolean, created_at timestamptz
+        const { data, error } = await supabase
           .from('insights')
-          .select('id, title, slug, content_type, tags, content_short, content_long, author, published_at')
-          .eq('status', 'published')
-          .order('published_at', { ascending: false })
-
-        // Fallback: si la colonne s'appelle 'published' au lieu de 'status'
-        if (!error && (!data || data.length === 0)) {
-          console.log('[Insights] Aucun article avec status=published, essai avec published=true')
-          const { data: data2, error: error2 } = await supabase
-            .from('insights')
-            .select('id, title, slug, content_type, tags, content_short, content_long, author, published_at')
-            .eq('published', true)
-            .order('published_at', { ascending: false })
-
-          if (!error2) {
-            data = data2
-            error = null
-          }
-        }
+          .select('id, slug, tag, title, subtitle, date, author, source, source_url, summary, img, content_md, featured, category, published')
+          .eq('published', true)
+          .order('created_at', { ascending: false })
 
         if (error) {
           console.error('[Insights] Erreur requête Supabase:', error)
           throw error
         }
 
-        console.log('[Insights] Résultat:', data?.length ?? 0, 'articles', data ? data.slice(0, 2) : 'null')
+        console.log('[Insights] Résultat:', data?.length ?? 0, 'articles')
 
         if (mounted) {
           if (data && data.length > 0) {
-            const mapped = data.map(a => {
-              // Déterminer la catégorie/tag principal avec fallback cohérent
-              let displayTag = 'Article'
-              let filterCategory = 'Article'
-
-              if (a.content_type === 'paper') {
-                displayTag = '📄 Retbaa Insights'
-                filterCategory = '📄 Retbaa Insights'
-              } else if (a.tags && Array.isArray(a.tags) && a.tags.length > 0) {
-                // Utiliser le premier tag s'il existe
-                displayTag = a.tags[0]
-                filterCategory = a.tags[0]
-              }
-
-              return {
-                id: a.slug || a.id,
-                tag: displayTag,
-                title: a.title,
-                date: new Date(a.published_at).toLocaleDateString('fr-FR', {
-                  day: 'numeric', month: 'long', year: 'numeric'
-                }),
-                author: a.author || 'Kemia',
-                source: '',
-                sourceUrl: null,
-                summary: a.content_short || '',
-                img: null,
-                content: a.content_long || '',
-                category: filterCategory,
-                featured: false,
-              }
-            })
+            const mapped = data.map(a => ({
+              id: a.slug || a.id,
+              tag: a.tag || a.category || 'Veille Marché',
+              title: a.title,
+              subtitle: a.subtitle || '',
+              date: a.date || '',
+              author: a.author || 'Kemia',
+              source: a.source || '',
+              sourceUrl: a.source_url || null,
+              summary: a.summary || '',
+              img: a.img || null,
+              content: a.content_md || '',
+              category: a.category || a.tag || 'Veille Marché',
+              featured: a.featured || false,
+            }))
             console.log('[Insights] Succès: mappé', mapped.length, 'articles')
             setArticles(mapped)
 
