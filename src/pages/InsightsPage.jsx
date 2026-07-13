@@ -2,6 +2,7 @@
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../hooks/useAuth'
 
 // Rendu markdown simple (gras, italique, titres, listes, images [[IMG:url|caption]])
 function renderMarkdown(text) {
@@ -374,12 +375,13 @@ function ArticleCard({ article, onOpen }) {
 // ─── PAGE PRINCIPALE ──────────────────────────────────────────
 export default function InsightsPage() {
   const { i18n } = useTranslation()
+  const { session } = useAuth()
   const [activeFilter, setActiveFilter] = useState('Tout')
   const [selectedArticle, setSelectedArticle] = useState(null)
   const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // Charger les articles depuis Supabase, fallback sur les données en cache
+  // Charger les articles depuis Supabase — relancé quand la session change
   useEffect(() => {
     let mounted = true
     async function loadArticles() {
@@ -424,7 +426,9 @@ export default function InsightsPage() {
     }
     loadArticles()
     return () => { mounted = false }
-  }, [])
+  // Relancer si la session change (connexion tardive après auth.retbaa.com)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session])
   const filteredArticles = activeFilter === 'Tout'
     ? articles
     : articles.filter(a => (a.category || 'Article') === activeFilter)
