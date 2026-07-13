@@ -405,16 +405,14 @@ export default function InsightsPage() {
       try {
         console.log('[Insights] Chargement articles (tentative', retryCount + 1, ')...')
 
-        // Schéma réel de la table insights :
-        //   id uuid, slug text, tag text, title text, subtitle text,
-        //   date text, author text, source text, source_url text,
-        //   summary text, img text, content_md text, featured boolean,
-        //   category text, published boolean, created_at timestamptz
+        // select('*') pour éviter tout problème de nom de colonne inconnu
+        // filtre sur status='published' (valeur confirmée par l'utilisateur)
+        // tri sur published_at DESC (colonne confirmée par Supabase)
         const { data, error } = await supabase
           .from('insights')
-          .select('id, slug, tag, title, subtitle, date, author, source, source_url, summary, img, content_md, featured, category, published')
-          .eq('published', true)
-          .order('created_at', { ascending: false })
+          .select('*')
+          .eq('status', 'published')
+          .order('published_at', { ascending: false })
 
         if (error) {
           console.error('[Insights] Erreur requête Supabase:', error)
@@ -427,17 +425,20 @@ export default function InsightsPage() {
           if (data && data.length > 0) {
             const mapped = data.map(a => ({
               id: a.slug || a.id,
-              tag: a.tag || a.category || 'Veille Marché',
+              tag: a.tag || a.category || a.content_type || 'Veille Marché',
               title: a.title,
               subtitle: a.subtitle || '',
-              date: a.date || '',
+              // date : champ texte direct, ou formaté depuis published_at
+              date: a.date || (a.published_at
+                ? new Date(a.published_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+                : ''),
               author: a.author || 'Kemia',
-              source: a.source || '',
-              sourceUrl: a.source_url || null,
-              summary: a.summary || '',
-              img: a.img || null,
-              content: a.content_md || '',
-              category: a.category || a.tag || 'Veille Marché',
+              source: a.source || a.source_name || '',
+              sourceUrl: a.source_url || a.sourceUrl || null,
+              summary: a.summary || a.content_short || a.description || '',
+              img: a.img || a.image || a.cover_url || null,
+              content: a.content_md || a.content || a.content_long || '',
+              category: a.category || a.tag || a.content_type || 'Veille Marché',
               featured: a.featured || false,
             }))
             console.log('[Insights] Succès: mappé', mapped.length, 'articles')
