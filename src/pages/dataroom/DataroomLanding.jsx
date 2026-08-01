@@ -486,26 +486,63 @@ function StepQualification({ ndaName, ndaDate, onSuccess }) {
 
       {/* Canal */}
       <label style={s.label}>Canal d'investissement *</label>
-      <div style={s.radioGroup}>
-        <label style={s.radioRow}>
-          <input type="radio" name="channel" value="holding" checked={channel === 'holding'} onChange={() => setChannel('holding')} style={s.radio} />
-          <span style={s.radioLabel}>Retbaa Holding — <span style={{ color: '#9CA3AF', fontSize: '13px' }}>equity direct</span></span>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
+
+        {/* Holding */}
+        <label style={{
+          display: 'flex', flexDirection: 'column', gap: '6px',
+          border: `2px solid ${channel === 'holding' ? '#1A3A6B' : '#E5E0D8'}`,
+          borderRadius: '4px', padding: '14px 16px', cursor: 'pointer',
+          backgroundColor: channel === 'holding' ? '#F0F4FA' : '#fff',
+          transition: 'border-color 0.15s',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <input type="radio" name="channel" value="holding" checked={channel === 'holding'} onChange={() => setChannel('holding')} style={s.radio} />
+            <span style={{ fontFamily: 'Newsreader, serif', fontStyle: 'italic', fontSize: '15px', color: '#1A3A6B', fontWeight: 500 }}>Retbaa Holding</span>
+            <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#C4A96A' }}>Equity direct</span>
+          </div>
+          <p style={{ margin: 0, fontSize: '12px', color: '#6B7280', lineHeight: '1.5', paddingLeft: '22px' }}>
+            Entrez au capital de Maison Retbaa Global Holding. Ticket à partir de 30 000 € pour 1 % d'equity — avec un bonus de +1 % pour tout engagement ≥ 150 000 €. Valorisation en forte croissance : CA ×8 visé d'ici 2028.
+          </p>
         </label>
-        <label style={s.radioRow}>
-          <input type="radio" name="channel" value="spv" checked={channel === 'spv'} onChange={() => setChannel('spv')} style={s.radio} />
-          <span style={s.radioLabel}>SPV Les Adresses — <span style={{ color: '#9CA3AF', fontSize: '13px' }}>réseau retail</span></span>
+
+        {/* SPV */}
+        <label style={{
+          display: 'flex', flexDirection: 'column', gap: '6px',
+          border: `2px solid ${channel === 'spv' ? '#1A3A6B' : '#E5E0D8'}`,
+          borderRadius: '4px', padding: '14px 16px', cursor: 'pointer',
+          backgroundColor: channel === 'spv' ? '#F0F4FA' : '#fff',
+          transition: 'border-color 0.15s',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <input type="radio" name="channel" value="spv" checked={channel === 'spv'} onChange={() => setChannel('spv')} style={s.radio} />
+            <span style={{ fontFamily: 'Newsreader, serif', fontStyle: 'italic', fontSize: '15px', color: '#1A3A6B', fontWeight: 500 }}>SPV Les Adresses</span>
+            <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#C4A96A' }}>Rendement patrimonial</span>
+          </div>
+          <p style={{ margin: 0, fontSize: '12px', color: '#6B7280', lineHeight: '1.5', paddingLeft: '22px' }}>
+            Co-investissez dans les deux premières adresses physiques Retbaa — Abidjan et Dakar — via un SPV dédié (SAS OHADA). Ticket à partir de 25 000 €. Redevance progressive sur CA (3 % → 5 %), plancher 6 %, sortie contractuelle à ×1,4 en année 5. TRI cible : 13–15 %.
+          </p>
         </label>
-        <label style={s.radioRow}>
-          <input type="radio" name="channel" value="manufacture" checked={channel === 'manufacture'} onChange={() => setChannel('manufacture')} style={s.radio} />
-          <span style={s.radioLabel}>
-            Manufacture
+
+        {/* Manufacture */}
+        <label style={{
+          display: 'flex', flexDirection: 'column', gap: '6px',
+          border: `2px solid ${channel === 'manufacture' ? '#1A3A6B' : '#E5E0D8'}`,
+          borderRadius: '4px', padding: '14px 16px', cursor: 'pointer',
+          backgroundColor: channel === 'manufacture' ? '#F0F4FA' : '#fff',
+          transition: 'border-color 0.15s',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <input type="radio" name="channel" value="manufacture" checked={channel === 'manufacture'} onChange={() => setChannel('manufacture')} style={s.radio} />
+            <span style={{ fontFamily: 'Newsreader, serif', fontStyle: 'italic', fontSize: '15px', color: '#1A3A6B', fontWeight: 500 }}>Retbaa Manufacture</span>
             <span style={s.badge}>Institutionnel</span>
-          </span>
+          </div>
+          <p style={{ margin: 0, fontSize: '12px', color: '#6B7280', lineHeight: '1.5', paddingLeft: '22px' }}>
+            Financement de la filière industrielle Retbaa : production intégrée, sourcing des matières premières africaines, académie des métiers du luxe. Horizon 7–10 ans. Réservé aux investisseurs institutionnels (DFI, family offices, fonds de développement). Un accès preview est disponible — l'accès complet est soumis à validation.
+          </p>
         </label>
+
       </div>
-      {channel === 'manufacture' && (
-        <div style={s.note}>⚠️ Ce canal est réservé aux investisseurs institutionnels.</div>
-      )}
 
       {/* Montant */}
       <label style={s.label}>Niveau d'engagement envisagé *</label>
