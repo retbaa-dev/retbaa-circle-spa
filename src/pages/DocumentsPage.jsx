@@ -2,10 +2,13 @@
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/useAuth'
+import { supabase } from '../lib/supabase'
 import { FileText, Download, Pen, Upload, CheckCircle, Clock, AlertCircle, X, Eye } from 'lucide-react'
 
-// ─── DATA — Documents réels Retbaa Circle ────────────────────────────────────
-const allDocs = [
+// ─── DATA STATIQUE — fallback si table Supabase absente ──────────────────────
+// Pour migrer vers Supabase : exécuter scripts/migrate-documents.sql
+// puis supprimer cette constante (DocumentsPage fera un fetch auto)
+const STATIC_DOCS = [
   // ── À SIGNER ──────────────────────────────────────────────
   {
     id: 1,
@@ -239,6 +242,22 @@ const allDocs = [
     founderExempt: true,
   },
 ]
+
+// Normalise un doc venant de Supabase vers le format interne
+function normalizeSupabaseDoc(d) {
+  return {
+    id: d.id,
+    title: d.title,
+    type: d.type,
+    format: d.format || 'PDF',
+    date: d.date_label || '—',
+    size: d.size_label || '—',
+    status: d.status,
+    priority: !!d.priority,
+    pdf: d.pdf_path || null,
+    founderExempt: !!d.founder_exempt,
+  }
+}
 
 // ─── STATUS CONFIG ────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -1017,6 +1036,22 @@ export default function DocumentsPage({ observateur = false, userName = '', isAs
 
   // Overrides de statut locaux (sign/upload → pending après action)
   const [docStatuses, setDocStatuses] = useState({})
+
+  // Docs actifs — Supabase en priorité, fallback statique
+  const [allDocs, setAllDocs] = useState(STATIC_DOCS)
+
+  useEffect(() => {
+    supabase
+      .from('documents')
+      .select('id, title, type, format, date_label, size_label, status, priority, pdf_path, founder_exempt')
+      .order('sort_order')
+      .then(({ data, error }) => {
+        if (!error && data && data.length > 0) {
+          setAllDocs(data.map(normalizeSupabaseDoc))
+        }
+        // Si erreur ou table absente → STATIC_DOCS reste en place (fail-safe)
+      })
+  }, [])
 
   // Mapping shortName → nom complet (affichage compte individuel)
   const COMPTE_MAP = {

@@ -394,9 +394,8 @@ export default function InsightsPage() {
   const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
   const [availableFilters, setAvailableFilters] = useState(FILTERS)
-  const [debugInfo, setDebugInfo] = useState(null)
 
-  // Charger les articles depuis Supabase — table publique, pas de dépendance à session
+  // Charger les articles depuis Supabase via supabase-js (clé depuis env vars)
   useEffect(() => {
     let mounted = true
     let retryTimer = null
@@ -404,24 +403,13 @@ export default function InsightsPage() {
 
     async function loadArticles() {
       try {
-        console.log('[Insights] Chargement articles (tentative', retryCount + 1, ')...')
+        const { data, error } = await supabase
+          .from('insights')
+          .select('id, title, slug, content_type, tags, content_short, content_long, author, status, published_at, img, source_url, featured')
+          .eq('status', 'published')
+          .order('published_at', { ascending: false })
 
-        // Fetch direct REST — bypass supabase-js pour diagnostic
-        const SUPA_URL = 'https://lufozqtrwrmowzojxcoi.supabase.co'
-        const SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1Zm96cXRyd3Jtb3d6b2p4Y29pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyOTcwNjMsImV4cCI6MjA5Mjg3MzA2M30._-jdklZKN7xAc4M9A55A5qqyVml5gkXU3URe_EyM9k4'
-        const res = await fetch(
-          `${SUPA_URL}/rest/v1/insights?select=id,title,slug,content_type,tags,content_short,content_long,author,status,published_at&status=eq.published&order=published_at.desc`,
-          { headers: { 'apikey': SUPA_ANON, 'Authorization': `Bearer ${SUPA_ANON}` } }
-        )
-        const rawText = await res.text()
-        console.log('[Insights] HTTP status:', res.status, '| body:', rawText.slice(0, 300))
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}: ${rawText.slice(0, 200)}`)
-        }
-        const data = JSON.parse(rawText)
-        const error = null
-
-        console.log('[Insights] Résultat:', data?.length ?? 0, 'articles')
+        if (error) throw error
 
         if (mounted) {
           if (data && data.length > 0) {
@@ -435,53 +423,37 @@ export default function InsightsPage() {
                 : '',
               author: a.author || 'Kemia',
               source: '',
-              sourceUrl: null,
+              sourceUrl: a.source_url || null,
               summary: a.content_short || '',
-              img: null,
-              content: a.content_long || '',
+              img: a.img || null,
+              content_md: a.content_long || '',
               category: (Array.isArray(a.tags) && a.tags[0]) || a.content_type || 'Veille Marché',
-              featured: false,
+              featured: !!a.featured,
             }))
-            console.log('[Insights] Succès: mappé', mapped.length, 'articles')
             setArticles(mapped)
 
-            // Générer les filtres disponibles depuis les catégories réelles des articles
+            // Filtres dynamiques depuis les catégories réelles
             const uniqueCategories = new Set(['Tout'])
-            mapped.forEach(a => {
-              if (a.category && a.category !== 'Article') {
-                uniqueCategories.add(a.category)
-              }
-            })
-            // Fusionner avec les filtres par défaut, en préservant l'ordre des défauts
+            mapped.forEach(a => { if (a.category && a.category !== 'Article') uniqueCategories.add(a.category) })
             const mergedFilters = ['Tout']
-            FILTERS.slice(1).forEach(filter => {
-              if (uniqueCategories.has(filter)) mergedFilters.push(filter)
-            })
-            // Ajouter les catégories non-prédéfinies trouvées dans les données
-            uniqueCategories.forEach(cat => {
-              if (!mergedFilters.includes(cat)) mergedFilters.push(cat)
-            })
+            FILTERS.slice(1).forEach(f => { if (uniqueCategories.has(f)) mergedFilters.push(f) })
+            uniqueCategories.forEach(cat => { if (!mergedFilters.includes(cat)) mergedFilters.push(cat) })
             setAvailableFilters(mergedFilters.length > 1 ? mergedFilters : FILTERS)
             setLoading(false)
           } else {
-            // Retry une fois après 2s si vide
+            // Retry une fois si vide (cold start Supabase)
             if (retryCount < 1) {
               retryCount++
-              console.warn('[Insights] Aucun article retourné, retry dans 2s')
               retryTimer = setTimeout(loadArticles, 2000)
             } else {
-              // Après 1 retry, utiliser le fallback
-              console.warn('[Insights] Toujours aucun article après retry, utilisation du fallback')
               setArticles(FALLBACK_ARTICLES)
               setAvailableFilters(FILTERS)
               setLoading(false)
             }
           }
         }
-      } catch (e) {
-        console.error('[Insights] Erreur Supabase:', e?.message || e)
+      } catch {
         if (mounted) {
-          setDebugInfo(`ERREUR: ${e?.message || String(e)}`)
           setArticles(FALLBACK_ARTICLES)
           setAvailableFilters(FILTERS)
           setLoading(false)
@@ -610,18 +582,6 @@ export default function InsightsPage() {
 
       {/* ─── CONTENU PRINCIPAL ─────────────────────────────── */}
       <div className="insights-main-container" style={{ maxWidth: '1400px', margin: '0 auto', padding: '56px 48px 80px' }}>
-
-        {/* Bandeau debug temporaire */}
-        {debugInfo && (
-          <div style={{ background: '#fee2e2', border: '1px solid #ef4444', borderRadius: '4px', padding: '12px 16px', marginBottom: '24px', fontFamily: 'monospace', fontSize: '12px', color: '#991b1b', wordBreak: 'break-all' }}>
-            🔴 DEBUG: {debugInfo}
-          </div>
-        )}
-        {!loading && !debugInfo && articles !== FALLBACK_ARTICLES && (
-          <div style={{ background: '#d1fae5', border: '1px solid #10b981', borderRadius: '4px', padding: '12px 16px', marginBottom: '24px', fontFamily: 'monospace', fontSize: '12px', color: '#065f46' }}>
-            ✅ {articles.length} articles chargés depuis Supabase
-          </div>
-        )}
 
         {/* Loading state */}
         {loading && (
