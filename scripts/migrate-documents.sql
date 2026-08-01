@@ -90,10 +90,10 @@ insert into public.documents
   (title, type, format, date_label, size_label, status, pdf_path, sort_order, visible_to)
 values
   ('Compte individuel — Massata NIANG',    'Associés', 'PDF', 'Fév. 2026', '1,3 Mo', 'validated', '/docs/legal/comptes-associes/compte-massata-niang.pdf',     300, array['all']),
-  ('Compte individuel — Barthélemy FAYE',  'Associés', 'PDF', 'Fév. 2026', '1,2 Mo', 'validated', '/docs/legal/comptes-associes/compte-barthelemy-faye.pdf',   310, array['founder', 'barthelemy@retbaa.com']),
-  ('Compte individuel — Pape Amadou NGOM', 'Associés', 'PDF', 'Fév. 2026', '1,2 Mo', 'validated', '/docs/legal/comptes-associes/compte-pape-amadou-ngom.pdf', 320, array['founder', 'pape.amadou.ngom@retbaa.com']),
-  ('Compte individuel — Cathy MUIZA',      'Associés', 'PDF', 'Fév. 2026', '1,9 Mo', 'validated', '/docs/legal/comptes-associes/compte-cathy-muiza.pdf',       330, array['founder', 'cathy@retbaa.com']),
-  ('Compte individuel — Raphaël PERDRIX',  'Associés', 'PDF', 'Fév. 2026', '1,4 Mo', 'validated', '/docs/legal/comptes-associes/compte-raphael-perdrix.pdf',   340, array['founder', 'raphael@retbaa.com']);
+  ('Compte individuel — Barthélemy FAYE',  'Associés', 'PDF', 'Fév. 2026', '1,2 Mo', 'validated', '/docs/legal/comptes-associes/compte-barthelemy-faye.pdf',   310, array['founder', 'bfaye@cgsh.com', 'fayebiram@gmail.com']),
+  ('Compte individuel — Pape Amadou NGOM', 'Associés', 'PDF', 'Fév. 2026', '1,2 Mo', 'validated', '/docs/legal/comptes-associes/compte-pape-amadou-ngom.pdf', 320, array['founder', 'angom@sqorus.com']),
+  ('Compte individuel — Cathy MUIZA',      'Associés', 'PDF', 'Fév. 2026', '1,9 Mo', 'validated', '/docs/legal/comptes-associes/compte-cathy-muiza.pdf',       330, array['founder', 'cathy@r2coop.com']),
+  ('Compte individuel — Raphaël PERDRIX',  'Associés', 'PDF', 'Fév. 2026', '1,4 Mo', 'validated', '/docs/legal/comptes-associes/compte-raphael-perdrix.pdf',   340, array['founder', 'Raphael.Perdrix@gmail.com']);
 
 -- ── 5. Trigger updated_at ────────────────────────────────────
 create or replace function public.set_updated_at()
