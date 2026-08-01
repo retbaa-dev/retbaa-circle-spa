@@ -13,6 +13,10 @@ import AuthCallback         from './pages/AuthCallback'
 import LoginPage            from './pages/LoginPage'
 import AppShell             from './components/AppShell'
 
+// ── Dataroom prospects (public) — lazy ─────────────────────────────────────
+const DataroomLanding       = lazy(() => import('./pages/dataroom/DataroomLanding'))
+const DataroomAccess        = lazy(() => import('./pages/dataroom/DataroomAccess'))
+
 // ── Pages lourdes — lazy ────────────────────────────────────────────────────
 const Dashboard             = lazy(() => import('./pages/Dashboard'))
 const InsightsPage          = lazy(() => import('./pages/InsightsPage'))
@@ -70,6 +74,16 @@ export default function App() {
         {/* Onboarding (public) */}
         <Route path="/bienvenue" element={
           <Suspense fallback={<PageLoader />}><BienvenueOnboarding /></Suspense>
+        } />
+
+        {/* Dataroom prospects — public */}
+        <Route path="/dataroom" element={
+          <Suspense fallback={<PageLoader />}><DataroomLanding /></Suspense>
+        } />
+
+        {/* Dataroom access — guard dans le composant */}
+        <Route path="/dataroom/access" element={
+          <Suspense fallback={<PageLoader />}><DataroomAccess /></Suspense>
         } />
 
         {/* Invitation investisseur */}
