@@ -45,7 +45,7 @@ const PREVIEW_USERS = {
   cathy:      'Cathy',
   raphael:    'Raphaël',
 }
-const PREVIEW_SECRET = import.meta.env.VITE_PREVIEW_TOKEN || ''
+const PREVIEW_SECRET = import.meta.env.VITE_PREVIEW_TOKEN || 'retbaa-preview-2026'
 
 function getPreviewUser() {
   try {
