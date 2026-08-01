@@ -1,12 +1,17 @@
-name: Deploy to o2switch
+name: CI — Lint & Build
+
+# Le déploiement est géré par Vercel (intégration GitHub automatique).
+# Ce workflow ne fait que valider le build sur chaque PR/push.
 
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -21,19 +26,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint
+        run: npm run lint
+
       - name: Build
         env:
-          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
-          VITE_ADMIN_SECRET: ${{ secrets.VITE_ADMIN_SECRET }}
-          VITE_ADMIN_API_URL: ${{ secrets.VITE_ADMIN_API_URL }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_PREVIEW_TOKEN: ${{ secrets.VITE_PREVIEW_TOKEN }}
         run: npm run build
-
-      - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ftp.jixa3380.odns.fr
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./dist/
-          server-dir: /circle.retbaa.com/
-          dangerous-clean-slate: true
