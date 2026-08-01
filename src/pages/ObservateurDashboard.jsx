@@ -1,6 +1,7 @@
 // pages/ObservateurDashboard.jsx — Retbaa Circle — Vue Observateur (Prospect)
 // Variante du Dashboard pour les prospects non-investisseurs
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Timeline from '../components/Timeline'
 
 const lang = 'fr'
@@ -207,11 +208,13 @@ function CarouselCard({ block, onClick }) {
   )
 }
 
-export default function ObservateurDashboard({ setActivePage }) {
+export default function ObservateurDashboard() {
   const [footerModal, setFooterModal] = useState(null)
+  const rrNavigate = useNavigate()
 
   const navigate = (page) => {
-    if (setActivePage) setActivePage(page)
+    const routes = { insights: '/insights', produits: '/produits', documents: '/documents', tranche2: '/tranche2', podcast: '/podcast' }
+    rrNavigate(routes[page] ?? '/')
   }
 
   const ndaMailto = `mailto:massata@retbaa.com?subject=${encodeURIComponent('Demande NDA Retbaa Circle')}&body=${encodeURIComponent('Bonjour Massata, je souhaite recevoir le NDA pour accéder aux données complètes du portail Retbaa Circle.')}`

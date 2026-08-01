@@ -2,20 +2,27 @@
 import { useTranslation } from 'react-i18next'
 
 const PAGE_LABELS = {
-  dashboard:    'Tableau de bord',
-  insights:     'Insights',
-  products:     'Produits',
-  catalogue:    'Produits',
-  documents:    'Documents',
-  'inner-circle': 'Inner Circle',
-  'tranche2':   'Tranche 2',
-  'mon-investissement': 'Mon Investissement',
-  podcast:      'Podcast',
+  '/':                  'Tableau de bord',
+  '/insights':          'Insights',
+  '/produits':          'Produits',
+  '/documents':         'Documents',
+  '/inner-circle':      'Inner Circle',
+  '/tranche2':          'Tranche 2',
+  '/investissement':    'Mon Investissement',
+  '/podcast':           'Podcast',
+  '/analytics':         'Analytics',
 }
 
-export default function Header({ activePage, userName, isMobile, onMenuClick }) {
+function getPageTitle(path) {
+  if (PAGE_LABELS[path]) return PAGE_LABELS[path]
+  // Sous-routes : /insights/mon-article → "Insights"
+  const parent = '/' + path.split('/')[1]
+  return PAGE_LABELS[parent] || 'Tableau de bord'
+}
+
+export default function Header({ activePath, userName, isMobile, onMenuClick }) {
   const { i18n } = useTranslation()
-  const pageTitle = PAGE_LABELS[activePage] || 'Tableau de bord'
+  const pageTitle = getPageTitle(activePath || '/')
 
   const initials = userName
     ? userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)

@@ -2,6 +2,7 @@
 // Complete redesign: Stitch-faithful + personalized hero + functional carousel
 import { useTranslation } from 'react-i18next'
 import { useState, useRef, useEffect } from 'react'
+import { useNavigate as useRRNavigate } from 'react-router-dom'
 import Timeline from '../components/Timeline'
 import { COMPANY_INFO } from '../data/captable.js'
 import { supabase } from '../lib/supabase'
@@ -335,7 +336,7 @@ function KpiCard({ label, value, sub, icon, subIcon, subColor }) {
   )
 }
 
-export default function Dashboard({ userName = 'Investisseur', setActivePage, onNavigate, isAssistant = false }) {
+export default function Dashboard({ userName = 'Investisseur', isAssistant = false }) {
   const { t, i18n } = useTranslation()
   const lang = i18n.language?.startsWith('fr') ? 'fr' : 'en'
   const [footerModal, setFooterModal] = useState(null)
@@ -397,9 +398,27 @@ export default function Dashboard({ userName = 'Investisseur', setActivePage, on
   const myShares = myRow?.actions ?? 0
   const myPct = myRow?.pct ?? 0
 
-  const navigate = (page) => {
-    if (setActivePage) setActivePage(page)
-    else if (onNavigate) onNavigate(page)
+  const rrNavigate = useRRNavigate()
+
+  // Map des anciens ids de page → nouvelles routes URL
+  const PAGE_ROUTES = {
+    dashboard:          '/',
+    insights:           '/insights',
+    products:           '/produits',
+    catalogue:          '/produits',
+    documents:          '/documents',
+    'inner-circle':     '/inner-circle',
+    innercircle:        '/inner-circle',
+    tranche2:           '/tranche2',
+    investissement:     '/investissement',
+    'mon-investissement': '/investissement',
+    podcast:            '/podcast',
+    analytics:          '/analytics',
+  }
+
+  const navigate = (pageOrPath) => {
+    const path = pageOrPath.startsWith('/') ? pageOrPath : (PAGE_ROUTES[pageOrPath] ?? '/')
+    rrNavigate(path)
   }
 
   return (

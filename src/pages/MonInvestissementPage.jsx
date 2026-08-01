@@ -1,4 +1,5 @@
 // MonInvestissementPage.jsx — Retbaa Circle — Design Stitch fidèle
+import { useNavigate } from 'react-router-dom'
 const INVESTOR_DATA = {
   'Massata':     { amount: 1000,   pct: 86.96, shares: 100000, sharesRange: '1 à 100 000',         entry: 'Fév. 2026', id: 'RC-0001', role: 'founder',  label: 'Apport fondateur' },
   'Barthélemy':  { amount: 150000, pct: 5.43,  shares: 6250,   sharesRange: '100 001 à 106 250',   entry: 'Fév. 2026', id: 'RC-9921', role: 'investor', label: 'Tranche 1' },
@@ -50,7 +51,8 @@ function DonutChart({ pct, color }) {
   )
 }
 
-export default function MonInvestissementPage({ userName, setActivePage = () => {}, isAssistant = false }) {
+export default function MonInvestissementPage({ userName, isAssistant = false }) {
+  const navigate = useNavigate()
   // Match par prénom ou nom complet (ex: "Massata Niang" → "Massata")
   const shortName = userName ? Object.keys(INVESTOR_DATA).find(k => userName.startsWith(k) || userName.includes(k)) : null
   const data = INVESTOR_DATA[shortName] || INVESTOR_DATA[userName] || (isAssistant ? null : Object.values(INVESTOR_DATA)[0])
@@ -283,7 +285,7 @@ export default function MonInvestissementPage({ userName, setActivePage = () => 
                 </div>
               ))}
               <button
-                onClick={() => setActivePage('documents')}
+                onClick={() => navigate('/documents')}
                 style={{
                   marginTop: '16px', padding: '10px 20px',
                   background: 'none', border: '1px solid #EFC0D4',

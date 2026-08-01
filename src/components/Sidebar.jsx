@@ -126,44 +126,39 @@ function ContactModal({ userName, onClose }) {
   )
 }
 
-export default function Sidebar({ activePage, setActivePage, userName, onLogout, observateur, isAdmin, isAssistant }) {
+export default function Sidebar({ activePath, onNavigate, userName, onLogout, observateur, isAdmin, isAssistant }) {
   const [showContact, setShowContact] = useState(false)
   const initials = userName
     ? userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
     : 'RC'
 
-  // Items communs à tous les rôles connectés (hors observateur)
+  // Map path → item de navigation
   const baseItems = [
-    { id: 'dashboard',          icon: 'account_balance', label: 'Tableau de bord'   },
-    { id: 'insights',           icon: 'insights',        label: 'Insights'           },
-    { id: 'products',           icon: 'category',        label: 'Produits'           },
-    { id: 'documents',          icon: 'description',     label: 'Documents'          },
-    { id: 'tranche2',           icon: 'trending_up',     label: 'Tranche 2'          },
-    { id: 'podcast',            icon: 'mic',             label: 'Podcast'            },
-    { id: 'mon-investissement', icon: 'person',          label: 'Mon Investissement' },
+    { path: '/',               icon: 'account_balance', label: 'Tableau de bord'   },
+    { path: '/insights',       icon: 'insights',        label: 'Insights'           },
+    { path: '/produits',       icon: 'category',        label: 'Produits'           },
+    { path: '/documents',      icon: 'description',     label: 'Documents'          },
+    { path: '/tranche2',       icon: 'trending_up',     label: 'Tranche 2'          },
+    { path: '/podcast',        icon: 'mic',             label: 'Podcast'            },
+    { path: '/investissement', icon: 'person',          label: 'Mon Investissement' },
   ]
 
   const navItems = observateur
-    ? [
-        { id: 'dashboard', icon: 'account_balance', label: 'Tableau de bord' },
-        { id: 'insights',  icon: 'insights',        label: 'Insights'        },
-        { id: 'products',  icon: 'category',        label: 'Produits'        },
-        { id: 'documents', icon: 'description',     label: 'Documents'       },
-        { id: 'tranche2',  icon: 'trending_up',     label: 'Tranche 2'       },
-        { id: 'podcast',   icon: 'mic',             label: 'Podcast'         },
-      ]
-    // Assistant : tous les items sauf Inner Circle
+    ? baseItems.filter(i => i.path !== '/investissement')
     : isAssistant
     ? baseItems
-    // Investisseur standard : Inner Circle + éventuellement Analytics
     : [
-        ...baseItems.slice(0, 4),                          // dashboard → documents
-        { id: 'inner-circle', icon: 'diamond', label: 'Inner Circle' },
-        ...baseItems.slice(4),                             // tranche2 → mon-investissement
-        ...(userName?.toLowerCase().includes('massata') || isAdmin
-          ? [{ id: 'analytics', icon: 'bar_chart', label: 'Analytics' }]
-          : []),
+        ...baseItems.slice(0, 4),
+        { path: '/inner-circle', icon: 'diamond',    label: 'Inner Circle' },
+        ...baseItems.slice(4),
+        ...(isAdmin ? [{ path: '/analytics', icon: 'bar_chart', label: 'Analytics' }] : []),
       ]
+
+  // Un item est actif si le path correspond exactement, ou commence par le path (pour sous-routes /insights/:slug)
+  const isActive = (itemPath) =>
+    itemPath === '/'
+      ? activePath === '/'
+      : activePath.startsWith(itemPath)
 
   return (
     <aside style={{
@@ -181,7 +176,7 @@ export default function Sidebar({ activePage, setActivePage, userName, onLogout,
 
       {/* ── Logo ── */}
       <div
-        onClick={() => setActivePage('dashboard')}
+        onClick={() => onNavigate('/')}
         style={{
           padding: '36px 28px 28px',
           cursor: 'pointer',
@@ -214,12 +209,12 @@ export default function Sidebar({ activePage, setActivePage, userName, onLogout,
 
       {/* ── Navigation ── */}
       <nav style={{ flex: 1, paddingTop: '8px' }}>
-        {navItems.map(({ id, icon, label }) => {
-          const isActive = activePage === id || (id === 'products' && activePage === 'catalogue')
+        {navItems.map(({ path, icon, label }) => {
+          const active = isActive(path)
           return (
             <button
-              key={id}
-              onClick={() => setActivePage(id)}
+              key={path}
+              onClick={() => onNavigate(path)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -227,21 +222,21 @@ export default function Sidebar({ activePage, setActivePage, userName, onLogout,
                 width: 'calc(100% - 32px)',
                 margin: '2px 16px',
                 padding: '12px 16px',
-                background: isActive ? '#EFC0D4' : 'transparent',
-                borderRadius: isActive ? '6px' : '6px',
+                background: active ? '#EFC0D4' : 'transparent',
+                borderRadius: '6px',
                 border: 'none',
                 cursor: 'pointer',
                 textAlign: 'left',
                 transition: 'background 0.15s ease',
               }}
-              onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(239,192,212,0.2)' }}
-              onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent' }}
+              onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(239,192,212,0.2)' }}
+              onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent' }}
             >
               <span
                 className="material-symbols-outlined"
                 style={{
                   fontSize: '20px',
-                  color: isActive ? '#704C5D' : '#1A3A6B',
+                  color: active ? '#704C5D' : '#1A3A6B',
                   flexShrink: 0,
                 }}
               >
@@ -250,8 +245,8 @@ export default function Sidebar({ activePage, setActivePage, userName, onLogout,
               <span style={{
                 fontFamily: 'Manrope, sans-serif',
                 fontSize: '13px',
-                fontWeight: isActive ? 700 : 500,
-                color: isActive ? '#704C5D' : '#1A3A6B',
+                fontWeight: active ? 700 : 500,
+                color: active ? '#704C5D' : '#1A3A6B',
                 letterSpacing: '0.01em',
               }}>
                 {label}

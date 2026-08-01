@@ -1,34 +1,32 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 import './i18n/index.js'
-import InvitePage from './pages/InvitePage'
-import PendingPage from './pages/PendingPage'
-import AdminPage from './pages/AdminPage'
-import ProspectGatePage from './pages/ProspectGatePage'
-import AuthCallback from './pages/AuthCallback'
-import LoginPage from './pages/LoginPage'
-import Sidebar from './components/Sidebar'
-import Header from './components/Header'
-import Footer from './components/Footer'
-import Dashboard from './pages/Dashboard'
-import ObservateurDashboard from './pages/ObservateurDashboard'
-import CataloguePage from './pages/CataloguePage'
-import DocumentsPage from './pages/DocumentsPage'
-import { track } from './utils/tracker'
 import './index.css'
 
-// ── Lazy imports — pages lourdes chargées à la demande ──────────────────────
-// Réduit le bundle initial (InnerCircle ~180KB, Podcast ~140KB, Insights ~100KB)
-const InsightsPage = lazy(() => import('./pages/InsightsPage'))
-const InnerCirclePage = lazy(() => import('./pages/InnerCirclePage'))
-const PodcastPage = lazy(() => import('./pages/PodcastPage'))
-const Tranche2Page = lazy(() => import('./pages/Tranche2Page'))
-const MonInvestissementPage = lazy(() => import('./pages/MonInvestissementPage'))
-const BienvenueOnboarding = lazy(() => import('./pages/BienvenueOnboarding'))
-const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'))
+// ── Pages légères — import direct ───────────────────────────────────────────
+import InvitePage           from './pages/InvitePage'
+import PendingPage          from './pages/PendingPage'
+import AdminPage            from './pages/AdminPage'
+import ProspectGatePage     from './pages/ProspectGatePage'
+import AuthCallback         from './pages/AuthCallback'
+import LoginPage            from './pages/LoginPage'
+import AppShell             from './components/AppShell'
 
-// Fallback spinner partagé pour le lazy loading
+// ── Pages lourdes — lazy ────────────────────────────────────────────────────
+const Dashboard             = lazy(() => import('./pages/Dashboard'))
+const InsightsPage          = lazy(() => import('./pages/InsightsPage'))
+const InnerCirclePage       = lazy(() => import('./pages/InnerCirclePage'))
+const PodcastPage           = lazy(() => import('./pages/PodcastPage'))
+const Tranche2Page          = lazy(() => import('./pages/Tranche2Page'))
+const MonInvestissementPage = lazy(() => import('./pages/MonInvestissementPage'))
+const BienvenueOnboarding   = lazy(() => import('./pages/BienvenueOnboarding'))
+const AnalyticsPage         = lazy(() => import('./pages/AnalyticsPage'))
+const CataloguePage         = lazy(() => import('./pages/CataloguePage'))
+const DocumentsPage         = lazy(() => import('./pages/DocumentsPage'))
+const ObservateurDashboard  = lazy(() => import('./pages/ObservateurDashboard'))
+const ArticlePage           = lazy(() => import('./pages/ArticlePage'))
+
 function PageLoader() {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
@@ -39,216 +37,74 @@ function PageLoader() {
   )
 }
 
-// Placeholder pages pour navigation carousel
-function PlaceholderPage({ title, subtitle, onBack }) {
-  return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '80px 40px', textAlign: 'center' }}>
-      <button
-        onClick={onBack}
-        style={{
-          display: 'inline-flex', alignItems: 'center', gap: '6px',
-          fontFamily: 'Manrope, sans-serif', fontSize: '10px',
-          color: '#EFC0D4', letterSpacing: '0.2em', textTransform: 'uppercase',
-          fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer',
-          marginBottom: '48px',
-        }}
-      >
-        ← Retour au tableau de bord
-      </button>
-      <div style={{
-        fontFamily: 'Newsreader, serif', fontSize: '42px', fontWeight: 300,
-        color: '#1A3A6B', fontStyle: 'italic', marginBottom: '12px',
-      }}>
-        {title}
-      </div>
-      <div style={{
-        fontFamily: 'Newsreader, serif', fontStyle: 'italic',
-        fontSize: '14px', color: '#9CA3AF',
-      }}>
-        {subtitle}
-      </div>
-    </div>
-  )
-}
-
-// ── Mode preview : ?preview=massata&token=retbaa-dev-2026 ──
+// ── Mode preview : ?preview=massata&token=XXX ───────────────────────────────
 const PREVIEW_USERS = {
-  massata: 'Massata',
+  massata:    'Massata',
   barthelemy: 'Barthélemy',
-  pape: 'Pape Amadou',
-  cathy: 'Cathy',
-  raphael: 'Raphaël',
+  pape:       'Pape Amadou',
+  cathy:      'Cathy',
+  raphael:    'Raphaël',
 }
 const PREVIEW_SECRET = import.meta.env.VITE_PREVIEW_TOKEN || ''
 
 function getPreviewUser() {
   try {
     if (!PREVIEW_SECRET) return null
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname)
     const params = new URLSearchParams(window.location.search)
-    const key = params.get('preview')?.toLowerCase()
-    const token = params.get('token')
+    const key    = params.get('preview')?.toLowerCase()
+    const token  = params.get('token')
     if (!isLocalhost && token !== PREVIEW_SECRET) return null
-    return key ? (PREVIEW_USERS[key] || null) : null
-  } catch {
-    return null
-  }
+    return key ? (PREVIEW_USERS[key] ?? null) : null
+  } catch { return null }
 }
 
-// Route /observateur
-function ObservateurRoute() {
-  const [prospectDone, setProspectDone] = useState(() => {
-    return !!sessionStorage.getItem('retbaa_prospect')
-  })
-  if (!prospectDone) {
-    return <ProspectGatePage onAccess={() => setProspectDone(true)} />
-  }
-  return <Navigate to="/" replace />
-}
-
-// ── App racine ──────────────────────────────────────────────────────────────
+// ── Composant racine ────────────────────────────────────────────────────────
 export default function App() {
-  const previewUser = getPreviewUser()
-
-  if (previewUser) {
-    return (
-      <BrowserRouter>
-        <PreviewApp userName={previewUser} />
-      </BrowserRouter>
-    )
-  }
-
   return (
     <BrowserRouter>
       <Routes>
-        {/* Callback auth Supabase (magic link + Google OAuth) */}
+        {/* Auth */}
         <Route path="/auth/callback" element={<AuthCallback />} />
 
-        {/* Onboarding investisseur — sans auth */}
-        <Route path="/bienvenue" element={<Suspense fallback={<PageLoader />}><BienvenueOnboarding /></Suspense>} />
+        {/* Onboarding (public) */}
+        <Route path="/bienvenue" element={
+          <Suspense fallback={<PageLoader />}><BienvenueOnboarding /></Suspense>
+        } />
 
-        {/* Invitation unique */}
+        {/* Invitation investisseur */}
         <Route path="/invite/:token" element={<InvitePage />} />
 
         {/* Admin */}
         <Route path="/admin" element={<AdminPage />} />
 
-        {/* Observateur */}
-        <Route path="/observateur" element={<ObservateurRoute />} />
+        {/* Observateur — gate prospect */}
+        <Route path="/observateur" element={<ObservateurGate />} />
 
-        {/* App investisseurs (gère son propre auth gate) */}
-        <Route path="/*" element={<InvestisseurApp />} />
+        {/* App principale — tout ce qui reste */}
+        <Route path="/*" element={<AuthGate />} />
       </Routes>
     </BrowserRouter>
   )
 }
 
-// ── PreviewApp — dashboard sans auth (mode ?preview=xxx) ───────────────────
-function PreviewApp({ userName }) {
-  const [activePage, setActivePage] = useState('dashboard')
-  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-
-  useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 768)
-    window.addEventListener('resize', handler)
-    return () => window.removeEventListener('resize', handler)
-  }, [])
-
-  const handleSetActivePage = (page) => {
-    setActivePage(page)
-    if (isMobile) setSidebarOpen(false)
-    track(userName || 'anonymous', page)
+// ── Gate observateur ────────────────────────────────────────────────────────
+function ObservateurGate() {
+  const done = !!sessionStorage.getItem('retbaa_prospect')
+  if (!done) {
+    return <ProspectGatePage onAccess={() => {
+      sessionStorage.setItem('retbaa_prospect', '1')
+      window.location.replace('/')
+    }} />
   }
-
-  return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#F9F9F9' }}>
-      {isMobile && sidebarOpen && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(10,20,40,0.65)', backdropFilter: 'blur(2px)', zIndex: 99 }}
-          onClick={() => setSidebarOpen(false)} />
-      )}
-      <div style={{
-        position: 'fixed', top: 0, left: 0, height: '100vh', zIndex: 100,
-        transform: isMobile ? (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
-        transition: 'transform 0.25s ease',
-        width: '288px',
-      }}>
-        <Sidebar
-          activePage={activePage}
-          setActivePage={handleSetActivePage}
-          onLogout={() => window.location.href = '/'}
-          userName={userName}
-          isMobile={isMobile}
-          observateur={false}
-          isAdmin={false}
-        />
-      </div>
-      <div style={{ flex: 1, marginLeft: isMobile ? 0 : '288px', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <Header userName={userName} activePage={activePage} isMobile={isMobile} onMenuClick={() => setSidebarOpen(o => !o)} />
-        <main style={{ flex: 1, padding: isMobile ? '80px 0 0' : '80px 0 0' }}>
-          <Suspense fallback={<PageLoader />}>
-            {activePage === 'dashboard' && <Dashboard userName={userName} setActivePage={handleSetActivePage} />}
-            {activePage === 'documents' && <DocumentsPage userName={userName} />}
-            {activePage === 'insights' && <InsightsPage />}
-            {activePage === 'catalogue' && <CataloguePage />}
-            {activePage === 'investissement' && <MonInvestissementPage userName={userName} setActivePage={handleSetActivePage} />}
-            {activePage === 'tranche2' && <Tranche2Page />}
-            {activePage === 'inner-circle' && <InnerCirclePage />}
-            {activePage === 'podcast' && <PodcastPage userName={userName} />}
-            {activePage === 'roadmap' && <PlaceholderPage title="Roadmap" subtitle="Feuille de route produit" onBack={() => handleSetActivePage('dashboard')} />}
-          </Suspense>
-        </main>
-        <Footer />
-      </div>
-    </div>
-  )
+  return <Navigate to="/" replace />
 }
 
-// ── InvestisseurApp — app principale avec Supabase auth ────────────────────
-// ADMIN_EMAILS retiré — l'accès admin est déterminé uniquement par role === 'founder'
-// dans user_profiles. Aucune liste d'emails hardcodée côté client.
-
-const LINKED_NAMES = {
-  cathy: 'Cathy',
-  barthelemy: 'Barthélemy',
-  pape: 'Pape Amadou',
-  raphael: 'Raphaël',
-  massata: 'Massata',
-}
-
-function InvestisseurApp() {
+// ── Gate auth — redirige vers login si non connecté ─────────────────────────
+function AuthGate() {
   const previewUser = getPreviewUser()
   const { user, profile, isLoaded, isSignedIn, role, signOut } = useAuth()
 
-  // Tous les hooks AVANT tout return conditionnel (règle des hooks React)
-  const [activePage, setActivePage] = useState('dashboard')
-  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-
-  useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 768)
-    window.addEventListener('resize', handler)
-    return () => window.removeEventListener('resize', handler)
-  }, [])
-
-  // Nom affiché : profil Supabase > email > preview
-  const userName = previewUser
-    || profile?.full_name
-    || user?.email?.split('@')[0]
-    || ''
-
-  const goToDashboard = () => setActivePage('dashboard')
-  const isObservateur = !!sessionStorage.getItem('retbaa_prospect')
-
-  // founder = admin (accès total + analytics)
-  // Admin = uniquement role 'founder' depuis user_profiles (source de vérité Supabase)
-  const isAdmin = isSignedIn && role === 'founder'
-
-  // assistant : accès délégué, lecture seule, sans données financières
-  const isAssistant = role === 'assistant'
-  const linkedUserName = isAssistant ? (LINKED_NAMES[profile?.linked_to] ?? '') : null
-
-  // ── Chargement auth ──
   if (!isLoaded) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: '#F9F9F9' }}>
@@ -259,12 +115,8 @@ function InvestisseurApp() {
     )
   }
 
-  // ── Non connecté → page login magic link ──
-  if (!isSignedIn && !previewUser) {
-    return <LoginPage />
-  }
+  if (!isSignedIn && !previewUser) return <LoginPage />
 
-  // ── Accès Circle refusé par app_access ──
   if (isSignedIn && role === 'no_access') {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: '#FAF7F2' }}>
@@ -275,10 +127,12 @@ function InvestisseurApp() {
           <div style={{ fontFamily: 'Manrope, sans-serif', fontSize: '14px', color: '#6B7280', marginBottom: '32px' }}>
             Votre compte n'a pas accès à Retbaa Circle.
           </div>
-          <button
-            onClick={signOut}
-            style={{ fontFamily: 'Manrope, sans-serif', fontSize: '12px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#1A3A6B', background: 'none', border: '1px solid #1A3A6B', padding: '10px 24px', cursor: 'pointer' }}
-          >
+          <button onClick={signOut} style={{
+            fontFamily: 'Manrope, sans-serif', fontSize: '12px', fontWeight: 700,
+            letterSpacing: '0.15em', textTransform: 'uppercase',
+            color: '#1A3A6B', background: 'none', border: '1px solid #1A3A6B',
+            padding: '10px 24px', cursor: 'pointer',
+          }}>
             Se déconnecter
           </button>
         </div>
@@ -286,10 +140,20 @@ function InvestisseurApp() {
     )
   }
 
-  // ── Compte en attente de validation ──
-  if (isSignedIn && profile?.role === 'pending') {
-    return <PendingPage />
-  }
+  if (isSignedIn && role === 'pending') return <PendingPage />
+
+  const LINKED_NAMES = { cathy: 'Cathy', barthelemy: 'Barthélemy', pape: 'Pape Amadou', raphael: 'Raphaël', massata: 'Massata' }
+  const isAdmin     = isSignedIn && role === 'founder'
+  const isAssistant = role === 'assistant'
+  const isObservateur = !!sessionStorage.getItem('retbaa_prospect')
+
+  const userName = previewUser
+    || profile?.full_name
+    || user?.email?.split('@')[0]
+    || ''
+
+  const linkedUserName = isAssistant ? (LINKED_NAMES[profile?.linked_to] ?? '') : null
+  const effectiveName  = isAssistant ? linkedUserName : userName
 
   const handleLogout = async () => {
     sessionStorage.removeItem('retbaa_prospect')
@@ -297,85 +161,48 @@ function InvestisseurApp() {
     window.location.href = '/'
   }
 
-  const handleSetActivePage = (page) => {
-    setActivePage(page)
-    if (isMobile) setSidebarOpen(false)
-    track(userName || 'anonymous', page)
-  }
-
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#F9F9F9' }}>
+    <AppShell userName={userName} onLogout={handleLogout} isAdmin={isAdmin} isAssistant={isAssistant} isObservateur={isObservateur}>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/"                    element={isObservateur ? <ObservateurDashboard /> : <Dashboard userName={effectiveName} isAssistant={isAssistant} />} />
+          <Route path="/insights"            element={<InsightsPage />} />
+          <Route path="/insights/:slug"      element={<ArticlePage />} />
+          <Route path="/produits"            element={<CataloguePage userName={userName} />} />
+          <Route path="/documents"           element={<DocumentsPage userName={effectiveName} isAssistant={isAssistant} />} />
+          <Route path="/investissement"      element={<MonInvestissementPage userName={effectiveName} isAssistant={isAssistant} />} />
+          <Route path="/tranche2"            element={<Tranche2Page userName={effectiveName} />} />
+          <Route path="/podcast"             element={<PodcastPage userName={effectiveName} />} />
+          <Route path="/inner-circle"        element={
+            isAssistant
+              ? <RestrictedPage />
+              : <InnerCirclePage />
+          } />
+          <Route path="/analytics"           element={
+            isAdmin
+              ? <AnalyticsPage />
+              : <RestrictedPage />
+          } />
+          {/* Compat anciens liens internes */}
+          <Route path="/catalogue"           element={<Navigate to="/produits" replace />} />
+          <Route path="/mon-investissement"  element={<Navigate to="/investissement" replace />} />
+          <Route path="/innercircle"         element={<Navigate to="/inner-circle" replace />} />
+          {/* 404 → dashboard */}
+          <Route path="*"                    element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+    </AppShell>
+  )
+}
 
-      {/* Overlay mobile */}
-      {isMobile && sidebarOpen && (
-        <div
-          onClick={() => setSidebarOpen(false)}
-          style={{ position: 'fixed', inset: 0, zIndex: 90, background: 'rgba(10,20,40,0.65)', backdropFilter: 'blur(2px)' }}
-        />
-      )}
-
-      {/* Sidebar */}
-      <div style={{
-        position: 'fixed', top: 0, left: 0, height: '100vh', zIndex: 100,
-        transform: isMobile ? (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
-        transition: 'transform 0.25s ease',
-        width: '288px',
-      }}>
-        <Sidebar
-          activePage={activePage}
-          setActivePage={handleSetActivePage}
-          onLogout={handleLogout}
-          userName={userName}
-          isMobile={isMobile}
-          observateur={isObservateur}
-          isAdmin={isAdmin}
-          isAssistant={isAssistant}
-        />
+function RestrictedPage() {
+  return (
+    <div style={{ maxWidth: '600px', margin: '80px auto', padding: '40px', textAlign: 'center' }}>
+      <div style={{ fontFamily: 'Newsreader, serif', fontSize: '32px', fontWeight: 300, color: '#1A3A6B', fontStyle: 'italic', marginBottom: '12px' }}>
+        Accès restreint
       </div>
-
-      {/* Main content */}
-      <div style={{
-        marginLeft: isMobile ? 0 : '288px',
-        width: isMobile ? '100%' : 'auto',
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100vh',
-        position: 'relative',
-      }}>
-        <Header activePage={activePage} userName={userName} isMobile={isMobile} onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-
-        <main style={{ flex: 1, padding: '0', backgroundColor: '#F9F9F9', overflow: 'hidden', minWidth: 0 }}>
-          <Suspense fallback={<PageLoader />}>
-            {activePage === 'dashboard' && (
-              isObservateur
-                ? <ObservateurDashboard />
-                : <Dashboard userName={isAssistant ? linkedUserName : userName} onNavigate={handleSetActivePage} isAssistant={isAssistant} />
-            )}
-            {activePage === 'products' && <CataloguePage userName={userName} />}
-            {activePage === 'documents' && <DocumentsPage userName={isAssistant ? linkedUserName : userName} isAssistant={isAssistant} />}
-            {activePage === 'insights' && <InsightsPage />}
-            {(activePage === 'innercircle' || activePage === 'inner-circle') && (
-              isAssistant
-                ? <PlaceholderPage title="Accès restreint" subtitle="Cette section est réservée aux investisseurs" onBack={goToDashboard} />
-                : <InnerCirclePage />
-            )}
-            {activePage === 'tranche2' && <Tranche2Page userName={isAssistant ? linkedUserName : userName} />}
-            {(activePage === 'investissement' || activePage === 'mon-investissement') && (
-              <MonInvestissementPage userName={isAssistant ? linkedUserName : userName} isAssistant={isAssistant} setActivePage={handleSetActivePage} />
-            )}
-            {activePage === 'podcast' && <PodcastPage userName={isAssistant ? linkedUserName : userName} />}
-            {activePage === 'analytics' && (
-              isAdmin
-                ? <AnalyticsPage />
-                : <PlaceholderPage title="Accès restreint" subtitle="Cette section est réservée à l'administration" onBack={goToDashboard} />
-            )}
-            {activePage === 'roadmap' && <PlaceholderPage title="Roadmap" subtitle="Feuille de route produit" onBack={goToDashboard} />}
-            {activePage === 'calendar' && <PlaceholderPage title="Calendrier" subtitle="Événements & jalons" onBack={goToDashboard} />}
-          </Suspense>
-        </main>
-
-        <Footer />
+      <div style={{ fontFamily: 'Manrope, sans-serif', fontSize: '14px', color: '#9CA3AF' }}>
+        Cette section est réservée aux investisseurs.
       </div>
     </div>
   )
