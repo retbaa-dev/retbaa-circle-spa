@@ -548,10 +548,10 @@ function StepQualification({ ndaName, ndaDate, onSuccess }) {
       <label style={s.label}>Niveau d'engagement envisagé *</label>
       <div style={s.radioGroup}>
         {[
-          { value: 'lt_10k',    label: 'Moins de 10 000 €' },
-          { value: '10k_50k',   label: '10 000 – 50 000 €' },
+          { value: '25k_50k',   label: '25 000 – 50 000 €' },
           { value: '50k_100k',  label: '50 000 – 100 000 €' },
-          { value: 'gt_100k',   label: '100 000 € et plus' },
+          { value: '100k_150k', label: '100 000 – 150 000 €' },
+          { value: 'gt_150k',   label: '150 000 € et plus' },
         ].map(opt => (
           <label key={opt.value} style={s.radioRow}>
             <input type="radio" name="amount" value={opt.value} checked={amount === opt.value} onChange={() => setAmount(opt.value)} style={s.radio} />
