@@ -18,6 +18,14 @@ const CATEGORY_META = {
 // ── PDF Viewer inline ────────────────────────────────────────────────────────
 function PdfViewer({ doc, onClose }) {
   const url = doc.file_url || doc.url
+  const openedAt = useRef(Date.now())
+
+  const handleClose = () => {
+    const seconds = Math.round((Date.now() - openedAt.current) / 1000)
+    trackDocClose({ docId: doc.id, viewerEmail: user?.email, durationSeconds: seconds })
+    onClose()
+  }
+
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 1000,
@@ -41,7 +49,7 @@ function PdfViewer({ doc, onClose }) {
           </div>
         </div>
         <button
-          onClick={onClose}
+          onClick={handleClose}
           style={{
             background: 'rgba(255,255,255,0.1)', border: 'none',
             color: '#fff', cursor: 'pointer',
@@ -427,7 +435,27 @@ export default function DataroomDocsPage({ isProspect = false, isApproved: isApp
       })
   }, [])
 
-  // Grouper par catégorie (hors Investissement)
+useEffect(() => {
+    if (!isProspect || !user?.email) return
+    supabase
+      .from('dataroom_prospects')
+      .select('status')
+      .eq('email', user.email)
+      .maybeSingle()
+      .then(({ data }) => setProspectStatus(data?.status ?? null))
+  }, [isProspect, user?.email])
+
+  const handlePreview = async (doc) => {
+    setViewerDoc(doc)
+    await trackDocView({
+      docId: doc.id,
+      docTitle: doc.title,
+      viewerEmail: user?.email || null,
+      isProspect: isProspect || false,
+    })
+  }
+
+  // Grouper par catégorie (hors Investissement, traité séparément)
   const grouped = CATEGORY_ORDER.reduce((acc, cat) => {
     const items = docs.filter(d => (d.category || 'Général') === cat)
     if (items.length > 0) acc[cat] = items
@@ -452,7 +480,7 @@ export default function DataroomDocsPage({ isProspect = false, isApproved: isApp
 
   return (
     <>
-      {viewerDoc && <PdfViewer doc={viewerDoc} onClose={() => setViewerDoc(null)} />}
+{viewerDoc && <PdfViewer doc={viewerDoc} onClose={() => setViewerDoc(null)} />}
       {showOnboarding && <OnboardingModal onClose={() => setShowOnboarding(false)} />}
 
       <div style={{ minHeight: '100vh', backgroundColor: '#FAF7F2', padding: '48px 32px' }}>
@@ -527,7 +555,7 @@ export default function DataroomDocsPage({ isProspect = false, isApproved: isApp
                 docs={docs.filter(d => d.category === 'Investissement')}
                 isAuthenticated={isAuthenticated}
                 isApproved={isApproved}
-                onPreviewClick={handleDocClick}
+onPreviewClick={handleDocClick}
                 onRestrictedClick={handleRestrictedClick}
               />
 
@@ -539,7 +567,7 @@ export default function DataroomDocsPage({ isProspect = false, isApproved: isApp
                   docs={items}
                   isAuthenticated={isAuthenticated}
                   isApproved={isApproved}
-                  onPreviewClick={handleDocClick}
+onPreviewClick={handleDocClick}
                   onRestrictedClick={handleRestrictedClick}
                 />
               ))}
