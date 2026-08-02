@@ -138,6 +138,7 @@ export default function Sidebar({ activePath, onNavigate, userName, onLogout, ob
     { path: '/insights',       icon: 'insights',        label: 'Insights'           },
     { path: '/produits',       icon: 'category',        label: 'Produits'           },
     { path: '/documents',      icon: 'description',     label: 'Documents'          },
+    { path: '/dataroom-docs',  icon: 'folder_open',     label: 'Dataroom'           },
     { path: '/tranche2',       icon: 'trending_up',     label: 'Tranche 2'          },
     { path: '/podcast',        icon: 'mic',             label: 'Podcast'            },
     { path: '/investissement', icon: 'person',          label: 'Mon Investissement' },
@@ -156,9 +157,9 @@ export default function Sidebar({ activePath, onNavigate, userName, onLogout, ob
     : isAssistant
     ? baseItems
     : [
-        ...baseItems.slice(0, 4),
-        { path: '/inner-circle', icon: 'diamond',    label: 'Inner Circle' },
-        ...baseItems.slice(4),
+        ...baseItems.slice(0, 5),
+        { path: '/inner-circle', icon: 'diamond', label: 'Inner Circle' },
+        ...baseItems.slice(5),
         ...(isAdmin ? [{ path: '/analytics', icon: 'bar_chart', label: 'Analytics' }] : []),
       ]
 
