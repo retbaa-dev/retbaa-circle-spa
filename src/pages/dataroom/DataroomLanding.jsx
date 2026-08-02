@@ -1,6 +1,6 @@
 // pages/dataroom/DataroomLanding.jsx — Retbaa Circle
 // Portail public prospects — Stepper 3 étapes : Présentation → NDA → Qualification
-import { useState } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
 
 // ── Styles ────────────────────────────────────────────────────────────────────
@@ -284,56 +284,494 @@ function StepPresentation({ onNext }) {
   )
 }
 
-// ── Étape 2 — NDA ─────────────────────────────────────────────────────────────
-function StepNDA({ onNext, ndaName, setNdaName, ndaAccepted, setNdaAccepted }) {
+// ── Étape 2 — NDA (refonte complète) ──────────────────────────────────────────
+function StepNDA({ onNext, ndaMeta, setNdaMeta, ndaAccepted, setNdaAccepted }) {
+  // counterparty type
+  const [cpType, setCpType] = useState(ndaMeta.counterparty_type || '')
+
+  // Particulier
+  const [firstName, setFirstName]   = useState(ndaMeta.cp_first_name || '')
+  const [lastName, setLastName]     = useState(ndaMeta.cp_last_name || '')
+  const [address, setAddress]       = useState(ndaMeta.address || '')
+
+  // Entité
+  const [entityName, setEntityName]         = useState(ndaMeta.counterparty_name || '')
+  const [legalForm, setLegalForm]           = useState(ndaMeta.legal_form || '')
+  const [registration, setRegistration]     = useState(ndaMeta.registration || '')
+  const [entityAddress, setEntityAddress]   = useState(ndaMeta.address || '')
+  const [repName, setRepName]               = useState(ndaMeta.representative_name || '')
+  const [repTitle, setRepTitle]             = useState(ndaMeta.representative_title || '')
+
+  // Signature
+  const [sigMode, setSigMode]   = useState('typed')
+  const [sigTyped, setSigTyped] = useState('')
+  const [sigDrawn, setSigDrawn] = useState('')  // base64 PNG
+  const [isDrawing, setIsDrawing] = useState(false)
+  const canvasRef = useRef(null)
+  const lastPos = useRef(null)
+
   const today = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
-  const canContinue = ndaName.trim().length > 0 && ndaAccepted
+
+  // Canvas drawing helpers
+  const getPos = (e, canvas) => {
+    const rect = canvas.getBoundingClientRect()
+    if (e.touches) {
+      return {
+        x: e.touches[0].clientX - rect.left,
+        y: e.touches[0].clientY - rect.top,
+      }
+    }
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    }
+  }
+
+  const startDraw = useCallback((e) => {
+    e.preventDefault()
+    const canvas = canvasRef.current
+    if (!canvas) return
+    setIsDrawing(true)
+    lastPos.current = getPos(e, canvas)
+  }, [])
+
+  const draw = useCallback((e) => {
+    e.preventDefault()
+    if (!isDrawing) return
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    const pos = getPos(e, canvas)
+    ctx.beginPath()
+    ctx.moveTo(lastPos.current.x, lastPos.current.y)
+    ctx.lineTo(pos.x, pos.y)
+    ctx.strokeStyle = '#1A3A6B'
+    ctx.lineWidth = 2
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    ctx.stroke()
+    lastPos.current = pos
+  }, [isDrawing])
+
+  const endDraw = useCallback(() => {
+    if (!isDrawing) return
+    setIsDrawing(false)
+    lastPos.current = null
+    // Capture base64
+    const canvas = canvasRef.current
+    if (canvas) {
+      setSigDrawn(canvas.toDataURL('image/png'))
+    }
+  }, [isDrawing])
+
+  const clearCanvas = () => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    setSigDrawn('')
+  }
+
+  // Attach touch listeners
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    canvas.addEventListener('touchstart', startDraw, { passive: false })
+    canvas.addEventListener('touchmove', draw, { passive: false })
+    canvas.addEventListener('touchend', endDraw, { passive: false })
+    return () => {
+      canvas.removeEventListener('touchstart', startDraw)
+      canvas.removeEventListener('touchmove', draw)
+      canvas.removeEventListener('touchend', endDraw)
+    }
+  }, [startDraw, draw, endDraw])
+
+  // Validation
+  const hasType = cpType !== ''
+  const hasFields = cpType === 'personal'
+    ? firstName.trim() && lastName.trim() && address.trim()
+    : cpType === 'entity'
+      ? entityName.trim() && legalForm.trim() && registration.trim() && entityAddress.trim() && repName.trim() && repTitle.trim()
+      : false
+  const hasSig = sigMode === 'typed' ? sigTyped.trim().length > 0 : sigDrawn !== ''
+  const canContinue = hasType && hasFields && ndaAccepted && hasSig
+
+  const handleNext = () => {
+    if (!canContinue) return
+    const meta = {
+      counterparty_type: cpType,
+      counterparty_name: cpType === 'personal' ? `${firstName.trim()} ${lastName.trim()}` : entityName.trim(),
+      cp_first_name: cpType === 'personal' ? firstName.trim() : '',
+      cp_last_name: cpType === 'personal' ? lastName.trim() : '',
+      legal_form: legalForm.trim(),
+      registration: registration.trim(),
+      address: cpType === 'personal' ? address.trim() : entityAddress.trim(),
+      representative_name: repName.trim(),
+      representative_title: repTitle.trim(),
+      signature_mode: sigMode,
+      signature_data: sigMode === 'typed' ? sigTyped.trim() : sigDrawn,
+    }
+    setNdaMeta(meta)
+    onNext()
+  }
 
   return (
     <div>
       <div style={s.stepLabel(true)}>Étape 2 — Confidentialité</div>
       <div style={s.title}>Accord de confidentialité</div>
-      <div style={s.body}>
-        Les informations contenues dans cet espace sont strictement confidentielles.
-        Elles sont destinées exclusivement à la personne qui en fait la demande et ne
-        peuvent être reproduites, transmises ou utilisées à des fins autres que l'évaluation
-        d'une opportunité d'investissement avec Retbaa Circle.
-      </div>
 
-      <label style={s.label}>Nom complet *</label>
-      <input
-        type="text"
-        value={ndaName}
-        onChange={e => setNdaName(e.target.value)}
-        placeholder="Prénom Nom"
-        style={s.input}
-      />
-
-      <label style={s.label}>Date</label>
-      <input
-        type="text"
-        value={today}
-        readOnly
-        style={s.inputReadonly}
-      />
-
-      <div style={s.checkboxRow}>
-        <input
-          type="checkbox"
-          id="nda-checkbox"
-          checked={ndaAccepted}
-          onChange={e => setNdaAccepted(e.target.checked)}
-          style={s.checkbox}
-        />
-        <label htmlFor="nda-checkbox" style={s.checkboxLabel}>
-          Je m'engage à ne pas divulguer ces informations à des tiers et à les utiliser
-          exclusivement dans le cadre de ma réflexion d'investissement avec Retbaa Circle.
+      {/* ── A. Formulaire contrepartie ── */}
+      <div style={{ ...s.label, marginTop: 0 }}>Vous êtes *</div>
+      <div style={{ display: 'flex', gap: '24px', marginBottom: '20px' }}>
+        <label style={s.radioRow}>
+          <input
+            type="radio"
+            name="nda-cp-type"
+            value="personal"
+            checked={cpType === 'personal'}
+            onChange={() => setCpType('personal')}
+            style={s.radio}
+          />
+          <span style={s.radioLabel}>Particulier</span>
+        </label>
+        <label style={s.radioRow}>
+          <input
+            type="radio"
+            name="nda-cp-type"
+            value="entity"
+            checked={cpType === 'entity'}
+            onChange={() => setCpType('entity')}
+            style={s.radio}
+          />
+          <span style={s.radioLabel}>Entité / Société</span>
         </label>
       </div>
 
+      {cpType === 'personal' && (
+        <div>
+          <div style={s.grid2}>
+            <div>
+              <label style={{ ...s.label, marginTop: 0 }}>Prénom *</label>
+              <input
+                type="text"
+                value={firstName}
+                onChange={e => setFirstName(e.target.value)}
+                placeholder="Prénom"
+                style={s.input}
+              />
+            </div>
+            <div>
+              <label style={{ ...s.label, marginTop: 0 }}>Nom *</label>
+              <input
+                type="text"
+                value={lastName}
+                onChange={e => setLastName(e.target.value)}
+                placeholder="Nom"
+                style={s.input}
+              />
+            </div>
+          </div>
+          <label style={s.label}>Adresse *</label>
+          <input
+            type="text"
+            value={address}
+            onChange={e => setAddress(e.target.value)}
+            placeholder="Adresse complète"
+            style={s.input}
+          />
+        </div>
+      )}
+
+      {cpType === 'entity' && (
+        <div>
+          <label style={{ ...s.label, marginTop: 0 }}>Dénomination / Nom société *</label>
+          <input
+            type="text"
+            value={entityName}
+            onChange={e => setEntityName(e.target.value)}
+            placeholder="SAS Exemple"
+            style={s.input}
+          />
+          <div style={s.grid2}>
+            <div>
+              <label style={s.label}>Forme juridique *</label>
+              <input
+                type="text"
+                value={legalForm}
+                onChange={e => setLegalForm(e.target.value)}
+                placeholder="SAS, SARL, SA…"
+                style={s.input}
+              />
+            </div>
+            <div>
+              <label style={s.label}>Numéro d'immatriculation *</label>
+              <input
+                type="text"
+                value={registration}
+                onChange={e => setRegistration(e.target.value)}
+                placeholder="SIREN / RCCM"
+                style={s.input}
+              />
+            </div>
+          </div>
+          <label style={s.label}>Adresse / Siège social *</label>
+          <input
+            type="text"
+            value={entityAddress}
+            onChange={e => setEntityAddress(e.target.value)}
+            placeholder="Adresse complète du siège"
+            style={s.input}
+          />
+          <div style={{ marginTop: '16px', padding: '14px 16px', background: '#FAF7F2', borderLeft: '2px solid rgba(196,169,106,0.5)' }}>
+            <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#1A3A6B', marginBottom: '12px' }}>
+              Représenté par
+            </div>
+            <div style={s.grid2}>
+              <div>
+                <label style={{ ...s.label, marginTop: 0 }}>Nom *</label>
+                <input
+                  type="text"
+                  value={repName}
+                  onChange={e => setRepName(e.target.value)}
+                  placeholder="Prénom Nom"
+                  style={s.input}
+                />
+              </div>
+              <div>
+                <label style={{ ...s.label, marginTop: 0 }}>Qualité / Titre *</label>
+                <input
+                  type="text"
+                  value={repTitle}
+                  onChange={e => setRepTitle(e.target.value)}
+                  placeholder="Gérant, DG…"
+                  style={s.input}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── B. Texte NDA ── */}
+      {cpType !== '' && (
+        <>
+          <div style={s.divider} />
+          <div style={{
+            maxHeight: '280px',
+            overflowY: 'auto',
+            border: '1px solid rgba(26,58,107,0.15)',
+            padding: '20px',
+            fontSize: '12.5px',
+            lineHeight: 1.75,
+            color: '#374151',
+            background: '#FAFAFA',
+            marginBottom: '20px',
+          }}>
+            <p style={{ fontWeight: 700, textAlign: 'center', marginTop: 0, marginBottom: '4px', fontSize: '13px', color: '#1A3A6B' }}>
+              ACCORD DE CONFIDENTIALITÉ
+            </p>
+            <p style={{ fontWeight: 700, textAlign: 'center', marginTop: 0, marginBottom: '16px', fontSize: '12px', color: '#1A3A6B' }}>
+              Groupe Retbaa — Multi-Entités France / Sénégal
+            </p>
+
+            <p style={{ fontWeight: 600, marginBottom: '6px' }}>Entre les soussignés :</p>
+            <p style={{ marginTop: 0 }}>
+              D'une part, <strong>RETBAA SASU</strong> (Entité France), SIREN 949 021 885, dont le siège social est situé 60 quai Fernand Saguet, 94700 Maisons-Alfort, France ; et <strong>RETBAA SASU</strong> (Entité Sénégal), RCCM SN DKR 2024 B 46558, dont le siège social est situé Villa E10, Cité Teylium Horizon, VDN, Dakar, Sénégal ; ci-après le « Groupe Retbaa », représenté par Massata Niang, Fondateur &amp; CEO.
+            </p>
+            <p>D'autre part, la Contrepartie identifiée ci-dessus.</p>
+
+            <p style={{ fontWeight: 600, marginBottom: '4px' }}>Article 1 — Objet</p>
+            <p style={{ marginTop: 0 }}>
+              Le présent accord a pour objet de définir les conditions dans lesquelles les Parties s'engagent à préserver la confidentialité des informations échangées dans le cadre d'un projet de partenariat, d'investissement ou de collaboration impliquant une ou plusieurs entités du Groupe Retbaa.
+            </p>
+
+            <p style={{ fontWeight: 600, marginBottom: '4px' }}>Article 2 — Obligations de confidentialité</p>
+            <p style={{ marginTop: 0 }}>
+              La Contrepartie s'engage à : (i) conserver strictement confidentielles toutes les informations reçues ; (ii) ne les utiliser qu'aux seules fins de l'évaluation du projet ; (iii) ne les divulguer qu'à ses représentants ayant un besoin d'en connaître, tenus par des obligations équivalentes.
+            </p>
+
+            <p style={{ fontWeight: 600, marginBottom: '4px' }}>Article 3 — Exclusions</p>
+            <p style={{ marginTop: 0 }}>
+              Ne sont pas confidentielles les informations déjà publiques, déjà connues de la Contrepartie, ou devant être divulguées par obligation légale.
+            </p>
+
+            <p style={{ fontWeight: 600, marginBottom: '4px' }}>Article 4 — Non-sollicitation</p>
+            <p style={{ marginTop: 0 }}>
+              Pendant les discussions et pendant 18 mois après leur cessation, la Contrepartie s'interdit de solliciter dirigeants, salariés ou partenaires clés du Groupe Retbaa identifiés dans ce cadre.
+            </p>
+
+            <p style={{ fontWeight: 600, marginBottom: '4px' }}>Article 5 — Absence d'engagement</p>
+            <p style={{ marginTop: 0 }}>
+              Le présent accord ne constitue ni une offre ni un engagement de conclure une opération. Chaque Partie peut mettre fin aux discussions à tout moment.
+            </p>
+
+            <p style={{ fontWeight: 600, marginBottom: '4px' }}>Article 6 — Durée</p>
+            <p style={{ marginTop: 0 }}>
+              Le présent accord est valable 3 ans à compter de sa signature. Les obligations relatives aux secrets d'affaires survivent 5 ans.
+            </p>
+
+            <p style={{ fontWeight: 600, marginBottom: '4px' }}>Article 7 — Droit applicable</p>
+            <p style={{ marginTop: 0, marginBottom: 0 }}>
+              Le présent accord est soumis au droit français. Tout différend sera tranché par arbitrage CCI, siège Paris.
+            </p>
+          </div>
+
+          {/* ── C. Signature double mode ── */}
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#1A3A6B', marginBottom: '12px' }}>
+              Votre signature *
+            </div>
+
+            {/* Onglets */}
+            <div style={{ display: 'flex', borderBottom: '2px solid rgba(26,58,107,0.12)', marginBottom: '16px' }}>
+              <button
+                type="button"
+                onClick={() => setSigMode('typed')}
+                style={{
+                  padding: '8px 20px',
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  fontFamily: 'system-ui, sans-serif',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  color: sigMode === 'typed' ? '#1A3A6B' : '#9CA3AF',
+                  borderBottom: sigMode === 'typed' ? '2px solid #1A3A6B' : '2px solid transparent',
+                  marginBottom: '-2px',
+                  transition: 'color 0.15s',
+                }}
+              >
+                ✏️ Taper
+              </button>
+              <button
+                type="button"
+                onClick={() => setSigMode('drawn')}
+                style={{
+                  padding: '8px 20px',
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  fontFamily: 'system-ui, sans-serif',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  color: sigMode === 'drawn' ? '#1A3A6B' : '#9CA3AF',
+                  borderBottom: sigMode === 'drawn' ? '2px solid #1A3A6B' : '2px solid transparent',
+                  marginBottom: '-2px',
+                  transition: 'color 0.15s',
+                }}
+              >
+                🖊️ Dessiner
+              </button>
+            </div>
+
+            {/* Onglet Taper */}
+            {sigMode === 'typed' && (
+              <div>
+                <input
+                  type="text"
+                  value={sigTyped}
+                  onChange={e => setSigTyped(e.target.value)}
+                  placeholder="Tapez votre nom complet"
+                  style={s.input}
+                />
+                {sigTyped.trim() && (
+                  <div style={{
+                    marginTop: '12px',
+                    padding: '12px 16px',
+                    background: '#FAF7F2',
+                    border: '1px solid rgba(196,169,106,0.3)',
+                    fontStyle: 'italic',
+                    fontFamily: 'Newsreader, Georgia, serif',
+                    fontSize: '28px',
+                    color: '#1A3A6B',
+                    minHeight: '52px',
+                  }}>
+                    {sigTyped}
+                  </div>
+                )}
+                <p style={s.note}>Votre nom tapé vaut signature électronique.</p>
+              </div>
+            )}
+
+            {/* Onglet Dessiner */}
+            {sigMode === 'drawn' && (
+              <div>
+                <div style={{ position: 'relative', display: 'inline-block' }}>
+                  <canvas
+                    ref={canvasRef}
+                    width={460}
+                    height={120}
+                    onMouseDown={startDraw}
+                    onMouseMove={draw}
+                    onMouseUp={endDraw}
+                    onMouseLeave={endDraw}
+                    style={{
+                      display: 'block',
+                      background: '#fff',
+                      border: '1px solid rgba(26,58,107,0.2)',
+                      cursor: 'crosshair',
+                      maxWidth: '100%',
+                      touchAction: 'none',
+                    }}
+                  />
+                </div>
+                <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <button
+                    type="button"
+                    onClick={clearCanvas}
+                    style={{
+                      padding: '6px 14px',
+                      fontFamily: 'system-ui, sans-serif',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      color: '#6B7280',
+                      background: 'none',
+                      border: '1px solid rgba(107,114,128,0.4)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Effacer
+                  </button>
+                  {sigDrawn && (
+                    <span style={{ fontSize: '11px', color: '#16a34a', fontWeight: 600 }}>✓ Signature enregistrée</span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Date */}
+          <label style={s.label}>Date</label>
+          <input type="text" value={today} readOnly style={s.inputReadonly} />
+
+          {/* Checkbox */}
+          <div style={s.checkboxRow}>
+            <input
+              type="checkbox"
+              id="nda-checkbox"
+              checked={ndaAccepted}
+              onChange={e => setNdaAccepted(e.target.checked)}
+              style={s.checkbox}
+            />
+            <label htmlFor="nda-checkbox" style={s.checkboxLabel}>
+              J'ai lu et j'accepte les termes du présent Accord de Confidentialité. Je m'engage
+              à ne pas divulguer les informations reçues à des tiers et à les utiliser exclusivement
+              dans le cadre de ma réflexion d'investissement avec Retbaa Circle.
+            </label>
+          </div>
+        </>
+      )}
+
       <button
+        type="button"
         style={{ ...s.btnPrimary, opacity: canContinue ? 1 : 0.45, cursor: canContinue ? 'pointer' : 'not-allowed' }}
-        onClick={() => canContinue && onNext()}
+        onClick={handleNext}
         disabled={!canContinue}
       >
         Signer et continuer →
@@ -343,12 +781,26 @@ function StepNDA({ onNext, ndaName, setNdaName, ndaAccepted, setNdaAccepted }) {
 }
 
 // ── Étape 3 — Qualification ───────────────────────────────────────────────────
-function StepQualification({ ndaName, ndaDate, onSuccess }) {
-  const [firstName, setFirstName] = useState(() => ndaName ? ndaName.split(' ')[0] : '')
-  const [lastName, setLastName]   = useState(() => ndaName ? ndaName.split(' ').slice(1).join(' ') : '')
+function StepQualification({ ndaMeta, ndaDate, onSuccess }) {
+  // Pré-remplissage depuis l'étape NDA
+  const initFirstName = () => {
+    if (ndaMeta.counterparty_type === 'personal') return ndaMeta.cp_first_name || ''
+    return ''
+  }
+  const initLastName = () => {
+    if (ndaMeta.counterparty_type === 'personal') return ndaMeta.cp_last_name || ''
+    return ''
+  }
+  const initEntityName = () => {
+    if (ndaMeta.counterparty_type === 'entity') return ndaMeta.counterparty_name || ''
+    return ''
+  }
+
+  const [firstName, setFirstName] = useState(initFirstName)
+  const [lastName, setLastName]   = useState(initLastName)
   const [email, setEmail]         = useState('')
   const [type, setType]           = useState('personal')
-  const [entityName, setEntityName] = useState('')
+  const [entityName, setEntityName] = useState(initEntityName)
   const [entitySiren, setEntitySiren] = useState('')
   const [channel, setChannel]     = useState('')
   const [amount, setAmount]       = useState('')
@@ -378,7 +830,8 @@ function StepQualification({ ndaName, ndaDate, onSuccess }) {
           channel,
           amount_range: amount,
           nda_signed_at: ndaDate,
-          nda_signer_name: ndaName,
+          nda_signer_name: ndaMeta.counterparty_name || '',
+          nda_meta: ndaMeta,
           status: 'pending',
         })
 
@@ -548,10 +1001,11 @@ function StepQualification({ ndaName, ndaDate, onSuccess }) {
       <label style={s.label}>Niveau d'engagement envisagé *</label>
       <div style={s.radioGroup}>
         {[
-          { value: '25k_50k',   label: '25 000 – 50 000 €' },
-          { value: '50k_100k',  label: '50 000 – 100 000 €' },
-          { value: '100k_150k', label: '100 000 – 150 000 €' },
-          { value: 'gt_150k',   label: '150 000 € et plus' },
+          { value: '25k_50k',    label: '25 000 – 50 000 €  /  16,4 – 32,8 M FCFA' },
+          { value: '50k_100k',   label: '50 000 – 100 000 €  /  32,8 – 65,6 M FCFA' },
+          { value: '100k_150k',  label: '100 000 – 150 000 €  /  65,6 – 98,4 M FCFA' },
+          { value: '150k_300k',  label: '150 000 – 300 000 €  /  98,4 – 196,8 M FCFA' },
+          { value: 'gt_300k',    label: '300 000 € et plus  /  196,8 M FCFA et plus' },
         ].map(opt => (
           <label key={opt.value} style={s.radioRow}>
             <input type="radio" name="amount" value={opt.value} checked={amount === opt.value} onChange={() => setAmount(opt.value)} style={s.radio} />
@@ -580,7 +1034,7 @@ function StepQualification({ ndaName, ndaDate, onSuccess }) {
 // ── Composant principal ───────────────────────────────────────────────────────
 export default function DataroomLanding() {
   const [step, setStep] = useState(0)
-  const [ndaName, setNdaName]         = useState('')
+  const [ndaMeta, setNdaMeta]         = useState({})
   const [ndaAccepted, setNdaAccepted] = useState(false)
   const [ndaDate]                     = useState(new Date().toISOString())
   const [sentTo, setSentTo]           = useState(null)
@@ -612,15 +1066,15 @@ export default function DataroomLanding() {
             {step === 1 && (
               <StepNDA
                 onNext={() => setStep(2)}
-                ndaName={ndaName}
-                setNdaName={setNdaName}
+                ndaMeta={ndaMeta}
+                setNdaMeta={setNdaMeta}
                 ndaAccepted={ndaAccepted}
                 setNdaAccepted={setNdaAccepted}
               />
             )}
             {step === 2 && (
               <StepQualification
-                ndaName={ndaName}
+                ndaMeta={ndaMeta}
                 ndaDate={ndaDate}
                 onSuccess={email => setSentTo(email)}
               />
