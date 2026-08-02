@@ -229,8 +229,13 @@ function AuthGate() {
   const [prospectChecked, setProspectChecked] = useState(false)
 
   useEffect(() => {
-    // Pas besoin de vérifier pour founder/assistant ou utilisateurs non connectés
-    if (!isSignedIn || !user?.email || role === 'founder' || role === 'assistant') {
+    // Pas besoin de vérifier pour founder/assistant
+    if (!isLoaded) return
+    if (!isSignedIn || !user?.email) {
+      setProspectChecked(true)
+      return
+    }
+    if (role === 'founder' || role === 'assistant') {
       setProspectChecked(true)
       return
     }
@@ -243,9 +248,10 @@ function AuthGate() {
         setIsProspect(!!data)
         setProspectChecked(true)
       })
-  }, [isSignedIn, user?.email, role])
+  }, [isLoaded, isSignedIn, user?.email, role])
 
-  // ── Loading ─────────────────────────────────────────────────────────────
+  // ── Loading — attendre TOUJOURS que la détection prospect soit terminée ──
+  // IMPORTANT : ne jamais afficher "accès refusé" avant que prospectChecked = true
   if (!isLoaded || !prospectChecked) {
     return <SplashScreen />
   }
