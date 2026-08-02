@@ -33,14 +33,111 @@ const ArticlePage           = lazy(() => import('./pages/ArticlePage'))
 const DataroomDocsPage      = lazy(() => import('./pages/DataroomDocsPage'))
 const ProspectDashboard     = lazy(() => import('./pages/ProspectDashboard'))
 
-function PageLoader() {
+// ── Splash screen animé ─────────────────────────────────────────────────────
+function SplashScreen({ message = 'Retbaa Circle' }) {
+  const [progress, setProgress] = useState(0)
+  const [phase, setPhase]       = useState(0)
+
+  const PHASES = [
+    'Chargement de votre espace…',
+    'Vérification de vos accès…',
+    'Préparation du contenu…',
+    'Presque prêt…',
+  ]
+
+  useEffect(() => {
+    // Progression fluide non-linéaire
+    const steps = [
+      { target: 30,  delay: 80  },
+      { target: 60,  delay: 150 },
+      { target: 80,  delay: 300 },
+      { target: 92,  delay: 500 },
+      { target: 100, delay: 200 },
+    ]
+    let current = 0
+    let timer
+
+    function next() {
+      if (current >= steps.length) return
+      const { target, delay } = steps[current++]
+      const startVal = current === 1 ? 0 : steps[current - 2].target
+      const diff = target - startVal
+      const step = diff / 20
+      let val = startVal
+      timer = setInterval(() => {
+        val = Math.min(val + step, target)
+        setProgress(Math.round(val))
+        setPhase(Math.floor((val / 100) * (PHASES.length - 1)))
+        if (val >= target) {
+          clearInterval(timer)
+          next()
+        }
+      }, delay / 20)
+    }
+    next()
+    return () => clearInterval(timer)
+  }, [])
+
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-      <div style={{ fontFamily: 'Newsreader, serif', fontSize: '16px', fontStyle: 'italic', color: '#1A3A6B', opacity: 0.4 }}>
-        Chargement…
+    <div style={{
+      position: 'fixed', inset: 0,
+      backgroundColor: '#0D1F3C',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      zIndex: 9999,
+    }}>
+      {/* Logo */}
+      <div style={{
+        fontFamily: 'Georgia, "Times New Roman", serif',
+        fontSize: '13px', letterSpacing: '0.4em',
+        textTransform: 'uppercase', color: '#EFC0D4',
+        fontWeight: 300, marginBottom: '12px',
+      }}>
+        RETBAA
+      </div>
+      <div style={{
+        fontFamily: 'Georgia, serif', fontSize: '32px',
+        fontWeight: 300, fontStyle: 'italic',
+        color: '#ffffff', marginBottom: '8px',
+      }}>
+        Circle
+      </div>
+      <div style={{
+        width: '32px', height: '1px',
+        background: '#EFC0D4', margin: '0 auto 48px',
+      }} />
+
+      {/* Barre de progression */}
+      <div style={{
+        width: '240px', height: '2px',
+        background: 'rgba(255,255,255,0.1)',
+        borderRadius: '1px', marginBottom: '20px',
+        overflow: 'hidden',
+      }}>
+        <div style={{
+          height: '100%', width: `${progress}%`,
+          background: 'linear-gradient(90deg, #EFC0D4, #ffffff)',
+          borderRadius: '1px',
+          transition: 'width 0.05s linear',
+        }} />
+      </div>
+
+      {/* Message de phase */}
+      <div style={{
+        fontFamily: 'system-ui, sans-serif',
+        fontSize: '11px', letterSpacing: '0.15em',
+        color: 'rgba(255,255,255,0.4)',
+        textTransform: 'uppercase',
+        minHeight: '20px',
+      }}>
+        {PHASES[phase]}
       </div>
     </div>
   )
+}
+
+function PageLoader() {
+  return <SplashScreen />
 }
 
 // ── Mode preview : ?preview=massata&token=XXX ───────────────────────────────
@@ -142,13 +239,7 @@ function AuthGate() {
 
   // ── Loading ─────────────────────────────────────────────────────────────
   if (!isLoaded || !prospectChecked) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: '#F9F9F9' }}>
-        <div style={{ fontFamily: 'Newsreader, serif', fontSize: '18px', fontStyle: 'italic', color: '#1A3A6B', opacity: 0.5 }}>
-          Chargement…
-        </div>
-      </div>
-    )
+    return <SplashScreen />
   }
 
   if (!isSignedIn && !previewUser) return <LoginPage />
