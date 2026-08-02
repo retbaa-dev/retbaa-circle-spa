@@ -1068,15 +1068,71 @@ function StepQualification({ ndaMeta, ndaDate, onSuccess }) {
       <label style={s.label}>Niveau d'engagement envisagé *</label>
       <div style={s.radioGroup}>
         {[
-          { value: '25k_50k',   label: '25 000 – 50 000 €  /  16,4 – 32,8 M FCFA' },
-          { value: '50k_100k',  label: '50 000 – 100 000 €  /  32,8 – 65,6 M FCFA' },
-          { value: '100k_150k', label: '100 000 – 150 000 €  /  65,6 – 98,4 M FCFA' },
-          { value: '150k_300k', label: '150 000 – 300 000 €  /  98,4 – 196,8 M FCFA' },
-          { value: 'gt_300k',   label: '300 000 € et plus  /  196,8 M FCFA et plus' },
+          {
+            value: '25k_50k',
+            label: '25 000 – 50 000 €  /  16,4 – 32,8 M FCFA',
+            contrepartie: {
+              holding:     '0,83 – 1,67 % du capital · Holding Retbaa Global',
+              spv:         '1 – 2 parts · redevance 3 → 5 % CA · sortie ×1,4 an 5 · TRI cible 13–15 %',
+              manufacture: 'Accès investisseur institutionnel — validation requise',
+            },
+          },
+          {
+            value: '50k_100k',
+            label: '50 000 – 100 000 €  /  32,8 – 65,6 M FCFA',
+            contrepartie: {
+              holding:     '1,67 – 3,33 % du capital · Holding Retbaa Global',
+              spv:         '2 – 4 parts · redevance progressive · plancher 6 % garanti · TRI cible 13–15 %',
+              manufacture: 'Accès investisseur institutionnel — validation requise',
+            },
+          },
+          {
+            value: '100k_150k',
+            label: '100 000 – 150 000 €  /  65,6 – 98,4 M FCFA',
+            contrepartie: {
+              holding:     '3,33 – 5 % du capital · Holding Retbaa Global',
+              spv:         '4 – 6 parts · redevance progressive · plancher 6 % garanti · TRI cible 13–15 %',
+              manufacture: 'Accès investisseur institutionnel — validation requise',
+            },
+          },
+          {
+            value: '150k_300k',
+            label: '150 000 – 300 000 €  /  98,4 – 196,8 M FCFA',
+            contrepartie: {
+              holding:     '5 – 10 % du capital + bonus +1 % (seuil ≥ 150 000 €) · Holding Retbaa Global',
+              spv:         '6 – 12 parts · redevance progressive · plancher 6 % · TRI cible 13–15 %',
+              manufacture: 'Accès investisseur institutionnel — validation requise',
+            },
+          },
+          {
+            value: 'gt_300k',
+            label: '300 000 € et plus  /  196,8 M FCFA et plus',
+            contrepartie: {
+              holding:     '10 %+ du capital + bonus +1 % · place au pacte d\'actionnaires · Holding Retbaa Global',
+              spv:         '12 parts et plus · conditions préférentielles · TRI cible 13–15 %',
+              manufacture: 'Ticket institutionnel — conditions sur mesure · validation requise',
+            },
+          },
         ].map(opt => (
-          <label key={opt.value} style={s.radioRow}>
-            <input type="radio" name="amount" value={opt.value} checked={amount === opt.value} onChange={() => setAmount(opt.value)} style={s.radio} />
-            <span style={s.radioLabel}>{opt.label}</span>
+          <label key={opt.value} style={{ ...s.radioRow, flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <input type="radio" name="amount" value={opt.value} checked={amount === opt.value} onChange={() => setAmount(opt.value)} style={s.radio} />
+              <span style={s.radioLabel}>{opt.label}</span>
+            </div>
+            {amount === opt.value && channel && opt.contrepartie[channel] && (
+              <div style={{
+                marginLeft: '24px',
+                fontSize: '12px',
+                color: '#1A3A6B',
+                background: '#F0F4FA',
+                border: '1px solid #C8D8F0',
+                borderRadius: '6px',
+                padding: '6px 10px',
+                fontStyle: 'italic',
+              }}>
+                → {opt.contrepartie[channel]}
+              </div>
+            )}
           </label>
         ))}
       </div>
