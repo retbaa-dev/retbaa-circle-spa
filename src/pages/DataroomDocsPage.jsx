@@ -193,8 +193,132 @@ function CategorySection({ category, docs, isProspect, isApproved, onPreview }) 
   )
 }
 
+// Véhicules d'investissement avec leur sous-titre
+const VEHICLES = {
+  'Retbaa Holding':    { subtitle: 'Equity direct · 30 000 € = 1 %',          icon: 'account_balance', color: '#1A3A6B' },
+  'Les Adresses':      { subtitle: 'SPV patrimonial · TRI cible 13–15 %',      icon: 'location_city',   color: '#065F46' },
+  'Retbaa Manufacture':{ subtitle: 'Filière industrielle · Horizon 7–10 ans',  icon: 'factory',         color: '#7C3AED' },
+}
+
+function InvestissementSection({ docs, isProspect, isApproved, onPreview }) {
+  return (
+    <div style={{ marginBottom: '40px' }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '10px',
+        marginBottom: '20px', paddingBottom: '12px',
+        borderBottom: '1px solid rgba(26,58,107,0.08)',
+      }}>
+        <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#1A3A6B' }}>account_balance</span>
+        <div style={{ fontFamily: 'system-ui', fontSize: '11px', fontWeight: 700, letterSpacing: '0.25em', textTransform: 'uppercase', color: '#1A3A6B' }}>
+          Investissement
+        </div>
+        <div style={{ marginLeft: 'auto', fontSize: '11px', color: '#9CA3AF', letterSpacing: '0.05em' }}>
+          3 véhicules
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+        {Object.entries(VEHICLES).map(([vehicle, meta]) => {
+          const vehicleDocs = docs.filter(d => d.vehicle === vehicle)
+          const isComingSoon = vehicle === 'Retbaa Manufacture'
+
+          return (
+            <div key={vehicle} style={{
+              background: '#fff',
+              border: `1px solid ${isComingSoon ? 'rgba(156,163,175,0.2)' : 'rgba(26,58,107,0.1)'}`,
+              borderRadius: '10px',
+              padding: '24px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              opacity: isComingSoon ? 0.7 : 1,
+            }}>
+              {/* Header véhicule */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                <div style={{
+                  width: '40px', height: '40px', borderRadius: '8px', flexShrink: 0,
+                  background: isComingSoon ? 'rgba(156,163,175,0.1)' : `${meta.color}15`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px', color: isComingSoon ? '#9CA3AF' : meta.color }}>
+                    {meta.icon}
+                  </span>
+                </div>
+                <div>
+                  <div style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '16px', color: isComingSoon ? '#9CA3AF' : '#1A3A6B', marginBottom: '4px' }}>
+                    {vehicle}
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#9CA3AF', lineHeight: 1.4 }}>
+                    {meta.subtitle}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ height: '1px', background: 'rgba(26,58,107,0.06)' }} />
+
+              {/* Documents du véhicule */}
+              {isComingSoon ? (
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: '8px',
+                  padding: '10px 14px',
+                  background: 'rgba(156,163,175,0.08)',
+                  borderRadius: '6px',
+                  fontSize: '12px', color: '#9CA3AF', fontStyle: 'italic',
+                }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>schedule</span>
+                  Dossier en préparation
+                </div>
+              ) : vehicleDocs.length === 0 ? (
+                <div style={{ fontSize: '12px', color: '#9CA3AF', fontStyle: 'italic' }}>Aucun document</div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {vehicleDocs.map(doc => {
+                    const isLocked = isProspect && !doc.preview_only && !isApproved
+                    return (
+                      <div
+                        key={doc.id}
+                        onClick={!isLocked ? () => onPreview(doc) : undefined}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: '10px',
+                          padding: '10px 12px',
+                          background: isLocked ? 'rgba(156,163,175,0.06)' : `${meta.color}08`,
+                          borderRadius: '6px',
+                          cursor: isLocked ? 'default' : 'pointer',
+                          transition: 'background 0.15s',
+                        }}
+                        onMouseEnter={e => { if (!isLocked) e.currentTarget.style.background = `${meta.color}15` }}
+                        onMouseLeave={e => { e.currentTarget.style.background = isLocked ? 'rgba(156,163,175,0.06)' : `${meta.color}08` }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: '16px', color: isLocked ? '#9CA3AF' : meta.color, flexShrink: 0 }}>
+                          {isLocked ? 'lock' : 'description'}
+                        </span>
+                        <span style={{
+                          flex: 1, fontSize: '13px',
+                          color: isLocked ? '#9CA3AF' : '#374151',
+                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        }}>
+                          {doc.title.replace(/^[^—]+—\s*/, '')}
+                        </span>
+                        {!isLocked && (
+                          <span className="material-symbols-outlined" style={{ fontSize: '14px', color: meta.color, flexShrink: 0 }}>
+                            visibility
+                          </span>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // Ordre d'affichage des catégories
-const CATEGORY_ORDER = ['Investissement', 'Financier', 'Juridique', 'Recherche & Marché', 'Stratégie', 'Général']
+const CATEGORY_ORDER = ['Financier', 'Juridique', 'Recherche & Marché', 'Stratégie', 'Général']
 
 export default function DataroomDocsPage({ isProspect }) {
   const { user } = useAuth()
@@ -226,16 +350,16 @@ export default function DataroomDocsPage({ isProspect }) {
 
   const isApproved = prospectStatus === 'approved'
 
-  // Grouper par catégorie dans l'ordre défini
+  // Grouper par catégorie (hors Investissement, traité séparément)
   const grouped = CATEGORY_ORDER.reduce((acc, cat) => {
     const items = docs.filter(d => (d.category || 'Général') === cat)
     if (items.length > 0) acc[cat] = items
     return acc
   }, {})
-  // Catégories restantes non listées dans CATEGORY_ORDER
   docs.forEach(d => {
     const cat = d.category || 'Général'
-    if (!grouped[cat]) grouped[cat] = docs.filter(x => (x.category || 'Général') === cat)
+    if (cat !== 'Investissement' && !grouped[cat])
+      grouped[cat] = docs.filter(x => (x.category || 'Général') === cat)
   })
 
   const totalAccessible = docs.filter(d => !(isProspect && !d.preview_only && !isApproved)).length
@@ -297,16 +421,27 @@ export default function DataroomDocsPage({ isProspect }) {
               Aucun document disponible pour le moment.
             </div>
           ) : (
-            Object.entries(grouped).map(([cat, items]) => (
-              <CategorySection
-                key={cat}
-                category={cat}
-                docs={items}
+            <>
+              {/* Section Investissement — 3 véhicules en cards */}
+              <InvestissementSection
+                docs={docs.filter(d => d.category === 'Investissement')}
                 isProspect={isProspect}
                 isApproved={isApproved}
                 onPreview={setViewerDoc}
               />
-            ))
+
+              {/* Autres catégories */}
+              {Object.entries(grouped).map(([cat, items]) => (
+                <CategorySection
+                  key={cat}
+                  category={cat}
+                  docs={items}
+                  isProspect={isProspect}
+                  isApproved={isApproved}
+                  onPreview={setViewerDoc}
+                />
+              ))}
+            </>
           )}
         </div>
       </div>
