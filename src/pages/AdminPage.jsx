@@ -3,6 +3,71 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 
+// ── Helpers NDA meta ──────────────────────────────────────────────────────────
+const JURISDICTION_LABEL = {
+  cci:         'CCI — Paris (France et international)',
+  ccja:        'CCJA — Abidjan (zone OHADA)',
+  ohada_dakar: 'Arbitrage OHADA — Dakar (République du Sénégal)',
+}
+
+const ARTICLE_LABEL = {
+  article1: 'Article 1 — Objet',
+  article2: 'Article 2 — Obligations de confidentialité',
+  article3: 'Article 3 — Exclusions',
+  article4: 'Article 4 — Non-sollicitation',
+  article5: "Article 5 — Absence d'engagement",
+  article6: 'Article 6 — Durée',
+  article7: 'Article 7 — Droit applicable et règlement des différends',
+}
+
+function hasNdaComments(ndaMeta) {
+  if (!ndaMeta || !ndaMeta.comments) return false
+  return Object.values(ndaMeta.comments).some(v => v && v.trim().length > 0)
+}
+
+function NdaDetail({ ndaMeta }) {
+  if (!ndaMeta) return null
+  const jurisdiction = ndaMeta.jurisdiction
+  const comments = ndaMeta.comments || {}
+  const filledComments = Object.entries(comments).filter(([, v]) => v && v.trim().length > 0)
+
+  return (
+    <div style={{
+      marginTop: '12px',
+      padding: '16px 20px',
+      background: '#FFF8EE',
+      border: '1px solid rgba(196,169,106,0.35)',
+      borderRadius: '3px',
+      fontFamily: 'system-ui, sans-serif',
+      fontSize: '12px',
+    }}>
+      {jurisdiction && (
+        <div style={{ marginBottom: filledComments.length > 0 ? '12px' : 0 }}>
+          <span style={{ fontWeight: 700, color: '#1A3A6B', fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+            Juridiction choisie
+          </span>
+          <div style={{ marginTop: '4px', color: '#374151' }}>{JURISDICTION_LABEL[jurisdiction] || jurisdiction}</div>
+        </div>
+      )}
+      {filledComments.length > 0 && (
+        <div>
+          <div style={{ fontWeight: 700, color: '#1A3A6B', fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>
+            Commentaires
+          </div>
+          {filledComments.map(([key, val]) => (
+            <div key={key} style={{ marginBottom: '10px' }}>
+              <div style={{ fontWeight: 600, color: '#1A3A6B', marginBottom: '2px', fontSize: '11px' }}>
+                {ARTICLE_LABEL[key] || key}
+              </div>
+              <div style={{ color: '#374151', lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>{val}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Badge statut prospects ────────────────────────────────────────────────────
 const STATUS_BADGE = {
   pending:          { label: 'En attente',        bg: 'rgba(196,169,106,0.12)', color: '#7A5C00', border: 'rgba(196,169,106,0.4)' },
