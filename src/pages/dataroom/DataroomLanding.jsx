@@ -265,22 +265,348 @@ function StepIndicator({ step }) {
 
 // ── Étape 1 — Présentation ────────────────────────────────────────────────────
 function StepPresentation({ onNext }) {
+  const MANIFESTO = [
+    {
+      num: 'I',
+      title: "Nous ne vendons pas des produits.",
+      subtitle: "Nous transformons un héritage en patrimoine.",
+      body: `Nous venons de territoires où chaque matière porte une mémoire, où chaque geste transmis raconte une manière d'habiter le monde. L'Afrique possède la matière, le geste, les récits et la mémoire sensorielle. Retbaa existe pour les inscrire dans un patrimoine désirable à l'échelle mondiale — non en reproduisant les codes du luxe européen, mais en construisant, depuis une autre origine, une maison capable de créer ses propres codes.`,
+    },
+    {
+      num: 'II',
+      title: "Le Luxe Culturel n\'est pas un segment.",
+      subtitle: "C\'est une grammaire.",
+      body: `Nous ne faisons pas du luxe inspiré par l'Afrique. Nous construisons une maison dont l'Afrique est la source de vérité, et dont Paris est l'atelier de précision. Notre langage se déploie à travers trois univers — Atmosphère, Gourmet et Beauté — unis par une même exigence. Aucune création ne folklorise. Aucune ne fige. Toutes transforment.`,
+    },
+    {
+      num: 'III',
+      title: "La rareté ne se décrète pas.",
+      subtitle: "Elle se prouve.",
+      body: `Une matière première rare. Un savoir-faire humain rare. Un temps de fabrication rare. Une transmission rare. C'est cette quadruple exigence qui distingue un objet précieux d'un objet simplement cher. Nous refusons la rareté artificielle produite par le marketing. Nous cultivons une rareté réelle — géologique, humaine, culturelle et temporelle.`,
+    },
+    {
+      num: 'IV',
+      title: "Nos objets ne représentent pas une culture.",
+      subtitle: "Ils permettent de la vivre.",
+      body: `Nous croyons qu'un objet peut être beau et avoir quelque chose à dire. Qu'un parfum peut réveiller une mémoire. Qu'une saveur peut révéler un territoire. Chaque création Retbaa est un fragment de culture mis en mouvement : une rencontre entre héritage et création, artisanat et innovation, ancrage africain et exigence internationale.`,
+    },
+    {
+      num: 'V',
+      title: "Notre ambition n'est pas régionale.",
+      subtitle: "Elle est fondatrice.",
+      body: `Retbaa n'est pas une maison africaine qui cherche à devenir internationale. Retbaa est une maison de luxe internationale dont l'Afrique constitue l'origine de vérité — comme la Provence pour un parfumeur, Kyoto pour un maître artisan ou Murano pour un verrier. Née au bord du Lac Rose, façonnée entre Dakar et Paris.`,
+    },
+  ]
+
   return (
-    <div>
-      <div style={s.stepLabel(true)}>Étape 1 — Présentation</div>
-      <div style={s.title}>Retbaa Circle · Espace Prospects</div>
-      <div style={s.body}>
-        Bienvenue dans l'espace investisseurs de Retbaa Circle. Ce portail vous permet
-        d'accéder aux informations stratégiques, financières et opérationnelles du groupe
-        dans le cadre d'une démarche de co-investissement.<br /><br />
-        Les documents et contenus partagés ici sont réservés aux personnes ayant manifesté
-        un intérêt pour rejoindre le cercle d'investisseurs Retbaa. L'accès est conditionné
-        à la signature d'un accord de confidentialité et à la qualification de votre profil.
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: '#0D1F3C',
+      fontFamily: 'system-ui, sans-serif',
+      overflowX: 'hidden',
+    }}>
+
+      {/* Hero */}
+      <div style={{
+        position: 'relative',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '80px 24px 60px',
+        textAlign: 'center',
+        background: 'linear-gradient(160deg, #0D1F3C 0%, #1A3A6B 50%, #0D2D1A 100%)',
+        overflow: 'hidden',
+      }}>
+        {/* Décor cercle */}
+        <div style={{
+          position: 'absolute', top: '10%', right: '-120px',
+          width: '500px', height: '500px',
+          borderRadius: '50%',
+          border: '1px solid rgba(239,192,212,0.08)',
+          pointerEvents: 'none',
+        }} />
+        <div style={{
+          position: 'absolute', bottom: '-80px', left: '-80px',
+          width: '400px', height: '400px',
+          borderRadius: '50%',
+          border: '1px solid rgba(239,192,212,0.06)',
+          pointerEvents: 'none',
+        }} />
+
+        {/* Eyebrow */}
+        <div style={{
+          fontSize: '9px', letterSpacing: '0.45em', textTransform: 'uppercase',
+          color: '#EFC0D4', fontWeight: 700, marginBottom: '32px',
+          fontFamily: 'system-ui, sans-serif',
+        }}>
+          RETBAA CIRCLE · ESPACE INVESTISSEURS
+        </div>
+
+        {/* Tagline géographique */}
+        <div style={{
+          fontSize: '11px', letterSpacing: '0.3em', textTransform: 'uppercase',
+          color: 'rgba(239,192,212,0.6)', marginBottom: '28px',
+          fontFamily: 'system-ui, sans-serif',
+        }}>
+          Born at Lac Rose · Designed in Paris · From Africa to the World
+        </div>
+
+        {/* Titre principal */}
+        <h1 style={{
+          fontFamily: 'Georgia, "Times New Roman", serif',
+          fontSize: 'clamp(36px, 6vw, 72px)',
+          fontWeight: 300,
+          fontStyle: 'italic',
+          color: '#ffffff',
+          lineHeight: 1.15,
+          margin: '0 0 24px',
+          maxWidth: '800px',
+        }}>
+          Des cultures à vivre.<br />
+          Des héritages à transmettre.
+        </h1>
+
+        {/* Trait */}
+        <div style={{ width: '60px', height: '1px', background: '#EFC0D4', margin: '0 auto 32px' }} />
+
+        {/* Sous-titre */}
+        <p style={{
+          fontFamily: 'system-ui, sans-serif',
+          fontSize: '16px', lineHeight: 1.8,
+          color: 'rgba(255,255,255,0.65)',
+          maxWidth: '520px', margin: '0 0 56px',
+        }}>
+          Retbaa ouvre son cercle à des partenaires qui partagent sa conviction :
+          les cultures africaines sont des forces contemporaines capables d'inventer
+          de nouvelles expressions du beau, du rare et du durable.
+        </p>
+
+        {/* CTA hero */}
+        <button
+          onClick={onNext}
+          style={{
+            display: 'inline-block',
+            padding: '18px 48px',
+            backgroundColor: '#EFC0D4',
+            color: '#1A3A6B',
+            fontFamily: 'system-ui, sans-serif',
+            fontSize: '11px', fontWeight: 700,
+            letterSpacing: '0.25em', textTransform: 'uppercase',
+            border: 'none', borderRadius: '2px',
+            cursor: 'pointer',
+            marginBottom: '16px',
+          }}
+        >
+          Rejoindre le cercle →
+        </button>
+
+        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.1em' }}>
+          Accès conditionné à la signature d'un accord de confidentialité
+        </div>
+
+        {/* Scroll hint */}
+        <div style={{
+          position: 'absolute', bottom: '32px',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+          color: 'rgba(255,255,255,0.3)', fontSize: '10px', letterSpacing: '0.2em',
+        }}>
+          <span>MANIFESTO</span>
+          <div style={{ width: '1px', height: '40px', background: 'rgba(239,192,212,0.3)' }} />
+        </div>
       </div>
-      <div style={s.divider} />
-      <button style={s.btnPrimary} onClick={onNext}>
-        Accéder à la dataroom →
-      </button>
+
+      {/* Manifesto */}
+      <div style={{ backgroundColor: '#FAF7F2', padding: '100px 24px' }}>
+        <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+
+          {/* Header manifesto */}
+          <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+            <div style={{
+              fontSize: '9px', letterSpacing: '0.4em', textTransform: 'uppercase',
+              color: '#EFC0D4', fontWeight: 700, marginBottom: '20px',
+            }}>
+              MANIFESTO
+            </div>
+            <h2 style={{
+              fontFamily: 'Georgia, serif', fontSize: 'clamp(28px, 4vw, 44px)',
+              fontWeight: 300, fontStyle: 'italic',
+              color: '#1A3A6B', margin: 0, lineHeight: 1.2,
+            }}>
+              Ce que nous croyons.
+            </h2>
+          </div>
+
+          {/* Articles manifesto */}
+          {MANIFESTO.map((article, i) => (
+            <div key={article.num} style={{
+              marginBottom: '72px',
+              paddingBottom: '72px',
+              borderBottom: i < MANIFESTO.length - 1 ? '1px solid rgba(239,192,212,0.3)' : 'none',
+            }}>
+              <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
+                {/* Numéro romain */}
+                <div style={{
+                  fontFamily: 'Georgia, serif', fontSize: '11px',
+                  color: '#EFC0D4', letterSpacing: '0.1em',
+                  paddingTop: '6px', flexShrink: 0, minWidth: '24px',
+                }}>
+                  {article.num}
+                </div>
+                <div>
+                  <h3 style={{
+                    fontFamily: 'Georgia, serif',
+                    fontSize: 'clamp(20px, 3vw, 28px)',
+                    fontWeight: 300, fontStyle: 'italic',
+                    color: '#1A3A6B', margin: '0 0 6px', lineHeight: 1.2,
+                  }}>
+                    {article.title}
+                  </h3>
+                  <p style={{
+                    fontFamily: 'Georgia, serif',
+                    fontSize: 'clamp(16px, 2vw, 20px)',
+                    fontWeight: 300, fontStyle: 'italic',
+                    color: '#9CA3AF', margin: '0 0 20px', lineHeight: 1.3,
+                  }}>
+                    {article.subtitle}
+                  </p>
+                  <p style={{
+                    fontFamily: 'system-ui, sans-serif',
+                    fontSize: '15px', lineHeight: 1.85,
+                    color: '#4B5563', margin: 0,
+                  }}>
+                    {article.body}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* Ce que nous refusons */}
+          <div style={{
+            background: '#1A3A6B', color: '#fff',
+            padding: '48px', borderRadius: '2px',
+            marginBottom: '80px',
+          }}>
+            <div style={{
+              fontSize: '9px', letterSpacing: '0.4em', textTransform: 'uppercase',
+              color: '#EFC0D4', fontWeight: 700, marginBottom: '24px',
+            }}>
+              CE QUE NOUS REFUSONS
+            </div>
+            {[
+              "L'exotisme de façade.",
+              "Le folklore comme raccourci.",
+              "La nostalgie comme argument de vente.",
+              "Les récits qui enferment l'Afrique dans l'anonymat ou le passé.",
+              "De choisir entre fierté d'origine et exigence de fabrication.",
+            ].map((item, i) => (
+              <div key={i} style={{
+                display: 'flex', gap: '16px', alignItems: 'flex-start',
+                marginBottom: i < 4 ? '16px' : 0,
+              }}>
+                <div style={{ width: '20px', height: '1px', background: '#EFC0D4', marginTop: '11px', flexShrink: 0 }} />
+                <p style={{
+                  fontFamily: 'Georgia, serif', fontSize: '16px',
+                  fontStyle: 'italic', fontWeight: 300,
+                  color: 'rgba(255,255,255,0.85)', margin: 0, lineHeight: 1.6,
+                }}>
+                  {item}
+                </p>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      </div>
+
+      {/* Section opportunité d'investissement */}
+      <div style={{
+        background: '#fff',
+        padding: '100px 24px',
+        borderTop: '1px solid rgba(239,192,212,0.2)',
+      }}>
+        <div style={{ maxWidth: '720px', margin: '0 auto', textAlign: 'center' }}>
+          <div style={{
+            fontSize: '9px', letterSpacing: '0.4em', textTransform: 'uppercase',
+            color: '#EFC0D4', fontWeight: 700, marginBottom: '20px',
+          }}>
+            L'OPPORTUNITÉ
+          </div>
+          <h2 style={{
+            fontFamily: 'Georgia, serif',
+            fontSize: 'clamp(28px, 4vw, 44px)',
+            fontWeight: 300, fontStyle: 'italic',
+            color: '#1A3A6B', margin: '0 0 32px', lineHeight: 1.2,
+          }}>
+            Rejoindre Retbaa, c'est parier<br />sur un nouveau récit du luxe.
+          </h2>
+          <p style={{
+            fontFamily: 'system-ui, sans-serif', fontSize: '15px',
+            lineHeight: 1.85, color: '#4B5563',
+            maxWidth: '560px', margin: '0 auto 56px',
+          }}>
+            Le Luxe Culturel est l'un des segments à plus fort potentiel de la prochaine décennie.
+            Retbaa en est à l'origine — avec une maison, une doctrine et une présence construites
+            depuis Dakar et Paris, pour le monde entier.
+          </p>
+
+          {/* 3 canaux résumés */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px', marginBottom: '56px', textAlign: 'left' }}>
+            {[
+              { label: 'Retbaa Holding', desc: 'Equity direct · 30 000 € = 1 %', detail: 'Entrer au capital de la Maison.' },
+              { label: 'SPV Les Adresses', desc: 'Rendement patrimonial · TRI 13–15 %', detail: 'Co-investir dans les premières adresses physiques.' },
+              { label: 'Retbaa Manufacture', desc: 'Institutionnel · Horizon 7–10 ans', detail: 'Financer la filière industrielle africaine.' },
+            ].map(c => (
+              <div key={c.label} style={{
+                padding: '28px 24px',
+                border: '1px solid rgba(239,192,212,0.4)',
+                borderRadius: '2px',
+              }}>
+                <div style={{
+                  fontSize: '9px', letterSpacing: '0.3em', textTransform: 'uppercase',
+                  color: '#EFC0D4', fontWeight: 700, marginBottom: '10px',
+                }}>
+                  {c.label}
+                </div>
+                <div style={{
+                  fontFamily: 'Georgia, serif', fontSize: '14px',
+                  fontStyle: 'italic', color: '#1A3A6B', marginBottom: '8px',
+                }}>
+                  {c.desc}
+                </div>
+                <div style={{ fontSize: '13px', color: '#6B7280', lineHeight: 1.6 }}>
+                  {c.detail}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA final */}
+          <button
+            onClick={onNext}
+            style={{
+              display: 'inline-block',
+              padding: '18px 56px',
+              backgroundColor: '#1A3A6B',
+              color: '#EFC0D4',
+              fontFamily: 'system-ui, sans-serif',
+              fontSize: '11px', fontWeight: 700,
+              letterSpacing: '0.25em', textTransform: 'uppercase',
+              border: 'none', borderRadius: '2px',
+              cursor: 'pointer',
+              marginBottom: '16px',
+            }}
+          >
+            Accéder à la dataroom →
+          </button>
+          <div style={{ fontSize: '11px', color: '#9CA3AF', letterSpacing: '0.05em' }}>
+            Signature NDA · Qualification · Accès personnalisé
+          </div>
+        </div>
+      </div>
+
     </div>
   )
 }
@@ -1202,39 +1528,38 @@ export default function DataroomLanding() {
   }
 
   return (
-    <div style={s.page}>
-      <div style={s.card}>
-        {/* Logo */}
-        <div style={s.logo}>Retbaa Circle</div>
-        <div style={s.tagline}>Espace Prospects · Portail Investisseurs</div>
-
-        {sentTo ? (
-          <div style={s.success}>
-            <div style={{ fontSize: '40px', marginBottom: '20px' }}>✉️</div>
-            <div style={s.successTitle}>Lien envoyé</div>
-            <div style={s.successText}>
-              Un lien d'accès vous a été envoyé à<br />
-              <strong style={{ color: '#1A3A6B' }}>{sentTo}</strong><br /><br />
-              Vérifiez votre boîte mail et cliquez sur le lien pour accéder à l'espace dataroom.
+    <>
+      {sentTo ? (
+        <div style={s.page}>
+          <div style={s.card}>
+            <div style={s.logo}>Retbaa Circle</div>
+            <div style={s.success}>
+              <div style={{ fontSize: '40px', marginBottom: '20px' }}>✉️</div>
+              <div style={s.successTitle}>Lien envoyé</div>
+              <div style={s.successText}>
+                Un lien d'accès vous a été envoyé à<br />
+                <strong style={{ color: '#1A3A6B' }}>{sentTo}</strong><br /><br />
+                Vérifiez votre boîte mail et cliquez sur le lien pour accéder à l'espace dataroom.
+              </div>
             </div>
           </div>
-        ) : (
-          <>
+        </div>
+      ) : step === 0 ? (
+        <StepPresentation onNext={() => { saveProgress({ step: 1 }); setStep(1) }} />
+      ) : step === 2 ? (
+        <div style={s.page}>
+          <div style={s.card}>
+            <div style={s.logo}>Retbaa Circle</div>
+            <div style={s.tagline}>Espace Prospects · Portail Investisseurs</div>
             <StepIndicator step={step} />
-
-            {step === 0 && (
-              <StepPresentation onNext={() => { saveProgress({ step: 1 }); setStep(1) }} />
-            )}
-            {step === 2 && (
-              <StepQualification
-                ndaMeta={ndaMeta}
-                ndaDate={ndaDate}
-                onSuccess={email => { clearDraft(); setSentTo(email) }}
-              />
-            )}
-          </>
-        )}
-      </div>
-    </div>
+            <StepQualification
+              ndaMeta={ndaMeta}
+              ndaDate={ndaDate}
+              onSuccess={email => { clearDraft(); setSentTo(email) }}
+            />
+          </div>
+        </div>
+      ) : null}
+    </>
   )
 }
