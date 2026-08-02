@@ -2,6 +2,8 @@
 // Portail public prospects — Stepper 3 étapes : Présentation → NDA (pleine page) → Qualification
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
+import { sendEmail } from '../../lib/brevo'
+import { welcomeProspect, notifyAdmin } from '../../lib/emailTemplates'
 
 // ── Styles partagés ───────────────────────────────────────────────────────────
 const s = {
@@ -1274,6 +1276,29 @@ function StepQualification({ ndaMeta, ndaDate, onSuccess }) {
         })
 
       if (insertErr) throw insertErr
+
+      // ── Emails automatiques Brevo (best-effort, ne bloque pas l'onboarding) ──
+      const prospectEmail = email.trim().toLowerCase()
+      const prospectFirst = firstName.trim()
+      const prospectLast  = lastName.trim()
+      await Promise.allSettled([
+        sendEmail({
+          to:      prospectEmail,
+          subject: 'Bienvenue dans Retbaa Circle',
+          html:    welcomeProspect({ firstName: prospectFirst, lastName: prospectLast }),
+        }),
+        sendEmail({
+          to:      'massata@retbaa.com',
+          subject: `🔔 Nouveau prospect Retbaa Circle — ${prospectFirst} ${prospectLast}`,
+          html:    notifyAdmin({
+            firstName: prospectFirst,
+            lastName:  prospectLast,
+            email:     prospectEmail,
+            canal:     channel,
+            montant:   amount,
+          }),
+        }),
+      ])
 
       const { error: otpErr } = await supabase.auth.signInWithOtp({
         email: email.trim().toLowerCase(),
