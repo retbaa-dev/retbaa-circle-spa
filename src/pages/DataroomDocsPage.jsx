@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import OnboardingModal from '../components/OnboardingModal'
+import DataroomFAQ from '../components/DataroomFAQ'
 
 // ── Icônes et couleurs par catégorie ────────────────────────────────────────
 const CATEGORY_META = {
@@ -542,6 +543,9 @@ export default function DataroomDocsPage({ isProspect = false, isApproved: isApp
                   onRestrictedClick={handleRestrictedClick}
                 />
               ))}
+
+              {/* FAQ Dataroom */}
+              <DataroomFAQ />
             </>
           )}
         </div>

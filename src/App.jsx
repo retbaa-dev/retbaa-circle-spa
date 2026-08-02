@@ -331,6 +331,7 @@ function AuthGate() {
           <Route path="/investissement"      element={<MonInvestissementPage userName={effectiveName} isAssistant={isAssistant} />} />
           <Route path="/tranche2"            element={<Tranche2Page userName={effectiveName} />} />
           <Route path="/podcast"             element={<PodcastPage userName={effectiveName} />} />
+          <Route path="/mon-espace"          element={<ProspectDashboard />} />
           <Route path="/inner-circle"        element={
             isAssistant
               ? <RestrictedPage />
