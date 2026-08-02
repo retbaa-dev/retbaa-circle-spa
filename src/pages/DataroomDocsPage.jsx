@@ -1,168 +1,209 @@
-// pages/DataroomDocsPage.jsx — Documents dataroom pour les prospects
+// pages/DataroomDocsPage.jsx — Documents dataroom catégorisés avec viewer inline
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 
-function LockedCard({ doc }) {
+// Icônes et couleurs par catégorie
+const CATEGORY_META = {
+  'Investissement':      { icon: 'account_balance', color: '#1A3A6B', bg: 'rgba(26,58,107,0.08)'  },
+  'Juridique':           { icon: 'gavel',            color: '#7C3AED', bg: 'rgba(124,58,237,0.08)' },
+  'Financier':           { icon: 'bar_chart',        color: '#065F46', bg: 'rgba(6,95,70,0.08)'    },
+  'Recherche & Marché':  { icon: 'travel_explore',   color: '#92400E', bg: 'rgba(146,64,14,0.08)'  },
+  'Stratégie':           { icon: 'lightbulb',        color: '#B45309', bg: 'rgba(180,83,9,0.08)'   },
+  'Général':             { icon: 'folder',           color: '#6B7280', bg: 'rgba(107,114,128,0.08)'},
+}
+
+function PdfViewer({ doc, onClose }) {
+  const url = doc.file_url || doc.url
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 1000,
+      backgroundColor: 'rgba(13,31,60,0.85)',
+      display: 'flex', flexDirection: 'column',
+    }}>
+      {/* Header viewer */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '16px 24px',
+        backgroundColor: '#0D1F3C',
+        borderBottom: '1px solid rgba(239,192,212,0.2)',
+        flexShrink: 0,
+      }}>
+        <div>
+          <div style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '18px', color: '#fff' }}>
+            {doc.title}
+          </div>
+          <div style={{ fontSize: '11px', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>
+            {doc.category} · Lecture seule
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          style={{
+            background: 'rgba(255,255,255,0.1)', border: 'none',
+            color: '#fff', cursor: 'pointer',
+            width: '36px', height: '36px', borderRadius: '50%',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '20px', flexShrink: 0,
+          }}
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* PDF iframe — sans toolbar pour éviter le téléchargement */}
+      <div style={{ flex: 1, overflow: 'hidden', backgroundColor: '#1A1A2E' }}>
+        <iframe
+          src={`${url}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
+          title={doc.title}
+          style={{ width: '100%', height: '100%', border: 'none' }}
+          sandbox="allow-same-origin allow-scripts"
+        />
+      </div>
+    </div>
+  )
+}
+
+function DocCard({ doc, isLocked, onPreview }) {
+  const meta = CATEGORY_META[doc.category] || CATEGORY_META['Général']
+
   return (
     <div style={{
       background: '#fff',
       border: '1px solid rgba(26,58,107,0.08)',
       borderRadius: '8px',
-      padding: '24px',
+      padding: '20px 24px',
       display: 'flex',
-      alignItems: 'flex-start',
+      alignItems: 'center',
       gap: '16px',
-      opacity: 0.7,
-    }}>
-      <span
-        className="material-symbols-outlined"
-        style={{ fontSize: '28px', color: '#9CA3AF', flexShrink: 0, marginTop: '2px' }}
-      >
-        lock
-      </span>
+      opacity: isLocked ? 0.6 : 1,
+      transition: 'box-shadow 0.15s',
+      cursor: isLocked ? 'default' : 'pointer',
+    }}
+    onClick={!isLocked ? onPreview : undefined}
+    onMouseEnter={e => { if (!isLocked) e.currentTarget.style.boxShadow = '0 4px 16px rgba(26,58,107,0.1)' }}
+    onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none' }}
+    >
+      {/* Icône catégorie */}
+      <div style={{
+        width: '44px', height: '44px', borderRadius: '8px',
+        background: isLocked ? 'rgba(156,163,175,0.1)' : meta.bg,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flexShrink: 0,
+      }}>
+        <span className="material-symbols-outlined" style={{
+          fontSize: '22px',
+          color: isLocked ? '#9CA3AF' : meta.color,
+        }}>
+          {isLocked ? 'lock' : meta.icon}
+        </span>
+      </div>
+
+      {/* Infos doc */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
-          fontFamily: 'Newsreader, serif',
-          fontStyle: 'italic',
-          fontSize: '18px',
-          color: '#1A3A6B',
-          marginBottom: '6px',
+          fontFamily: 'Georgia, serif', fontStyle: 'italic',
+          fontSize: '16px', color: isLocked ? '#9CA3AF' : '#1A3A6B',
+          marginBottom: '4px', whiteSpace: 'nowrap',
+          overflow: 'hidden', textOverflow: 'ellipsis',
         }}>
-          {doc.name || doc.title || 'Document'}
+          {doc.title}
         </div>
         {doc.description && (
-          <p style={{
-            fontFamily: 'Manrope, sans-serif',
-            fontSize: '13px',
-            color: '#6B7280',
-            margin: '0 0 10px',
-            lineHeight: 1.5,
+          <div style={{
+            fontSize: '12px', color: '#9CA3AF',
+            lineHeight: 1.5, overflow: 'hidden',
+            display: '-webkit-box', WebkitLineClamp: 1,
+            WebkitBoxOrient: 'vertical',
           }}>
             {doc.description}
-          </p>
-        )}
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '6px',
-          padding: '6px 12px',
-          background: 'rgba(156,163,175,0.12)',
-          borderRadius: '4px',
-          fontFamily: 'Manrope, sans-serif',
-          fontSize: '11px',
-          fontWeight: 600,
-          color: '#6B7280',
-          letterSpacing: '0.05em',
-        }}>
-          <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>schedule</span>
-          Document disponible après validation de votre accès
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function DocCard({ doc }) {
-  const hasFile = doc.file_url || doc.url
-  return (
-    <div style={{
-      background: '#fff',
-      border: '1px solid rgba(26,58,107,0.08)',
-      borderRadius: '8px',
-      padding: '24px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '12px',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-        <span
-          className="material-symbols-outlined"
-          style={{ fontSize: '28px', color: '#EFC0D4', flexShrink: 0, marginTop: '2px' }}
-        >
-          description
-        </span>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontFamily: 'Newsreader, serif',
-            fontStyle: 'italic',
-            fontSize: '18px',
-            color: '#1A3A6B',
-            marginBottom: '6px',
-          }}>
-            {doc.name || doc.title || 'Document'}
           </div>
-          {doc.description && (
-            <p style={{
-              fontFamily: 'Manrope, sans-serif',
-              fontSize: '13px',
-              color: '#6B7280',
-              margin: 0,
-              lineHeight: 1.5,
-            }}>
-              {doc.description}
-            </p>
-          )}
-        </div>
+        )}
       </div>
 
-      {/* Aperçu PDF inline si disponible */}
-      {hasFile && doc.preview_only && (
-        <div style={{ marginTop: '4px' }}>
-          <iframe
-            src={doc.file_url || doc.url}
-            title={doc.name || doc.title}
-            style={{
-              width: '100%',
-              height: '360px',
-              border: '1px solid rgba(26,58,107,0.08)',
-              borderRadius: '4px',
-            }}
-          />
+      {/* Statut / action */}
+      {isLocked ? (
+        <div style={{
+          flexShrink: 0, fontSize: '11px', letterSpacing: '0.1em',
+          textTransform: 'uppercase', color: '#9CA3AF',
+          fontWeight: 600, whiteSpace: 'nowrap',
+        }}>
+          Accès restreint
         </div>
-      )}
-
-      {hasFile && (
-        <a
-          href={doc.file_url || doc.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '8px 16px',
-            background: '#EFC0D4',
-            borderRadius: '4px',
-            fontFamily: 'Manrope, sans-serif',
-            fontSize: '11px',
-            fontWeight: 700,
-            letterSpacing: '0.15em',
-            textTransform: 'uppercase',
-            color: '#704C5D',
-            textDecoration: 'none',
-            alignSelf: 'flex-start',
-            transition: 'opacity 0.15s',
-          }}
-          onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
-          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-        >
-          <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>open_in_new</span>
-          Ouvrir
-        </a>
+      ) : (
+        <div style={{
+          flexShrink: 0,
+          display: 'flex', alignItems: 'center', gap: '4px',
+          fontSize: '11px', letterSpacing: '0.1em',
+          textTransform: 'uppercase', color: meta.color,
+          fontWeight: 700,
+        }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>visibility</span>
+          Consulter
+        </div>
       )}
     </div>
   )
 }
+
+function CategorySection({ category, docs, isProspect, isApproved, onPreview }) {
+  const meta = CATEGORY_META[category] || CATEGORY_META['Général']
+  return (
+    <div style={{ marginBottom: '40px' }}>
+      {/* Header section */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '10px',
+        marginBottom: '16px',
+        paddingBottom: '12px',
+        borderBottom: '1px solid rgba(26,58,107,0.08)',
+      }}>
+        <span className="material-symbols-outlined" style={{ fontSize: '18px', color: meta.color }}>
+          {meta.icon}
+        </span>
+        <div style={{
+          fontFamily: 'system-ui', fontSize: '11px',
+          fontWeight: 700, letterSpacing: '0.25em',
+          textTransform: 'uppercase', color: meta.color,
+        }}>
+          {category}
+        </div>
+        <div style={{
+          marginLeft: 'auto', fontSize: '11px',
+          color: '#9CA3AF', letterSpacing: '0.05em',
+        }}>
+          {docs.length} document{docs.length > 1 ? 's' : ''}
+        </div>
+      </div>
+
+      {/* Cartes */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {docs.map(doc => {
+          const isLocked = isProspect && !doc.preview_only && !isApproved
+          return (
+            <DocCard
+              key={doc.id}
+              doc={doc}
+              isLocked={isLocked}
+              onPreview={() => onPreview(doc)}
+            />
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// Ordre d'affichage des catégories
+const CATEGORY_ORDER = ['Investissement', 'Financier', 'Juridique', 'Recherche & Marché', 'Stratégie', 'Général']
 
 export default function DataroomDocsPage({ isProspect }) {
   const { user } = useAuth()
-  const [docs, setDocs]           = useState([])
-  const [loading, setLoading]     = useState(true)
+  const [docs, setDocs]                     = useState([])
+  const [loading, setLoading]               = useState(true)
   const [prospectStatus, setProspectStatus] = useState(null)
+  const [viewerDoc, setViewerDoc]           = useState(null)
 
   useEffect(() => {
-    // Charger les docs
     supabase
       .from('dataroom_docs')
       .select('*')
@@ -174,98 +215,101 @@ export default function DataroomDocsPage({ isProspect }) {
   }, [])
 
   useEffect(() => {
-    // Charger le statut du prospect pour savoir s'il est approuvé
     if (!isProspect || !user?.email) return
     supabase
       .from('dataroom_prospects')
       .select('status')
       .eq('email', user.email)
       .maybeSingle()
-      .then(({ data }) => {
-        setProspectStatus(data?.status ?? null)
-      })
+      .then(({ data }) => setProspectStatus(data?.status ?? null))
   }, [isProspect, user?.email])
 
   const isApproved = prospectStatus === 'approved'
 
+  // Grouper par catégorie dans l'ordre défini
+  const grouped = CATEGORY_ORDER.reduce((acc, cat) => {
+    const items = docs.filter(d => (d.category || 'Général') === cat)
+    if (items.length > 0) acc[cat] = items
+    return acc
+  }, {})
+  // Catégories restantes non listées dans CATEGORY_ORDER
+  docs.forEach(d => {
+    const cat = d.category || 'Général'
+    if (!grouped[cat]) grouped[cat] = docs.filter(x => (x.category || 'Général') === cat)
+  })
+
+  const totalAccessible = docs.filter(d => !(isProspect && !d.preview_only && !isApproved)).length
+  const totalLocked     = docs.length - totalAccessible
+
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#FAF7F2',
-      padding: '48px 32px',
-    }}>
-      <div style={{ maxWidth: '760px', margin: '0 auto' }}>
-        {/* Titre */}
-        <div style={{ marginBottom: '40px' }}>
-          <h1 style={{
-            fontFamily: 'Newsreader, serif',
-            fontWeight: 300,
-            fontStyle: 'italic',
-            fontSize: '36px',
-            color: '#1A3A6B',
-            marginBottom: '8px',
-          }}>
-            Dataroom
-          </h1>
-          <p style={{
-            fontFamily: 'Manrope, sans-serif',
-            fontSize: '14px',
-            color: '#6B7280',
-            margin: 0,
-          }}>
-            Documents mis à disposition dans le cadre de votre analyse.
-          </p>
-          {isProspect && !isApproved && prospectStatus !== null && (
+    <>
+      {viewerDoc && <PdfViewer doc={viewerDoc} onClose={() => setViewerDoc(null)} />}
+
+      <div style={{ minHeight: '100vh', backgroundColor: '#FAF7F2', padding: '48px 32px' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+
+          {/* En-tête */}
+          <div style={{ marginBottom: '40px' }}>
             <div style={{
-              marginTop: '16px',
-              padding: '12px 16px',
-              background: 'rgba(239,192,212,0.2)',
-              borderLeft: '3px solid #EFC0D4',
-              borderRadius: '0 4px 4px 0',
-              fontFamily: 'Manrope, sans-serif',
-              fontSize: '13px',
-              color: '#704C5D',
+              fontSize: '9px', letterSpacing: '0.4em', textTransform: 'uppercase',
+              color: '#EFC0D4', fontWeight: 700, marginBottom: '12px',
             }}>
-              Certains documents seront disponibles une fois votre accès validé par l'équipe Retbaa.
+              RETBAA CIRCLE · ESPACE CONFIDENTIEL
             </div>
+            <h1 style={{
+              fontFamily: 'Georgia, serif', fontWeight: 300, fontStyle: 'italic',
+              fontSize: '36px', color: '#1A3A6B', margin: '0 0 12px',
+            }}>
+              Dataroom
+            </h1>
+            <p style={{ fontFamily: 'system-ui', fontSize: '14px', color: '#6B7280', margin: 0 }}>
+              {totalAccessible} document{totalAccessible > 1 ? 's' : ''} disponible{totalAccessible > 1 ? 's' : ''}
+              {totalLocked > 0 && ` · ${totalLocked} en accès restreint`}
+            </p>
+
+            {isProspect && !isApproved && prospectStatus !== null && (
+              <div style={{
+                marginTop: '16px', padding: '12px 16px',
+                background: 'rgba(239,192,212,0.2)',
+                borderLeft: '3px solid #EFC0D4',
+                borderRadius: '0 4px 4px 0',
+                fontFamily: 'system-ui', fontSize: '13px', color: '#704C5D',
+              }}>
+                Les documents en accès restreint seront disponibles après validation de votre dossier par l'équipe Retbaa.
+              </div>
+            )}
+          </div>
+
+          {/* Contenu */}
+          {loading ? (
+            <div style={{
+              textAlign: 'center', padding: '80px 0',
+              fontFamily: 'Georgia, serif', fontStyle: 'italic',
+              fontSize: '16px', color: '#1A3A6B', opacity: 0.4,
+            }}>
+              Chargement…
+            </div>
+          ) : docs.length === 0 ? (
+            <div style={{
+              textAlign: 'center', padding: '80px 0',
+              fontFamily: 'system-ui', fontSize: '14px', color: '#9CA3AF',
+            }}>
+              Aucun document disponible pour le moment.
+            </div>
+          ) : (
+            Object.entries(grouped).map(([cat, items]) => (
+              <CategorySection
+                key={cat}
+                category={cat}
+                docs={items}
+                isProspect={isProspect}
+                isApproved={isApproved}
+                onPreview={setViewerDoc}
+              />
+            ))
           )}
         </div>
-
-        {/* Contenu */}
-        {loading ? (
-          <div style={{
-            textAlign: 'center',
-            padding: '80px 0',
-            fontFamily: 'Newsreader, serif',
-            fontStyle: 'italic',
-            fontSize: '16px',
-            color: '#1A3A6B',
-            opacity: 0.4,
-          }}>
-            Chargement…
-          </div>
-        ) : docs.length === 0 ? (
-          <div style={{
-            textAlign: 'center',
-            padding: '80px 0',
-            fontFamily: 'Manrope, sans-serif',
-            fontSize: '14px',
-            color: '#9CA3AF',
-          }}>
-            Aucun document disponible pour le moment.
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {docs.map(doc => {
-              // Si preview_only = false ET prospect pas encore approuvé → carte verrouillée
-              if (isProspect && !doc.preview_only && !isApproved) {
-                return <LockedCard key={doc.id} doc={doc} />
-              }
-              return <DocCard key={doc.id} doc={doc} />
-            })}
-          </div>
-        )}
       </div>
-    </div>
+    </>
   )
 }
