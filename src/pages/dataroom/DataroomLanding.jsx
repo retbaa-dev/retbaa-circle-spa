@@ -1093,24 +1093,49 @@ function StepQualification({ ndaMeta, ndaDate, onSuccess }) {
   )
 }
 
+// ── Helpers localStorage ──────────────────────────────────────────────────────
+const LS_KEY = 'retbaa_dataroom_draft'
+
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(LS_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch { return null }
+}
+
+function saveDraft(data) {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(data)) } catch {}
+}
+
+function clearDraft() {
+  try { localStorage.removeItem(LS_KEY) } catch {}
+}
+
 // ── Composant principal ───────────────────────────────────────────────────────
 export default function DataroomLanding() {
-  const [step, setStep]               = useState(0)
-  const [ndaMeta, setNdaMeta]         = useState({})
-  const [ndaAccepted, setNdaAccepted] = useState(false)
-  const [ndaDate]                     = useState(new Date().toISOString())
+  const draft = loadDraft()
+
+  const [step, setStep]               = useState(draft?.step ?? 0)
+  const [ndaMeta, setNdaMeta]         = useState(draft?.ndaMeta ?? {})
+  const [ndaAccepted, setNdaAccepted] = useState(draft?.ndaAccepted ?? false)
+  const [ndaDate]                     = useState(draft?.ndaDate ?? new Date().toISOString())
   const [sentTo, setSentTo]           = useState(null)
+
+  // Sauvegarde auto à chaque changement d'état
+  const saveProgress = (patch) => {
+    saveDraft({ step, ndaMeta, ndaAccepted, ndaDate, ...patch })
+  }
 
   // L'étape NDA prend toute la page — on sort du layout card
   if (step === 1) {
     return (
       <StepNDA
-        onNext={() => setStep(2)}
-        onBack={() => setStep(0)}
+        onNext={() => { saveProgress({ step: 2 }); setStep(2) }}
+        onBack={() => { saveProgress({ step: 0 }); setStep(0) }}
         ndaMeta={ndaMeta}
-        setNdaMeta={setNdaMeta}
+        setNdaMeta={(meta) => { setNdaMeta(meta); saveProgress({ ndaMeta: meta }) }}
         ndaAccepted={ndaAccepted}
-        setNdaAccepted={setNdaAccepted}
+        setNdaAccepted={(v) => { setNdaAccepted(v); saveProgress({ ndaAccepted: v }) }}
       />
     )
   }
@@ -1137,13 +1162,13 @@ export default function DataroomLanding() {
             <StepIndicator step={step} />
 
             {step === 0 && (
-              <StepPresentation onNext={() => setStep(1)} />
+              <StepPresentation onNext={() => { saveProgress({ step: 1 }); setStep(1) }} />
             )}
             {step === 2 && (
               <StepQualification
                 ndaMeta={ndaMeta}
                 ndaDate={ndaDate}
-                onSuccess={email => setSentTo(email)}
+                onSuccess={email => { clearDraft(); setSentTo(email) }}
               />
             )}
           </>
