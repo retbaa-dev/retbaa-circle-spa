@@ -84,6 +84,7 @@ function ProspectsTab() {
   const [prospects, setProspects] = useState([])
   const [loading, setLoading]     = useState(true)
   const [msg, setMsg]             = useState('')
+  const [expandedId, setExpandedId] = useState(null)
 
   const fetchProspects = async () => {
     setLoading(true)
@@ -140,69 +141,103 @@ function ProspectsTab() {
             </thead>
             <tbody>
               {prospects.map(p => {
-                const badge = STATUS_BADGE[p.status] || STATUS_BADGE.pending
+                const badge       = STATUS_BADGE[p.status] || STATUS_BADGE.pending
+                const ndaMeta     = p.nda_meta || {}
+                const withComments= hasNdaComments(ndaMeta)
+                const isExpanded  = expandedId === p.id
+
                 return (
-                  <tr key={p.id} style={{ borderBottom: '1px solid rgba(26,58,107,0.06)' }}>
-                    <td style={{ padding: '12px 12px', fontWeight: 600, color: '#1A1C1C', whiteSpace: 'nowrap' }}>
-                      {p.first_name} {p.last_name}
-                    </td>
-                    <td style={{ padding: '12px 12px', color: '#6B7280', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {p.email}
-                    </td>
-                    <td style={{ padding: '12px 12px', color: '#374151', whiteSpace: 'nowrap' }}>
-                      {CHANNEL_LABEL[p.channel] || p.channel}
-                    </td>
-                    <td style={{ padding: '12px 12px', color: '#374151', whiteSpace: 'nowrap' }}>
-                      {AMOUNT_LABEL[p.amount_range] || p.amount_range}
-                    </td>
-                    <td style={{ padding: '12px 12px' }}>
-                      <span style={{
-                        display: 'inline-block',
-                        padding: '3px 10px',
-                        fontSize: '10px',
-                        fontWeight: 700,
-                        letterSpacing: '0.1em',
-                        textTransform: 'uppercase',
-                        color: badge.color,
-                        background: badge.bg,
-                        border: `1px solid ${badge.border}`,
-                        whiteSpace: 'nowrap',
-                      }}>
-                        {badge.label}
-                      </span>
-                    </td>
-                    <td style={{ padding: '12px 12px', color: '#9CA3AF', whiteSpace: 'nowrap', fontSize: '12px' }}>
-                      {new Date(p.created_at).toLocaleDateString('fr-FR')}
-                    </td>
-                    <td style={{ padding: '12px 12px' }}>
-                      <div style={{ display: 'flex', gap: '6px' }}>
-                        <button
-                          onClick={() => updateStatus(p.id, 'approved')}
-                          disabled={p.status === 'approved'}
-                          style={{
-                            padding: '5px 12px', background: p.status === 'approved' ? '#E5E7EB' : '#1E6B4A',
-                            color: p.status === 'approved' ? '#9CA3AF' : '#fff',
-                            border: 'none', cursor: p.status === 'approved' ? 'default' : 'pointer',
-                            fontSize: '11px', fontWeight: 600, fontFamily: 'system-ui, sans-serif',
-                          }}
-                        >
-                          Approuver
-                        </button>
-                        <button
-                          onClick={() => updateStatus(p.id, 'rejected')}
-                          disabled={p.status === 'rejected'}
-                          style={{
-                            padding: '5px 12px', background: p.status === 'rejected' ? '#E5E7EB' : '#ba1a1a',
-                            color: p.status === 'rejected' ? '#9CA3AF' : '#fff',
-                            border: 'none', cursor: p.status === 'rejected' ? 'default' : 'pointer',
-                            fontSize: '11px', fontWeight: 600, fontFamily: 'system-ui, sans-serif',
-                          }}
-                        >
-                          Rejeter
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                  <>
+                    <tr
+                      key={p.id}
+                      style={{ borderBottom: isExpanded ? 'none' : '1px solid rgba(26,58,107,0.06)', cursor: 'pointer' }}
+                      onClick={() => setExpandedId(isExpanded ? null : p.id)}
+                    >
+                      <td style={{ padding: '12px 12px', fontWeight: 600, color: '#1A1C1C', whiteSpace: 'nowrap' }}>
+                        {p.first_name} {p.last_name}
+                        {withComments && (
+                          <span style={{
+                            display: 'inline-block',
+                            marginLeft: '8px',
+                            fontSize: '9px',
+                            fontWeight: 700,
+                            letterSpacing: '0.1em',
+                            textTransform: 'uppercase',
+                            color: '#7A4100',
+                            background: 'rgba(234,179,8,0.15)',
+                            border: '1px solid rgba(234,179,8,0.5)',
+                            padding: '2px 6px',
+                            verticalAlign: 'middle',
+                          }}>
+                            💬 Commentaires NDA
+                          </span>
+                        )}
+                      </td>
+                      <td style={{ padding: '12px 12px', color: '#6B7280', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {p.email}
+                      </td>
+                      <td style={{ padding: '12px 12px', color: '#374151', whiteSpace: 'nowrap' }}>
+                        {CHANNEL_LABEL[p.channel] || p.channel}
+                      </td>
+                      <td style={{ padding: '12px 12px', color: '#374151', whiteSpace: 'nowrap' }}>
+                        {AMOUNT_LABEL[p.amount_range] || p.amount_range}
+                      </td>
+                      <td style={{ padding: '12px 12px' }}>
+                        <span style={{
+                          display: 'inline-block',
+                          padding: '3px 10px',
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          letterSpacing: '0.1em',
+                          textTransform: 'uppercase',
+                          color: badge.color,
+                          background: badge.bg,
+                          border: `1px solid ${badge.border}`,
+                          whiteSpace: 'nowrap',
+                        }}>
+                          {badge.label}
+                        </span>
+                      </td>
+                      <td style={{ padding: '12px 12px', color: '#9CA3AF', whiteSpace: 'nowrap', fontSize: '12px' }}>
+                        {new Date(p.created_at).toLocaleDateString('fr-FR')}
+                      </td>
+                      <td style={{ padding: '12px 12px' }} onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <button
+                            onClick={() => updateStatus(p.id, 'approved')}
+                            disabled={p.status === 'approved'}
+                            style={{
+                              padding: '5px 12px', background: p.status === 'approved' ? '#E5E7EB' : '#1E6B4A',
+                              color: p.status === 'approved' ? '#9CA3AF' : '#fff',
+                              border: 'none', cursor: p.status === 'approved' ? 'default' : 'pointer',
+                              fontSize: '11px', fontWeight: 600, fontFamily: 'system-ui, sans-serif',
+                            }}
+                          >
+                            Approuver
+                          </button>
+                          <button
+                            onClick={() => updateStatus(p.id, 'rejected')}
+                            disabled={p.status === 'rejected'}
+                            style={{
+                              padding: '5px 12px', background: p.status === 'rejected' ? '#E5E7EB' : '#ba1a1a',
+                              color: p.status === 'rejected' ? '#9CA3AF' : '#fff',
+                              border: 'none', cursor: p.status === 'rejected' ? 'default' : 'pointer',
+                              fontSize: '11px', fontWeight: 600, fontFamily: 'system-ui, sans-serif',
+                            }}
+                          >
+                            Rejeter
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    {isExpanded && (ndaMeta.jurisdiction || withComments) && (
+                      <tr key={p.id + '-nda'} style={{ borderBottom: '1px solid rgba(26,58,107,0.06)' }}>
+                        <td colSpan={7} style={{ padding: '0 12px 16px 12px' }}>
+                          <NdaDetail ndaMeta={ndaMeta} />
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 )
               })}
             </tbody>
