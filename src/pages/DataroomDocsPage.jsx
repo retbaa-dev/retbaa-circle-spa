@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import DataroomFAQ from '../components/DataroomFAQ'
 
 // Icônes et couleurs par catégorie
 const CATEGORY_META = {
@@ -441,6 +442,9 @@ export default function DataroomDocsPage({ isProspect }) {
                   onPreview={setViewerDoc}
                 />
               ))}
+
+              {/* FAQ Dataroom */}
+              <DataroomFAQ />
             </>
           )}
         </div>
