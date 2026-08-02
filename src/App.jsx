@@ -162,6 +162,13 @@ function getPreviewUser() {
   } catch { return null }
 }
 
+function getPreviewRole() {
+  try {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('role') || null
+  } catch { return null }
+}
+
 // ── Composant racine ────────────────────────────────────────────────────────
 export default function App() {
   return (
@@ -214,6 +221,7 @@ function ObservateurGate() {
 // ── Gate auth — redirige vers login si non connecté ─────────────────────────
 function AuthGate() {
   const previewUser = getPreviewUser()
+  const previewRole = getPreviewRole()
   const { user, profile, isLoaded, isSignedIn, role, signOut } = useAuth()
 
   // ── Détection prospect ──────────────────────────────────────────────────
@@ -271,7 +279,7 @@ function AuthGate() {
   if (isSignedIn && role === 'pending') return <PendingPage />
 
   const LINKED_NAMES = { cathy: 'Cathy', barthelemy: 'Barthélemy', pape: 'Pape Amadou', raphael: 'Raphaël', massata: 'Massata' }
-  const isAdmin     = isSignedIn && role === 'founder'
+  const isAdmin     = (isSignedIn && role === 'founder') || previewRole === 'founder'
   const isAssistant = role === 'assistant'
   const isObservateur = !!sessionStorage.getItem('retbaa_prospect')
 
