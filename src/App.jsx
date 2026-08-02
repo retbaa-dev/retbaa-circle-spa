@@ -16,6 +16,7 @@ import AppShell             from './components/AppShell'
 
 // ── Dataroom prospects (public) — lazy ─────────────────────────────────────
 const DataroomLanding       = lazy(() => import('./pages/dataroom/DataroomLanding'))
+const DataroomDocsPage      = lazy(() => import('./pages/DataroomDocsPage'))
 
 // ── Pages lourdes — lazy ────────────────────────────────────────────────────
 const Dashboard             = lazy(() => import('./pages/Dashboard'))
@@ -30,7 +31,6 @@ const CataloguePage         = lazy(() => import('./pages/CataloguePage'))
 const DocumentsPage         = lazy(() => import('./pages/DocumentsPage'))
 const ObservateurDashboard  = lazy(() => import('./pages/ObservateurDashboard'))
 const ArticlePage           = lazy(() => import('./pages/ArticlePage'))
-const DataroomDocsPage      = lazy(() => import('./pages/DataroomDocsPage'))
 const ProspectDashboard     = lazy(() => import('./pages/ProspectDashboard'))
 
 // ── Splash screen animé ─────────────────────────────────────────────────────
@@ -190,6 +190,9 @@ export default function App() {
         {/* Dataroom access — redirige vers / (prospect géré par AuthGate) */}
         <Route path="/dataroom/access" element={<Navigate to="/" replace />} />
 
+        {/* Dataroom docs — page publique, onboarding à la demande */}
+        <Route path="/dataroom-docs" element={<PublicDataroomDocs />} />
+
         {/* Invitation investisseur */}
         <Route path="/invite/:token" element={<InvitePage />} />
 
@@ -328,7 +331,6 @@ function AuthGate() {
           <Route path="/investissement"      element={<MonInvestissementPage userName={effectiveName} isAssistant={isAssistant} />} />
           <Route path="/tranche2"            element={<Tranche2Page userName={effectiveName} />} />
           <Route path="/podcast"             element={<PodcastPage userName={effectiveName} />} />
-          <Route path="/dataroom-docs"       element={<DataroomDocsPage isProspect={isProspect} />} />
           <Route path="/inner-circle"        element={
             isAssistant
               ? <RestrictedPage />
@@ -361,5 +363,48 @@ function RestrictedPage() {
         Cette section est réservée aux investisseurs.
       </div>
     </div>
+  )
+}
+
+// ── Wrapper public pour /dataroom-docs ──────────────────────────────────────
+// Rend la page accessible sans auth ; passe isProspect/isApproved si connecté
+function PublicDataroomDocs() {
+  const { user, isSignedIn, role, isLoaded } = useAuth()
+  const [isProspect, setIsProspect]   = useState(false)
+  const [isApproved, setIsApproved]   = useState(false)
+  const [checked,    setChecked]      = useState(false)
+
+  useEffect(() => {
+    if (!isLoaded) return
+    if (!isSignedIn || !user?.email) { setChecked(true); return }
+
+    supabase
+      .from('dataroom_prospects')
+      .select('id, status')
+      .eq('email', user.email)
+      .maybeSingle()
+      .then(({ data }) => {
+        setIsProspect(!!data)
+        setIsApproved(data?.status === 'approved')
+        setChecked(true)
+      })
+  }, [isLoaded, isSignedIn, user?.email])
+
+  // Founder/assistant sont toujours approuvés
+  if (isLoaded && isSignedIn && (role === 'founder' || role === 'assistant') && !checked) {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <DataroomDocsPage isProspect={false} isApproved={true} />
+      </Suspense>
+    )
+  }
+
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <DataroomDocsPage
+        isProspect={isProspect}
+        isApproved={isApproved || role === 'founder' || role === 'assistant'}
+      />
+    </Suspense>
   )
 }

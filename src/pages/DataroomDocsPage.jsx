@@ -1,18 +1,20 @@
-// pages/DataroomDocsPage.jsx — Documents dataroom catégorisés avec viewer inline
+// pages/DataroomDocsPage.jsx — Navigation libre + onboarding à la demande
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import OnboardingModal from '../components/OnboardingModal'
 
-// Icônes et couleurs par catégorie
+// ── Icônes et couleurs par catégorie ────────────────────────────────────────
 const CATEGORY_META = {
-  'Investissement':      { icon: 'account_balance', color: '#1A3A6B', bg: 'rgba(26,58,107,0.08)'  },
-  'Juridique':           { icon: 'gavel',            color: '#7C3AED', bg: 'rgba(124,58,237,0.08)' },
-  'Financier':           { icon: 'bar_chart',        color: '#065F46', bg: 'rgba(6,95,70,0.08)'    },
-  'Recherche & Marché':  { icon: 'travel_explore',   color: '#92400E', bg: 'rgba(146,64,14,0.08)'  },
-  'Stratégie':           { icon: 'lightbulb',        color: '#B45309', bg: 'rgba(180,83,9,0.08)'   },
-  'Général':             { icon: 'folder',           color: '#6B7280', bg: 'rgba(107,114,128,0.08)'},
+  'Investissement':     { icon: 'account_balance', color: '#1A3A6B', bg: 'rgba(26,58,107,0.08)'  },
+  'Juridique':          { icon: 'gavel',            color: '#7C3AED', bg: 'rgba(124,58,237,0.08)' },
+  'Financier':          { icon: 'bar_chart',        color: '#065F46', bg: 'rgba(6,95,70,0.08)'    },
+  'Recherche & Marché': { icon: 'travel_explore',   color: '#92400E', bg: 'rgba(146,64,14,0.08)'  },
+  'Stratégie':          { icon: 'lightbulb',        color: '#B45309', bg: 'rgba(180,83,9,0.08)'   },
+  'Général':            { icon: 'folder',           color: '#6B7280', bg: 'rgba(107,114,128,0.08)'},
 }
 
+// ── PDF Viewer inline ────────────────────────────────────────────────────────
 function PdfViewer({ doc, onClose }) {
   const url = doc.file_url || doc.url
   return (
@@ -50,7 +52,6 @@ function PdfViewer({ doc, onClose }) {
           ✕
         </button>
       </div>
-
       {/* PDF iframe — sans toolbar pour éviter le téléchargement */}
       <div style={{ flex: 1, overflow: 'hidden', backgroundColor: '#1A1A2E' }}>
         <iframe
@@ -64,97 +65,155 @@ function PdfViewer({ doc, onClose }) {
   )
 }
 
-function DocCard({ doc, isLocked, onPreview }) {
-  const meta = CATEGORY_META[doc.category] || CATEGORY_META['Général']
+// ── Badge ────────────────────────────────────────────────────────────────────
+function Badge({ type }) {
+  if (type === 'preview') {
+    return (
+      <span style={{
+        display: 'inline-flex', alignItems: 'center', gap: '4px',
+        padding: '3px 8px', borderRadius: '4px',
+        background: 'rgba(6,95,70,0.1)',
+        fontSize: '10px', fontWeight: 700,
+        letterSpacing: '0.1em', textTransform: 'uppercase',
+        color: '#065F46', whiteSpace: 'nowrap',
+        flexShrink: 0,
+      }}>
+        Aperçu libre
+      </span>
+    )
+  }
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: '4px',
+      padding: '3px 8px', borderRadius: '4px',
+      background: 'rgba(156,163,175,0.15)',
+      fontSize: '10px', fontWeight: 700,
+      letterSpacing: '0.1em', textTransform: 'uppercase',
+      color: '#6B7280', whiteSpace: 'nowrap',
+      flexShrink: 0,
+    }}>
+      🔒 Accès restreint
+    </span>
+  )
+}
+
+// ── Carte document ───────────────────────────────────────────────────────────
+function DocCard({ doc, isAuthenticated, isApproved, onPreviewClick, onRestrictedClick }) {
+  const meta     = CATEGORY_META[doc.category] || CATEGORY_META['Général']
+  const canOpen  = isAuthenticated && isApproved
+  const isPreviewOnly = doc.preview_only
+
+  function handleClick() {
+    if (!isAuthenticated) {
+      // Non connecté → onboarding
+      onRestrictedClick()
+    } else if (canOpen) {
+      // Connecté + approuvé → viewer
+      onPreviewClick(doc)
+    } else if (!isPreviewOnly) {
+      // Connecté mais pas approuvé + doc restreint → onboarding (ou info)
+      onRestrictedClick()
+    } else {
+      // Connecté, aperçu libre
+      onPreviewClick(doc)
+    }
+  }
 
   return (
-    <div style={{
-      background: '#fff',
-      border: '1px solid rgba(26,58,107,0.08)',
-      borderRadius: '8px',
-      padding: '20px 24px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '16px',
-      opacity: isLocked ? 0.6 : 1,
-      transition: 'box-shadow 0.15s',
-      cursor: isLocked ? 'default' : 'pointer',
-    }}
-    onClick={!isLocked ? onPreview : undefined}
-    onMouseEnter={e => { if (!isLocked) e.currentTarget.style.boxShadow = '0 4px 16px rgba(26,58,107,0.1)' }}
-    onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none' }}
+    <div
+      onClick={handleClick}
+      style={{
+        background: '#fff',
+        border: '1px solid rgba(26,58,107,0.08)',
+        borderRadius: '8px',
+        padding: '20px 24px',
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '16px',
+        cursor: 'pointer',
+        transition: 'box-shadow 0.15s, transform 0.1s',
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.boxShadow = '0 4px 16px rgba(26,58,107,0.1)'
+        e.currentTarget.style.transform = 'translateY(-1px)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.boxShadow = 'none'
+        e.currentTarget.style.transform = 'translateY(0)'
+      }}
     >
       {/* Icône catégorie */}
       <div style={{
         width: '44px', height: '44px', borderRadius: '8px',
-        background: isLocked ? 'rgba(156,163,175,0.1)' : meta.bg,
+        background: isPreviewOnly ? meta.bg : 'rgba(156,163,175,0.1)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         flexShrink: 0,
       }}>
         <span className="material-symbols-outlined" style={{
           fontSize: '22px',
-          color: isLocked ? '#9CA3AF' : meta.color,
+          color: isPreviewOnly ? meta.color : '#9CA3AF',
         }}>
-          {isLocked ? 'lock' : meta.icon}
+          {isPreviewOnly ? meta.icon : 'lock'}
         </span>
       </div>
 
       {/* Infos doc */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
-          fontFamily: 'Georgia, serif', fontStyle: 'italic',
-          fontSize: '16px', color: isLocked ? '#9CA3AF' : '#1A3A6B',
-          marginBottom: '4px', whiteSpace: 'nowrap',
-          overflow: 'hidden', textOverflow: 'ellipsis',
+          display: 'flex', alignItems: 'center', gap: '8px',
+          flexWrap: 'wrap', marginBottom: '6px',
         }}>
-          {doc.title}
+          <div style={{
+            fontFamily: 'Georgia, serif', fontStyle: 'italic',
+            fontSize: '16px', color: '#1A3A6B',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {doc.title}
+          </div>
+          <Badge type={isPreviewOnly ? 'preview' : 'restricted'} />
         </div>
         {doc.description && (
           <div style={{
-            fontSize: '12px', color: '#9CA3AF',
-            lineHeight: 1.5, overflow: 'hidden',
-            display: '-webkit-box', WebkitLineClamp: 1,
+            fontSize: '13px', color: '#6B7280',
+            lineHeight: 1.6,
+            display: '-webkit-box',
+            WebkitLineClamp: isPreviewOnly ? 3 : 2,
             WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
           }}>
             {doc.description}
           </div>
         )}
       </div>
 
-      {/* Statut / action */}
-      {isLocked ? (
-        <div style={{
-          flexShrink: 0, fontSize: '11px', letterSpacing: '0.1em',
-          textTransform: 'uppercase', color: '#9CA3AF',
-          fontWeight: 600, whiteSpace: 'nowrap',
-        }}>
-          Accès restreint
-        </div>
-      ) : (
-        <div style={{
-          flexShrink: 0,
-          display: 'flex', alignItems: 'center', gap: '4px',
-          fontSize: '11px', letterSpacing: '0.1em',
-          textTransform: 'uppercase', color: meta.color,
-          fontWeight: 700,
-        }}>
-          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>visibility</span>
-          Consulter
-        </div>
-      )}
+      {/* Action */}
+      <div style={{
+        flexShrink: 0, alignSelf: 'center',
+        display: 'flex', alignItems: 'center', gap: '4px',
+        fontSize: '11px', letterSpacing: '0.1em',
+        textTransform: 'uppercase',
+        color: isPreviewOnly ? meta.color : '#9CA3AF',
+        fontWeight: 700,
+      }}>
+        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
+          {isPreviewOnly ? 'visibility' : 'lock_open'}
+        </span>
+        <span style={{ display: 'none' }}>
+          {isPreviewOnly ? 'Aperçu' : 'Accéder'}
+        </span>
+      </div>
     </div>
   )
 }
 
-function CategorySection({ category, docs, isProspect, isApproved, onPreview }) {
+// ── Section catégorie ────────────────────────────────────────────────────────
+function CategorySection({ category, docs, isAuthenticated, isApproved, onPreviewClick, onRestrictedClick }) {
   const meta = CATEGORY_META[category] || CATEGORY_META['Général']
   return (
     <div style={{ marginBottom: '40px' }}>
-      {/* Header section */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: '10px',
-        marginBottom: '16px',
-        paddingBottom: '12px',
+        marginBottom: '16px', paddingBottom: '12px',
         borderBottom: '1px solid rgba(26,58,107,0.08)',
       }}>
         <span className="material-symbols-outlined" style={{ fontSize: '18px', color: meta.color }}>
@@ -167,40 +226,34 @@ function CategorySection({ category, docs, isProspect, isApproved, onPreview }) 
         }}>
           {category}
         </div>
-        <div style={{
-          marginLeft: 'auto', fontSize: '11px',
-          color: '#9CA3AF', letterSpacing: '0.05em',
-        }}>
+        <div style={{ marginLeft: 'auto', fontSize: '11px', color: '#9CA3AF', letterSpacing: '0.05em' }}>
           {docs.length} document{docs.length > 1 ? 's' : ''}
         </div>
       </div>
-
-      {/* Cartes */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {docs.map(doc => {
-          const isLocked = isProspect && !doc.preview_only && !isApproved
-          return (
-            <DocCard
-              key={doc.id}
-              doc={doc}
-              isLocked={isLocked}
-              onPreview={() => onPreview(doc)}
-            />
-          )
-        })}
+        {docs.map(doc => (
+          <DocCard
+            key={doc.id}
+            doc={doc}
+            isAuthenticated={isAuthenticated}
+            isApproved={isApproved}
+            onPreviewClick={onPreviewClick}
+            onRestrictedClick={onRestrictedClick}
+          />
+        ))}
       </div>
     </div>
   )
 }
 
-// Véhicules d'investissement avec leur sous-titre
+// ── Véhicules d'investissement ───────────────────────────────────────────────
 const VEHICLES = {
-  'Retbaa Holding':    { subtitle: 'Equity direct · 30 000 € = 1 %',          icon: 'account_balance', color: '#1A3A6B' },
-  'Les Adresses':      { subtitle: 'SPV patrimonial · TRI cible 13–15 %',      icon: 'location_city',   color: '#065F46' },
-  'Retbaa Manufacture':{ subtitle: 'Filière industrielle · Horizon 7–10 ans',  icon: 'factory',         color: '#7C3AED' },
+  'Retbaa Holding':     { subtitle: 'Equity direct · 30 000 € = 1 %',         icon: 'account_balance', color: '#1A3A6B' },
+  'Les Adresses':       { subtitle: 'SPV patrimonial · TRI cible 13–15 %',     icon: 'location_city',   color: '#065F46' },
+  'Retbaa Manufacture': { subtitle: 'Filière industrielle · Horizon 7–10 ans', icon: 'factory',         color: '#7C3AED' },
 }
 
-function InvestissementSection({ docs, isProspect, isApproved, onPreview }) {
+function InvestissementSection({ docs, isAuthenticated, isApproved, onPreviewClick, onRestrictedClick }) {
   return (
     <div style={{ marginBottom: '40px' }}>
       <div style={{
@@ -219,8 +272,8 @@ function InvestissementSection({ docs, isProspect, isApproved, onPreview }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
         {Object.entries(VEHICLES).map(([vehicle, meta]) => {
-          const vehicleDocs = docs.filter(d => d.vehicle === vehicle)
-          const isComingSoon = vehicle === 'Retbaa Manufacture'
+          const vehicleDocs   = docs.filter(d => d.vehicle === vehicle)
+          const isComingSoon  = vehicle === 'Retbaa Manufacture'
 
           return (
             <div key={vehicle} style={{
@@ -228,9 +281,7 @@ function InvestissementSection({ docs, isProspect, isApproved, onPreview }) {
               border: `1px solid ${isComingSoon ? 'rgba(156,163,175,0.2)' : 'rgba(26,58,107,0.1)'}`,
               borderRadius: '10px',
               padding: '24px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px',
+              display: 'flex', flexDirection: 'column', gap: '12px',
               opacity: isComingSoon ? 0.7 : 1,
             }}>
               {/* Header véhicule */}
@@ -256,7 +307,6 @@ function InvestissementSection({ docs, isProspect, isApproved, onPreview }) {
 
               <div style={{ height: '1px', background: 'rgba(26,58,107,0.06)' }} />
 
-              {/* Documents du véhicule */}
               {isComingSoon ? (
                 <div style={{
                   display: 'flex', alignItems: 'center', gap: '8px',
@@ -273,35 +323,52 @@ function InvestissementSection({ docs, isProspect, isApproved, onPreview }) {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {vehicleDocs.map(doc => {
-                    const isLocked = isProspect && !doc.preview_only && !isApproved
+                    const isPreviewOnly = doc.preview_only
+
+                    function handleClick() {
+                      if (!isAuthenticated) {
+                        onRestrictedClick()
+                      } else if (isAuthenticated && isApproved) {
+                        onPreviewClick(doc)
+                      } else if (!isPreviewOnly) {
+                        onRestrictedClick()
+                      } else {
+                        onPreviewClick(doc)
+                      }
+                    }
+
                     return (
                       <div
                         key={doc.id}
-                        onClick={!isLocked ? () => onPreview(doc) : undefined}
+                        onClick={handleClick}
                         style={{
                           display: 'flex', alignItems: 'center', gap: '10px',
                           padding: '10px 12px',
-                          background: isLocked ? 'rgba(156,163,175,0.06)' : `${meta.color}08`,
+                          background: isPreviewOnly ? `${meta.color}08` : 'rgba(156,163,175,0.06)',
                           borderRadius: '6px',
-                          cursor: isLocked ? 'default' : 'pointer',
+                          cursor: 'pointer',
                           transition: 'background 0.15s',
                         }}
-                        onMouseEnter={e => { if (!isLocked) e.currentTarget.style.background = `${meta.color}15` }}
-                        onMouseLeave={e => { e.currentTarget.style.background = isLocked ? 'rgba(156,163,175,0.06)' : `${meta.color}08` }}
+                        onMouseEnter={e => { e.currentTarget.style.background = isPreviewOnly ? `${meta.color}15` : 'rgba(156,163,175,0.12)' }}
+                        onMouseLeave={e => { e.currentTarget.style.background = isPreviewOnly ? `${meta.color}08` : 'rgba(156,163,175,0.06)' }}
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: '16px', color: isLocked ? '#9CA3AF' : meta.color, flexShrink: 0 }}>
-                          {isLocked ? 'lock' : 'description'}
+                        <span className="material-symbols-outlined" style={{ fontSize: '16px', color: isPreviewOnly ? meta.color : '#9CA3AF', flexShrink: 0 }}>
+                          {isPreviewOnly ? 'description' : 'lock'}
                         </span>
                         <span style={{
                           flex: 1, fontSize: '13px',
-                          color: isLocked ? '#9CA3AF' : '#374151',
+                          color: '#374151',
                           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                         }}>
                           {doc.title.replace(/^[^—]+—\s*/, '')}
                         </span>
-                        {!isLocked && (
+                        {isPreviewOnly ? (
                           <span className="material-symbols-outlined" style={{ fontSize: '14px', color: meta.color, flexShrink: 0 }}>
                             visibility
+                          </span>
+                        ) : (
+                          <span className="material-symbols-outlined" style={{ fontSize: '14px', color: '#9CA3AF', flexShrink: 0 }}>
+                            lock_open
                           </span>
                         )}
                       </div>
@@ -317,16 +384,37 @@ function InvestissementSection({ docs, isProspect, isApproved, onPreview }) {
   )
 }
 
-// Ordre d'affichage des catégories
+// ── Ordre d'affichage des catégories ─────────────────────────────────────────
 const CATEGORY_ORDER = ['Financier', 'Juridique', 'Recherche & Marché', 'Stratégie', 'Général']
 
-export default function DataroomDocsPage({ isProspect }) {
-  const { user } = useAuth()
-  const [docs, setDocs]                     = useState([])
-  const [loading, setLoading]               = useState(true)
-  const [prospectStatus, setProspectStatus] = useState(null)
-  const [viewerDoc, setViewerDoc]           = useState(null)
+// ── Page principale ──────────────────────────────────────────────────────────
+export default function DataroomDocsPage({ isProspect = false, isApproved: isApprovedProp = false }) {
+  const { user, isSignedIn } = useAuth()
+  const [docs, setDocs]           = useState([])
+  const [loading, setLoading]     = useState(true)
+  const [viewerDoc, setViewerDoc] = useState(null)
+  const [showOnboarding, setShowOnboarding] = useState(false)
 
+  // Authentification : utiliser les props si fournis par App.jsx (utilisateur connecté)
+  // sinon fallback sur useAuth directement
+  const isAuthenticated = isSignedIn || false
+
+  // Vérifier si l'utilisateur approuvé : prop ou statut prospect
+  const [prospectStatus, setProspectStatus] = useState(null)
+
+  useEffect(() => {
+    if (!isAuthenticated || !user?.email) return
+    supabase
+      .from('dataroom_prospects')
+      .select('status')
+      .eq('email', user.email)
+      .maybeSingle()
+      .then(({ data }) => setProspectStatus(data?.status ?? null))
+  }, [isAuthenticated, user?.email])
+
+  const isApproved = isApprovedProp || prospectStatus === 'approved'
+
+  // Charger tous les docs (public — pas de filtre auth)
   useEffect(() => {
     supabase
       .from('dataroom_docs')
@@ -338,19 +426,7 @@ export default function DataroomDocsPage({ isProspect }) {
       })
   }, [])
 
-  useEffect(() => {
-    if (!isProspect || !user?.email) return
-    supabase
-      .from('dataroom_prospects')
-      .select('status')
-      .eq('email', user.email)
-      .maybeSingle()
-      .then(({ data }) => setProspectStatus(data?.status ?? null))
-  }, [isProspect, user?.email])
-
-  const isApproved = prospectStatus === 'approved'
-
-  // Grouper par catégorie (hors Investissement, traité séparément)
+  // Grouper par catégorie (hors Investissement)
   const grouped = CATEGORY_ORDER.reduce((acc, cat) => {
     const items = docs.filter(d => (d.category || 'Général') === cat)
     if (items.length > 0) acc[cat] = items
@@ -362,12 +438,21 @@ export default function DataroomDocsPage({ isProspect }) {
       grouped[cat] = docs.filter(x => (x.category || 'Général') === cat)
   })
 
-  const totalAccessible = docs.filter(d => !(isProspect && !d.preview_only && !isApproved)).length
-  const totalLocked     = docs.length - totalAccessible
+  const totalPreview    = docs.filter(d => d.preview_only).length
+  const totalRestricted = docs.length - totalPreview
+
+  function handleDocClick(doc) {
+    setViewerDoc(doc)
+  }
+
+  function handleRestrictedClick() {
+    setShowOnboarding(true)
+  }
 
   return (
     <>
       {viewerDoc && <PdfViewer doc={viewerDoc} onClose={() => setViewerDoc(null)} />}
+      {showOnboarding && <OnboardingModal onClose={() => setShowOnboarding(false)} />}
 
       <div style={{ minHeight: '100vh', backgroundColor: '#FAF7F2', padding: '48px 32px' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
@@ -386,12 +471,26 @@ export default function DataroomDocsPage({ isProspect }) {
             }}>
               Dataroom
             </h1>
-            <p style={{ fontFamily: 'system-ui', fontSize: '14px', color: '#6B7280', margin: 0 }}>
-              {totalAccessible} document{totalAccessible > 1 ? 's' : ''} disponible{totalAccessible > 1 ? 's' : ''}
-              {totalLocked > 0 && ` · ${totalLocked} en accès restreint`}
+            <p style={{ fontFamily: 'system-ui', fontSize: '14px', color: '#6B7280', margin: '0 0 4px' }}>
+              {docs.length} document{docs.length > 1 ? 's' : ''} · {totalPreview} en aperçu libre · {totalRestricted} en accès restreint
             </p>
 
-            {isProspect && !isApproved && prospectStatus !== null && (
+            {/* Bannière info pour visiteurs non connectés */}
+            {!isAuthenticated && (
+              <div style={{
+                marginTop: '16px', padding: '14px 18px',
+                background: 'rgba(26,58,107,0.06)',
+                borderLeft: '3px solid #1A3A6B',
+                borderRadius: '0 6px 6px 0',
+                fontFamily: 'system-ui', fontSize: '13px', color: '#374151',
+                lineHeight: 1.6,
+              }}>
+                Parcourez librement les titres et descriptions. Cliquez sur un document pour créer votre accès.
+              </div>
+            )}
+
+            {/* Info prospect en attente */}
+            {isAuthenticated && isProspect && !isApproved && prospectStatus !== null && (
               <div style={{
                 marginTop: '16px', padding: '12px 16px',
                 background: 'rgba(239,192,212,0.2)',
@@ -425,9 +524,10 @@ export default function DataroomDocsPage({ isProspect }) {
               {/* Section Investissement — 3 véhicules en cards */}
               <InvestissementSection
                 docs={docs.filter(d => d.category === 'Investissement')}
-                isProspect={isProspect}
+                isAuthenticated={isAuthenticated}
                 isApproved={isApproved}
-                onPreview={setViewerDoc}
+                onPreviewClick={handleDocClick}
+                onRestrictedClick={handleRestrictedClick}
               />
 
               {/* Autres catégories */}
@@ -436,9 +536,10 @@ export default function DataroomDocsPage({ isProspect }) {
                   key={cat}
                   category={cat}
                   docs={items}
-                  isProspect={isProspect}
+                  isAuthenticated={isAuthenticated}
                   isApproved={isApproved}
-                  onPreview={setViewerDoc}
+                  onPreviewClick={handleDocClick}
+                  onRestrictedClick={handleRestrictedClick}
                 />
               ))}
             </>
