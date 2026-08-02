@@ -187,11 +187,8 @@ export default function App() {
           <Suspense fallback={<PageLoader />}><DataroomLanding /></Suspense>
         } />
 
-        {/* Dataroom access — redirige vers / (prospect géré par AuthGate) */}
-        <Route path="/dataroom/access" element={<Navigate to="/" replace />} />
-
-        {/* Dataroom docs — page publique, onboarding à la demande */}
-        <Route path="/dataroom-docs" element={<PublicDataroomDocs />} />
+        {/* Dataroom access — redirige vers /dataroom-docs */}
+        <Route path="/dataroom/access" element={<Navigate to="/dataroom-docs" replace />} />
 
         {/* Invitation investisseur */}
         <Route path="/invite/:token" element={<InvitePage />} />
@@ -332,6 +329,11 @@ function AuthGate() {
           <Route path="/tranche2"            element={<Tranche2Page userName={effectiveName} />} />
           <Route path="/podcast"             element={<PodcastPage userName={effectiveName} />} />
           <Route path="/mon-espace"          element={<ProspectDashboard />} />
+          <Route path="/dataroom-docs"       element={
+            <Suspense fallback={<PageLoader />}>
+              <DataroomDocsPage isProspect={isProspect} isApproved={prospectStatus === 'approved' || role === 'founder' || role === 'assistant'} />
+            </Suspense>
+          } />
           <Route path="/inner-circle"        element={
             isAssistant
               ? <RestrictedPage />
@@ -367,45 +369,3 @@ function RestrictedPage() {
   )
 }
 
-// ── Wrapper public pour /dataroom-docs ──────────────────────────────────────
-// Rend la page accessible sans auth ; passe isProspect/isApproved si connecté
-function PublicDataroomDocs() {
-  const { user, isSignedIn, role, isLoaded } = useAuth()
-  const [isProspect, setIsProspect]   = useState(false)
-  const [isApproved, setIsApproved]   = useState(false)
-  const [checked,    setChecked]      = useState(false)
-
-  useEffect(() => {
-    if (!isLoaded) return
-    if (!isSignedIn || !user?.email) { setChecked(true); return }
-
-    supabase
-      .from('dataroom_prospects')
-      .select('id, status')
-      .eq('email', user.email)
-      .maybeSingle()
-      .then(({ data }) => {
-        setIsProspect(!!data)
-        setIsApproved(data?.status === 'approved')
-        setChecked(true)
-      })
-  }, [isLoaded, isSignedIn, user?.email])
-
-  // Founder/assistant sont toujours approuvés
-  if (isLoaded && isSignedIn && (role === 'founder' || role === 'assistant') && !checked) {
-    return (
-      <Suspense fallback={<PageLoader />}>
-        <DataroomDocsPage isProspect={false} isApproved={true} />
-      </Suspense>
-    )
-  }
-
-  return (
-    <Suspense fallback={<PageLoader />}>
-      <DataroomDocsPage
-        isProspect={isProspect}
-        isApproved={isApproved || role === 'founder' || role === 'assistant'}
-      />
-    </Suspense>
-  )
-}
