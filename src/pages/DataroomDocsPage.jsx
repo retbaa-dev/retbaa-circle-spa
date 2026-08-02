@@ -1,7 +1,8 @@
 // pages/DataroomDocsPage.jsx — Documents dataroom catégorisés avec viewer inline
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { trackDocView, trackDocClose } from '../lib/tracking'
 
 // Icônes et couleurs par catégorie
 const CATEGORY_META = {
@@ -13,8 +14,16 @@ const CATEGORY_META = {
   'Général':             { icon: 'folder',           color: '#6B7280', bg: 'rgba(107,114,128,0.08)'},
 }
 
-function PdfViewer({ doc, onClose }) {
+function PdfViewer({ doc, onClose, user }) {
   const url = doc.file_url || doc.url
+  const openedAt = useRef(Date.now())
+
+  const handleClose = () => {
+    const seconds = Math.round((Date.now() - openedAt.current) / 1000)
+    trackDocClose({ docId: doc.id, viewerEmail: user?.email, durationSeconds: seconds })
+    onClose()
+  }
+
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 1000,
@@ -38,7 +47,7 @@ function PdfViewer({ doc, onClose }) {
           </div>
         </div>
         <button
-          onClick={onClose}
+          onClick={handleClose}
           style={{
             background: 'rgba(255,255,255,0.1)', border: 'none',
             color: '#fff', cursor: 'pointer',
@@ -350,6 +359,16 @@ export default function DataroomDocsPage({ isProspect }) {
 
   const isApproved = prospectStatus === 'approved'
 
+  const handlePreview = async (doc) => {
+    setViewerDoc(doc)
+    await trackDocView({
+      docId: doc.id,
+      docTitle: doc.title,
+      viewerEmail: user?.email || null,
+      isProspect: isProspect || false,
+    })
+  }
+
   // Grouper par catégorie (hors Investissement, traité séparément)
   const grouped = CATEGORY_ORDER.reduce((acc, cat) => {
     const items = docs.filter(d => (d.category || 'Général') === cat)
@@ -367,7 +386,7 @@ export default function DataroomDocsPage({ isProspect }) {
 
   return (
     <>
-      {viewerDoc && <PdfViewer doc={viewerDoc} onClose={() => setViewerDoc(null)} />}
+      {viewerDoc && <PdfViewer doc={viewerDoc} onClose={() => setViewerDoc(null)} user={user} />}
 
       <div style={{ minHeight: '100vh', backgroundColor: '#FAF7F2', padding: '48px 32px' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
@@ -427,7 +446,7 @@ export default function DataroomDocsPage({ isProspect }) {
                 docs={docs.filter(d => d.category === 'Investissement')}
                 isProspect={isProspect}
                 isApproved={isApproved}
-                onPreview={setViewerDoc}
+                onPreview={handlePreview}
               />
 
               {/* Autres catégories */}
@@ -438,7 +457,7 @@ export default function DataroomDocsPage({ isProspect }) {
                   docs={items}
                   isProspect={isProspect}
                   isApproved={isApproved}
-                  onPreview={setViewerDoc}
+                  onPreview={handlePreview}
                 />
               ))}
             </>
