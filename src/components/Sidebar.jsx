@@ -126,7 +126,7 @@ function ContactModal({ userName, onClose }) {
   )
 }
 
-export default function Sidebar({ activePath, onNavigate, userName, onLogout, observateur, isAdmin, isAssistant }) {
+export default function Sidebar({ activePath, onNavigate, userName, onLogout, observateur, isAdmin, isAssistant, isProspect }) {
   const [showContact, setShowContact] = useState(false)
   const initials = userName
     ? userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
@@ -143,7 +143,15 @@ export default function Sidebar({ activePath, onNavigate, userName, onLogout, ob
     { path: '/investissement', icon: 'person',          label: 'Mon Investissement' },
   ]
 
-  const navItems = observateur
+  const navItems = isProspect
+    ? [
+        { path: '/',              icon: 'account_balance', label: 'Accueil'   },
+        { path: '/insights',      icon: 'insights',        label: 'Insights'  },
+        { path: '/podcast',       icon: 'mic',             label: 'Podcast'   },
+        { path: '/produits',      icon: 'category',        label: 'Produits'  },
+        { path: '/dataroom-docs', icon: 'folder_open',     label: 'Dataroom'  },
+      ]
+    : observateur
     ? baseItems.filter(i => i.path !== '/investissement')
     : isAssistant
     ? baseItems
@@ -255,8 +263,8 @@ export default function Sidebar({ activePath, onNavigate, userName, onLogout, ob
           )
         })}
 
-        {/* Inner Circle — verrouillé en mode observateur */}
-        {observateur && (
+        {/* Inner Circle — verrouillé en mode observateur (pas prospect) */}
+        {observateur && !isProspect && (
           <div style={{
             display: 'flex',
             alignItems: 'center',

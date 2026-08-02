@@ -1,6 +1,7 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
+import { supabase } from './lib/supabase'
 import './i18n/index.js'
 import './index.css'
 
@@ -15,7 +16,6 @@ import AppShell             from './components/AppShell'
 
 // ── Dataroom prospects (public) — lazy ─────────────────────────────────────
 const DataroomLanding       = lazy(() => import('./pages/dataroom/DataroomLanding'))
-const DataroomAccess        = lazy(() => import('./pages/dataroom/DataroomAccess'))
 
 // ── Pages lourdes — lazy ────────────────────────────────────────────────────
 const Dashboard             = lazy(() => import('./pages/Dashboard'))
@@ -30,6 +30,8 @@ const CataloguePage         = lazy(() => import('./pages/CataloguePage'))
 const DocumentsPage         = lazy(() => import('./pages/DocumentsPage'))
 const ObservateurDashboard  = lazy(() => import('./pages/ObservateurDashboard'))
 const ArticlePage           = lazy(() => import('./pages/ArticlePage'))
+const DataroomDocsPage      = lazy(() => import('./pages/DataroomDocsPage'))
+const ProspectDashboard     = lazy(() => import('./pages/ProspectDashboard'))
 
 function PageLoader() {
   return (
@@ -76,15 +78,13 @@ export default function App() {
           <Suspense fallback={<PageLoader />}><BienvenueOnboarding /></Suspense>
         } />
 
-        {/* Dataroom prospects — public */}
+        {/* Dataroom landing — public */}
         <Route path="/dataroom" element={
           <Suspense fallback={<PageLoader />}><DataroomLanding /></Suspense>
         } />
 
-        {/* Dataroom access — guard dans le composant */}
-        <Route path="/dataroom/access" element={
-          <Suspense fallback={<PageLoader />}><DataroomAccess /></Suspense>
-        } />
+        {/* Dataroom access — redirige vers / (prospect géré par AuthGate) */}
+        <Route path="/dataroom/access" element={<Navigate to="/" replace />} />
 
         {/* Invitation investisseur */}
         <Route path="/invite/:token" element={<InvitePage />} />
@@ -119,7 +119,29 @@ function AuthGate() {
   const previewUser = getPreviewUser()
   const { user, profile, isLoaded, isSignedIn, role, signOut } = useAuth()
 
-  if (!isLoaded) {
+  // ── Détection prospect ──────────────────────────────────────────────────
+  const [isProspect,      setIsProspect]      = useState(false)
+  const [prospectChecked, setProspectChecked] = useState(false)
+
+  useEffect(() => {
+    // Pas besoin de vérifier pour founder/assistant ou utilisateurs non connectés
+    if (!isSignedIn || !user?.email || role === 'founder' || role === 'assistant') {
+      setProspectChecked(true)
+      return
+    }
+    supabase
+      .from('dataroom_prospects')
+      .select('id, status')
+      .eq('email', user.email)
+      .maybeSingle()
+      .then(({ data }) => {
+        setIsProspect(!!data)
+        setProspectChecked(true)
+      })
+  }, [isSignedIn, user?.email, role])
+
+  // ── Loading ─────────────────────────────────────────────────────────────
+  if (!isLoaded || !prospectChecked) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: '#F9F9F9' }}>
         <div style={{ fontFamily: 'Newsreader, serif', fontSize: '18px', fontStyle: 'italic', color: '#1A3A6B', opacity: 0.5 }}>
@@ -131,7 +153,8 @@ function AuthGate() {
 
   if (!isSignedIn && !previewUser) return <LoginPage />
 
-  if (isSignedIn && role === 'no_access') {
+  // Accès non autorisé — sauf si c'est un prospect
+  if (isSignedIn && role === 'no_access' && !isProspect) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: '#FAF7F2' }}>
         <div style={{ textAlign: 'center', padding: '40px' }}>
@@ -176,10 +199,23 @@ function AuthGate() {
   }
 
   return (
-    <AppShell userName={userName} onLogout={handleLogout} isAdmin={isAdmin} isAssistant={isAssistant} isObservateur={isObservateur}>
+    <AppShell
+      userName={userName}
+      onLogout={handleLogout}
+      isAdmin={isAdmin}
+      isAssistant={isAssistant}
+      isObservateur={isObservateur}
+      isProspect={isProspect}
+    >
       <Suspense fallback={<PageLoader />}>
         <Routes>
-          <Route path="/"                    element={isObservateur ? <ObservateurDashboard /> : <Dashboard userName={effectiveName} isAssistant={isAssistant} />} />
+          <Route path="/" element={
+            isProspect
+              ? <ProspectDashboard />
+              : isObservateur
+              ? <ObservateurDashboard />
+              : <Dashboard userName={effectiveName} isAssistant={isAssistant} />
+          } />
           <Route path="/insights"            element={<InsightsPage />} />
           <Route path="/insights/:slug"      element={<ArticlePage />} />
           <Route path="/produits"            element={<CataloguePage userName={userName} />} />
@@ -187,6 +223,7 @@ function AuthGate() {
           <Route path="/investissement"      element={<MonInvestissementPage userName={effectiveName} isAssistant={isAssistant} />} />
           <Route path="/tranche2"            element={<Tranche2Page userName={effectiveName} />} />
           <Route path="/podcast"             element={<PodcastPage userName={effectiveName} />} />
+          <Route path="/dataroom-docs"       element={<DataroomDocsPage isProspect={isProspect} />} />
           <Route path="/inner-circle"        element={
             isAssistant
               ? <RestrictedPage />

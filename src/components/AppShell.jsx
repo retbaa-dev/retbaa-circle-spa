@@ -7,7 +7,7 @@ import Header  from './Header'
 import Footer  from './Footer'
 import { track } from '../utils/tracker'
 
-export default function AppShell({ children, userName, onLogout, isAdmin, isAssistant, isObservateur }) {
+export default function AppShell({ children, userName, onLogout, isAdmin, isAssistant, isObservateur, isProspect }) {
   const navigate   = useNavigate()
   const location   = useLocation()
   const [isMobile,    setIsMobile]    = useState(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false)
@@ -56,6 +56,7 @@ export default function AppShell({ children, userName, onLogout, isAdmin, isAssi
           observateur={isObservateur}
           isAdmin={isAdmin}
           isAssistant={isAssistant}
+          isProspect={isProspect}
         />
       </div>
 
