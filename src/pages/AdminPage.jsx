@@ -1,5 +1,5 @@
 // pages/AdminPage.jsx — Panel de validation des investisseurs
-import { useState, useEffect } from 'react'
+import { Fragment, useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 
@@ -147,9 +147,8 @@ function ProspectsTab() {
                 const isExpanded  = expandedId === p.id
 
                 return (
-                  <>
+                  <Fragment key={p.id}>
                     <tr
-                      key={p.id}
                       style={{ borderBottom: isExpanded ? 'none' : '1px solid rgba(26,58,107,0.06)', cursor: 'pointer' }}
                       onClick={() => setExpandedId(isExpanded ? null : p.id)}
                     >
@@ -231,13 +230,13 @@ function ProspectsTab() {
                       </td>
                     </tr>
                     {isExpanded && (ndaMeta.jurisdiction || withComments) && (
-                      <tr key={p.id + '-nda'} style={{ borderBottom: '1px solid rgba(26,58,107,0.06)' }}>
+                      <tr style={{ borderBottom: '1px solid rgba(26,58,107,0.06)' }}>
                         <td colSpan={7} style={{ padding: '0 12px 16px 12px' }}>
                           <NdaDetail ndaMeta={ndaMeta} />
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                 )
               })}
             </tbody>

@@ -415,7 +415,7 @@ function StepNDA({ onNext, onBack, ndaMeta, setNdaMeta, ndaAccepted, setNdaAccep
   const [sigMode, setSigMode]   = useState('typed')
   const [sigTyped, setSigTyped] = useState(ndaMeta.signature_mode === 'typed' ? (ndaMeta.signature_data || '') : '')
   const [sigDrawn, setSigDrawn] = useState(ndaMeta.signature_mode === 'drawn' ? (ndaMeta.signature_data || '') : '')
-  const [isDrawing, setIsDrawing] = useState(false)
+  const isDrawingRef = useRef(false)
   const canvasRef = useRef(null)
   const lastPos   = useRef(null)
 
@@ -440,13 +440,13 @@ function StepNDA({ onNext, onBack, ndaMeta, setNdaMeta, ndaAccepted, setNdaAccep
     e.preventDefault()
     const canvas = canvasRef.current
     if (!canvas) return
-    setIsDrawing(true)
+    isDrawingRef.current = true
     lastPos.current = getPos(e, canvas)
   }, [])
 
   const draw = useCallback((e) => {
     e.preventDefault()
-    if (!isDrawing) return
+    if (!isDrawingRef.current) return
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
@@ -460,17 +460,22 @@ function StepNDA({ onNext, onBack, ndaMeta, setNdaMeta, ndaAccepted, setNdaAccep
     ctx.lineJoin = 'round'
     ctx.stroke()
     lastPos.current = pos
-  }, [isDrawing])
+  }, [])
 
   const endDraw = useCallback(() => {
-    if (!isDrawing) return
-    setIsDrawing(false)
+    if (!isDrawingRef.current) return
+    isDrawingRef.current = false
     lastPos.current = null
     const canvas = canvasRef.current
     if (canvas) {
-      setSigDrawn(canvas.toDataURL('image/png'))
+      // Detect if canvas has actual content by comparing with a blank canvas
+      const blank = document.createElement('canvas')
+      blank.width  = canvas.width
+      blank.height = canvas.height
+      const hasContent = canvas.toDataURL() !== blank.toDataURL()
+      setSigDrawn(hasContent ? canvas.toDataURL('image/png') : '')
     }
-  }, [isDrawing])
+  }, [])
 
   const clearCanvas = () => {
     const canvas = canvasRef.current

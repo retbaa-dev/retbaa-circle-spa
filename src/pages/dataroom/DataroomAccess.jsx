@@ -261,7 +261,8 @@ function DocumentsTab({ userEmail }) {
       .from('dataroom_docs')
       .select('*')
       .order('sort_order', { ascending: true })
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) console.error('dataroom_docs fetch error:', error)
         setDocs(data || [])
         setLoading(false)
       })
