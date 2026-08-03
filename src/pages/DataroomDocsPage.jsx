@@ -1,9 +1,10 @@
 // pages/DataroomDocsPage.jsx — Navigation libre + onboarding à la demande
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import OnboardingModal from '../components/OnboardingModal'
 import DataroomFAQ from '../components/DataroomFAQ'
+import { trackDocView, trackDocClose } from '../lib/tracking'
 
 // ── Icônes et couleurs par catégorie ────────────────────────────────────────
 const CATEGORY_META = {
@@ -430,7 +431,8 @@ export default function DataroomDocsPage({ isProspect = false, isApproved: isApp
       .select('*')
       .order('sort_order', { ascending: true })
       .then(({ data, error }) => {
-        if (!error && data) setDocs(data)
+        if (error) console.error('dataroom_docs error:', error)
+        if (data) setDocs(data)
         setLoading(false)
       })
   }, [])
