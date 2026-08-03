@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import OnboardingModal from '../components/OnboardingModal'
+import ErrorBoundary from '../components/ErrorBoundary'
 import DataroomFAQ from '../components/DataroomFAQ'
 import { trackDocView, trackDocClose } from '../lib/tracking'
 
@@ -17,13 +18,13 @@ const CATEGORY_META = {
 }
 
 // ── PDF Viewer inline ────────────────────────────────────────────────────────
-function PdfViewer({ doc, onClose }) {
+function PdfViewer({ doc, onClose, viewerEmail = null }) {
   const url = doc.file_url || doc.url
   const openedAt = useRef(Date.now())
 
   const handleClose = () => {
     const seconds = Math.round((Date.now() - openedAt.current) / 1000)
-    trackDocClose({ docId: doc.id, viewerEmail: user?.email, durationSeconds: seconds })
+    trackDocClose({ docId: doc.id, viewerEmail, durationSeconds: seconds })
     onClose()
   }
 
@@ -483,6 +484,13 @@ useEffect(() => {
 
   function handleDocClick(doc) {
     setViewerDoc(doc)
+    // tracking async — non bloquant
+    trackDocView({
+      docId: doc.id,
+      docTitle: doc.title,
+      viewerEmail: user?.email ?? null,
+      isProspect: isProspect || false,
+    }).catch(() => {})
   }
 
   function handleRestrictedClick() {
@@ -491,7 +499,7 @@ useEffect(() => {
 
   return (
     <>
-{viewerDoc && <PdfViewer doc={viewerDoc} onClose={() => setViewerDoc(null)} />}
+{viewerDoc && <PdfViewer doc={viewerDoc} onClose={() => setViewerDoc(null)} viewerEmail={user?.email ?? null} />}
       {showOnboarding && <OnboardingModal onClose={() => setShowOnboarding(false)} />}
 
       <div style={{ minHeight: '100vh', backgroundColor: '#FAF7F2', padding: '48px 32px' }}>
@@ -562,29 +570,34 @@ useEffect(() => {
           ) : (
             <>
               {/* Section Investissement — 3 véhicules en cards */}
-              <InvestissementSection
-                docs={docs.filter(d => d.category === 'Investissement')}
-                isAuthenticated={isAuthenticated}
-                isApproved={isApproved}
-onPreviewClick={handleDocClick}
-                onRestrictedClick={handleRestrictedClick}
-              />
+              <ErrorBoundary>
+                <InvestissementSection
+                  docs={docs.filter(d => d.category === 'Investissement')}
+                  isAuthenticated={isAuthenticated}
+                  isApproved={isApproved}
+                  onPreviewClick={handleDocClick}
+                  onRestrictedClick={handleRestrictedClick}
+                />
+              </ErrorBoundary>
 
               {/* Autres catégories */}
               {Object.entries(grouped).map(([cat, items]) => (
-                <CategorySection
-                  key={cat}
-                  category={cat}
-                  docs={items}
-                  isAuthenticated={isAuthenticated}
-                  isApproved={isApproved}
-onPreviewClick={handleDocClick}
-                  onRestrictedClick={handleRestrictedClick}
-                />
+                <ErrorBoundary key={cat}>
+                  <CategorySection
+                    category={cat}
+                    docs={items}
+                    isAuthenticated={isAuthenticated}
+                    isApproved={isApproved}
+                    onPreviewClick={handleDocClick}
+                    onRestrictedClick={handleRestrictedClick}
+                  />
+                </ErrorBoundary>
               ))}
 
               {/* FAQ Dataroom */}
-              <DataroomFAQ />
+              <ErrorBoundary>
+                <DataroomFAQ />
+              </ErrorBoundary>
             </>
           )}
         </div>
