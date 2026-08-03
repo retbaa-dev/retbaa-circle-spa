@@ -355,34 +355,41 @@ function InvestissementSection({ docs, isAuthenticated, isApproved, onPreviewCli
                         key={doc.id}
                         onClick={handleClick}
                         style={{
-                          display: 'flex', alignItems: 'center', gap: '10px',
-                          padding: '10px 12px',
+                          padding: '14px 16px',
                           background: isPreviewOnly ? `${meta.color}08` : 'rgba(156,163,175,0.06)',
-                          borderRadius: '6px',
+                          borderRadius: '8px',
                           cursor: 'pointer',
                           transition: 'background 0.15s',
+                          border: `1px solid ${isPreviewOnly ? `${meta.color}20` : 'rgba(156,163,175,0.15)'}`,
                         }}
                         onMouseEnter={e => { e.currentTarget.style.background = isPreviewOnly ? `${meta.color}15` : 'rgba(156,163,175,0.12)' }}
                         onMouseLeave={e => { e.currentTarget.style.background = isPreviewOnly ? `${meta.color}08` : 'rgba(156,163,175,0.06)' }}
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: '16px', color: isPreviewOnly ? meta.color : '#9CA3AF', flexShrink: 0 }}>
-                          {isPreviewOnly ? 'description' : 'lock'}
-                        </span>
-                        <span style={{
-                          flex: 1, fontSize: '13px',
-                          color: '#374151',
-                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                        }}>
-                          {doc.title.replace(/^[^—]+—\s*/, '')}
-                        </span>
-                        {isPreviewOnly ? (
-                          <span className="material-symbols-outlined" style={{ fontSize: '14px', color: meta.color, flexShrink: 0 }}>
-                            visibility
+                        {/* Titre + icône action */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: doc.summary ? '8px' : 0 }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: '15px', color: isPreviewOnly ? meta.color : '#9CA3AF', flexShrink: 0 }}>
+                            {isPreviewOnly ? 'description' : 'lock'}
                           </span>
-                        ) : (
-                          <span className="material-symbols-outlined" style={{ fontSize: '14px', color: '#9CA3AF', flexShrink: 0 }}>
-                            lock_open
+                          <span style={{
+                            flex: 1, fontSize: '13px', fontWeight: 600,
+                            color: isPreviewOnly ? '#1A3A6B' : '#9CA3AF',
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                          }}>
+                            {doc.title.replace(/^[^—]+—\s*/, '')}
                           </span>
+                          <span className="material-symbols-outlined" style={{ fontSize: '14px', color: isPreviewOnly ? meta.color : '#9CA3AF', flexShrink: 0 }}>
+                            {isPreviewOnly ? 'visibility' : 'lock'}
+                          </span>
+                        </div>
+                        {/* Résumé */}
+                        {doc.summary && (
+                          <div style={{
+                            fontSize: '12px', color: '#6B7280', lineHeight: 1.55,
+                            display: '-webkit-box', WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                          }}>
+                            {doc.summary}
+                          </div>
                         )}
                       </div>
                     )
