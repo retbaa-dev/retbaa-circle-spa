@@ -109,23 +109,26 @@ function Badge({ type }) {
 
 // ── Carte document ───────────────────────────────────────────────────────────
 function DocCard({ doc, isAuthenticated, isApproved, onPreviewClick, onRestrictedClick }) {
-  const meta     = CATEGORY_META[doc.category] || CATEGORY_META['Général']
-  const canOpen  = isAuthenticated && isApproved
+  const meta          = CATEGORY_META[doc.category] || CATEGORY_META['Général']
   const isPreviewOnly = doc.preview_only
+  // Docs preview_only : accessibles sans inscription
+  // Docs restreints : nécessitent inscription + approbation
+  const isFreeAccess  = isPreviewOnly
+  const canOpenFull   = isAuthenticated && (isApproved || isPreviewOnly)
 
   function handleClick() {
-    if (!isAuthenticated) {
-      // Non connecté → onboarding
+    if (isFreeAccess) {
+      // Aperçu libre — pas besoin d'auth
+      onPreviewClick(doc)
+    } else if (!isAuthenticated) {
+      // Doc restreint + non connecté → onboarding
       onRestrictedClick()
-    } else if (canOpen) {
+    } else if (isApproved) {
       // Connecté + approuvé → viewer
       onPreviewClick(doc)
-    } else if (!isPreviewOnly) {
-      // Connecté mais pas approuvé + doc restreint → onboarding (ou info)
-      onRestrictedClick()
     } else {
-      // Connecté, aperçu libre
-      onPreviewClick(doc)
+      // Connecté mais pas encore approuvé
+      onRestrictedClick()
     }
   }
 
