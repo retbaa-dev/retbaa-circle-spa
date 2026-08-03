@@ -272,31 +272,43 @@ function StepPresentation({ onNext }) {
       num: 'I',
       title: "Nous ne vendons pas des produits.",
       subtitle: "Nous transformons un héritage en patrimoine.",
-      body: `Nous venons de territoires où chaque matière porte une mémoire, où chaque geste transmis raconte une manière d'habiter le monde. L'Afrique possède la matière, le geste, les récits et la mémoire sensorielle. Retbaa existe pour les inscrire dans un patrimoine désirable à l'échelle mondiale — non en reproduisant les codes du luxe européen, mais en construisant, depuis une autre origine, une maison capable de créer ses propres codes.`,
+      body: `Nous venons de territoires où chaque matière porte une mémoire, où chaque geste transmis raconte une manière d'habiter le monde. L'Afrique possède la matière, le geste, les récits et la mémoire sensorielle. Mais elle a trop rarement disposé des maisons, des institutions et de la continuité nécessaires pour les inscrire dans un patrimoine désirable à l'échelle mondiale. Retbaa existe pour contribuer à combler cet écart — non en reproduisant les codes du luxe européen, mais en construisant, depuis une autre origine, une maison capable de créer ses propres codes et de les faire traverser les frontières comme les générations.`,
     },
     {
       num: 'II',
-      title: "Le Luxe Culturel n\'est pas un segment.",
-      subtitle: "C\'est une grammaire.",
-      body: `Nous ne faisons pas du luxe inspiré par l'Afrique. Nous construisons une maison dont l'Afrique est la source de vérité, et dont Paris est l'atelier de précision. Notre langage se déploie à travers trois univers — Atmosphère, Gourmet et Beauté — unis par une même exigence. Aucune création ne folklorise. Aucune ne fige. Toutes transforment.`,
+      title: "Le Luxe Culturel n'est pas un segment.",
+      subtitle: "C'est une grammaire.",
+      body: `Nous ne faisons pas du luxe inspiré par l'Afrique. Nous construisons une maison dont l'Afrique est la source de vérité, et dont Paris est l'atelier de précision. Notre langage se déploie à travers trois univers — Atmosphère, Gourmet et Beauté — unis par une même exigence. Chaque création révèle une matière, un geste, un territoire ou une mémoire. Aucune ne folklorise. Aucune ne fige. Toutes transforment. Nous ne reproduisons pas le passé. Nous dialoguons avec lui pour inventer ce qui vient.`,
     },
     {
       num: 'III',
       title: "La rareté ne se décrète pas.",
       subtitle: "Elle se prouve.",
-      body: `Une matière première rare. Un savoir-faire humain rare. Un temps de fabrication rare. Une transmission rare. C'est cette quadruple exigence qui distingue un objet précieux d'un objet simplement cher. Nous refusons la rareté artificielle produite par le marketing. Nous cultivons une rareté réelle — géologique, humaine, culturelle et temporelle.`,
+      body: `Le luxe ne réside pas dans l'ostentation. Il naît de la profondeur : celle d'une origine, d'un savoir-faire, d'une histoire et du temps consacré à leur donner forme. Une matière première rare. Un savoir-faire humain rare. Un temps de fabrication rare. Une transmission rare. C'est cette quadruple exigence qui distingue un objet précieux d'un objet simplement cher. Nous refusons la rareté artificielle produite par le marketing. Nous cultivons une rareté réelle — géologique, humaine, culturelle et temporelle — celle qui résiste à l'échelle, à l'oubli et à la copie.`,
     },
     {
       num: 'IV',
-      title: "Nos objets ne représentent pas une culture.",
-      subtitle: "Ils permettent de la vivre.",
-      body: `Nous croyons qu'un objet peut être beau et avoir quelque chose à dire. Qu'un parfum peut réveiller une mémoire. Qu'une saveur peut révéler un territoire. Chaque création Retbaa est un fragment de culture mis en mouvement : une rencontre entre héritage et création, artisanat et innovation, ancrage africain et exigence internationale.`,
+      title: "Nous ne proposons pas des objets silencieux.",
+      subtitle: "Nos objets ne représentent pas une culture. Ils permettent de la vivre.",
+      body: `Nous croyons qu'un objet peut être beau et avoir quelque chose à dire. Qu'un parfum peut réveiller une mémoire. Qu'une saveur peut révéler un territoire. Qu'un geste de beauté peut devenir un rituel. Qu'un espace peut être un lieu de rencontre et de transmission. Chaque création Retbaa est un fragment de culture mis en mouvement : une rencontre entre héritage et création, artisanat et innovation, ancrage africain et exigence internationale.`,
     },
     {
       num: 'V',
+      title: "Nous n'entrons pas sur un marché.",
+      subtitle: "Nous y déposons une méthode.",
+      body: `Dakar, Abidjan, Kigali, Casablanca, Paris, Dubaï ou Tokyo : chaque territoire possède sa propre lecture du beau, du précieux et du désirable. Nous refusons l'expansion par duplication. Le Retbaa Compass est notre discipline d'entrée : comprendre avant de proposer, dialoguer avant de traduire, s'ancrer avant de s'étendre. Nous ne reproduisons pas un concept d'une ville à l'autre. Nous traduisons une doctrine sans jamais en diluer l'origine.`,
+    },
+    {
+      num: 'VI',
+      title: "La transmission est notre destination.",
+      subtitle: "Nous créons ce qui mérite de rester.",
+      body: `Une création Retbaa n'est pas achevée lorsqu'elle est fabriquée. Elle ne l'est pas davantage lorsqu'elle est achetée. Elle le devient lorsqu'elle est vécue, racontée et transmise — à un proche, à un cercle, à une génération, à une mémoire. C'est pourquoi nous ne créons pas seulement pour le présent.`,
+    },
+    {
+      num: 'VII',
       title: "Notre ambition n'est pas régionale.",
       subtitle: "Elle est fondatrice.",
-      body: `Retbaa n'est pas une maison africaine qui cherche à devenir internationale. Retbaa est une maison de luxe internationale dont l'Afrique constitue l'origine de vérité — comme la Provence pour un parfumeur, Kyoto pour un maître artisan ou Murano pour un verrier. Née au bord du Lac Rose, façonnée entre Dakar et Paris.`,
+      body: `Retbaa n'est pas une maison africaine qui cherche à devenir internationale. Retbaa est une maison de luxe internationale dont l'Afrique constitue l'origine de vérité — comme la Provence pour un parfumeur, Kyoto pour un maître artisan ou Murano pour un verrier. Née au bord du Lac Rose, façonnée entre Dakar et Paris, Retbaa porte une conviction simple : les cultures africaines ne sont pas seulement des héritages à préserver. Elles sont des forces contemporaines capables d'inventer de nouvelles expressions du beau, du rare et du durable. Nous partons de nos racines, non pour y rester, mais pour aller plus loin.`,
     },
   ]
 
@@ -501,8 +513,9 @@ function StepPresentation({ onNext }) {
               "L'exotisme de façade.",
               "Le folklore comme raccourci.",
               "La nostalgie comme argument de vente.",
-              "Les récits qui enferment l'Afrique dans l'anonymat ou le passé.",
+              "Les récits qui enferment l'Afrique dans l'anonymat, l'imitation ou le passé.",
               "De choisir entre fierté d'origine et exigence de fabrication.",
+              "Le Luxe Culturel n'a pas à s'excuser d'où il vient. Il doit démontrer ce qu'il apporte au monde.",
             ].map((item, i) => (
               <div key={i} style={{
                 display: 'flex', gap: '16px', alignItems: 'flex-start',
