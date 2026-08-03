@@ -432,7 +432,8 @@ export default function DataroomDocsPage({ isProspect = false, isApproved: isApp
       .then(({ data }) => setProspectStatus(data?.status ?? null))
   }, [isAuthenticated, user?.email])
 
-  const isApproved = isApprovedProp || prospectStatus === 'approved'
+  // TEST MODE : tout utilisateur connecté ou preview = approuvé
+  const isApproved = isApprovedProp || isAuthenticated || prospectStatus === 'approved'
 
   // Charger tous les docs (public — pas de filtre auth)
   useEffect(() => {

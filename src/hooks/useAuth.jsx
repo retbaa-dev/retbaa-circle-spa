@@ -85,8 +85,8 @@ export function AuthProvider({ children }) {
 
   // Rôle mappé (founder / active / assistant / pending / no_access / null)
   const rawRole = profile?.role ? (ROLE_MAP[profile.role] ?? profile.role) : null
-  // no_access : accès refusé par app_access — sauf founder (accès total)
-  const role = (!circleAccess && rawRole !== 'founder') ? 'no_access' : rawRole
+  // TEST MODE : circleAccess ignoré — tout utilisateur avec un profil a accès
+  const role = rawRole
 
   const value = {
     user,           // user Supabase Auth (id, email, …)
