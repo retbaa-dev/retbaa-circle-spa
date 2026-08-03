@@ -182,16 +182,16 @@ function DocCard({ doc, isAuthenticated, isApproved, onPreviewClick, onRestricte
           </div>
           <Badge type={isPreviewOnly ? 'preview' : 'restricted'} />
         </div>
-        {doc.description && (
+        {(doc.summary || doc.description) && (
           <div style={{
             fontSize: '13px', color: '#6B7280',
             lineHeight: 1.6,
             display: '-webkit-box',
-            WebkitLineClamp: isPreviewOnly ? 3 : 2,
+            WebkitLineClamp: 3,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
           }}>
-            {doc.description}
+            {doc.summary || doc.description}
           </div>
         )}
       </div>
