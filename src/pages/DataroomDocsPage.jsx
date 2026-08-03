@@ -408,16 +408,15 @@ function InvestissementSection({ docs, isAuthenticated, isApproved, onPreviewCli
 const CATEGORY_ORDER = ['Financier', 'Juridique', 'Recherche & Marché', 'Stratégie', 'Général']
 
 // ── Page principale ──────────────────────────────────────────────────────────
-export default function DataroomDocsPage({ isProspect = false, isApproved: isApprovedProp = false }) {
+export default function DataroomDocsPage({ isProspect = false, isApproved: isApprovedProp = false, isAuthenticated: isAuthProp = false }) {
   const { user, isSignedIn } = useAuth()
   const [docs, setDocs]           = useState([])
   const [loading, setLoading]     = useState(true)
   const [viewerDoc, setViewerDoc] = useState(null)
   const [showOnboarding, setShowOnboarding] = useState(false)
 
-  // Authentification : utiliser les props si fournis par App.jsx (utilisateur connecté)
-  // sinon fallback sur useAuth directement
-  const isAuthenticated = isSignedIn || false
+  // Mode preview (isAuthProp=true) OU vraiment connecté
+  const isAuthenticated = isAuthProp || isSignedIn || false
 
   // Vérifier si l'utilisateur approuvé : prop ou statut prospect
   const [prospectStatus, setProspectStatus] = useState(null)

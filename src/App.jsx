@@ -331,7 +331,11 @@ function AuthGate() {
           <Route path="/mon-espace"          element={<ProspectDashboard />} />
           <Route path="/dataroom-docs"       element={
             <Suspense fallback={<PageLoader />}>
-              <DataroomDocsPage isProspect={isProspect} isApproved={role === 'founder' || role === 'assistant'} />
+              <DataroomDocsPage
+                isProspect={isProspect}
+                isApproved={role === 'founder' || role === 'assistant'}
+                isAuthenticated={isSignedIn || !!previewUser}
+              />
             </Suspense>
           } />
           <Route path="/inner-circle"        element={
