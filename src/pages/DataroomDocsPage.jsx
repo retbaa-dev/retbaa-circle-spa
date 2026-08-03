@@ -19,7 +19,7 @@ const CATEGORY_META = {
 
 // ── PDF Viewer inline ────────────────────────────────────────────────────────
 function PdfViewer({ doc, onClose, viewerEmail = null }) {
-  const url = doc.file_url || doc.url
+  const url = doc.pdf_path || doc.file_url || doc.url
   const openedAt = useRef(Date.now())
 
   const handleClose = () => {
