@@ -21,6 +21,7 @@ const CATEGORY_META = {
 function PdfViewer({ doc, onClose, viewerEmail = null }) {
   const url = doc.pdf_path || doc.file_url || doc.url
   const openedAt = useRef(Date.now())
+  const [fallback, setFallback] = useState(false)
 
   const handleClose = () => {
     const seconds = Math.round((Date.now() - openedAt.current) / 1000)
@@ -28,10 +29,15 @@ function PdfViewer({ doc, onClose, viewerEmail = null }) {
     onClose()
   }
 
+  // URL absolue pour l'iframe
+  const absoluteUrl = url
+    ? (url.startsWith('http') ? url : `${window.location.origin}${url}`)
+    : null
+
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 1000,
-      backgroundColor: 'rgba(13,31,60,0.85)',
+      backgroundColor: 'rgba(13,31,60,0.92)',
       display: 'flex', flexDirection: 'column',
     }}>
       {/* Header viewer */}
@@ -47,30 +53,72 @@ function PdfViewer({ doc, onClose, viewerEmail = null }) {
             {doc.title}
           </div>
           <div style={{ fontSize: '11px', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>
-            {doc.category} · Lecture seule
+            {doc.category || doc.type} · Lecture seule
           </div>
         </div>
-        <button
-          onClick={handleClose}
-          style={{
-            background: 'rgba(255,255,255,0.1)', border: 'none',
-            color: '#fff', cursor: 'pointer',
-            width: '36px', height: '36px', borderRadius: '50%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '20px', flexShrink: 0,
-          }}
-        >
-          ✕
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {absoluteUrl && (
+            <a
+              href={absoluteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase',
+                color: 'rgba(255,255,255,0.5)', textDecoration: 'none', fontWeight: 700,
+              }}
+            >
+              Ouvrir ↗
+            </a>
+          )}
+          <button
+            onClick={handleClose}
+            style={{
+              background: 'rgba(255,255,255,0.1)', border: 'none',
+              color: '#fff', cursor: 'pointer',
+              width: '36px', height: '36px', borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '20px', flexShrink: 0,
+            }}
+          >
+            ✕
+          </button>
+        </div>
       </div>
-      {/* PDF iframe — sans toolbar pour éviter le téléchargement */}
-      <div style={{ flex: 1, overflow: 'hidden', backgroundColor: '#1A1A2E' }}>
-        <iframe
-          src={`${url}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
-          title={doc.title}
-          style={{ width: '100%', height: '100%', border: 'none' }}
-          sandbox="allow-same-origin allow-scripts"
-        />
+
+      {/* PDF viewer */}
+      <div style={{ flex: 1, overflow: 'hidden', backgroundColor: '#1A1A2E', position: 'relative' }}>
+        {!absoluteUrl ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,0.4)', fontFamily: 'Manrope, sans-serif' }}>
+            Document non disponible
+          </div>
+        ) : fallback ? (
+          /* Fallback : lien direct si l'iframe ne charge pas */
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '16px' }}>
+            <div style={{ color: 'rgba(255,255,255,0.6)', fontFamily: 'Manrope, sans-serif', fontSize: '14px' }}>
+              Le document ne peut pas s'afficher en ligne.
+            </div>
+            <a
+              href={absoluteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                background: '#1A3A6B', color: '#fff', padding: '12px 24px',
+                borderRadius: '6px', textDecoration: 'none',
+                fontFamily: 'Manrope, sans-serif', fontSize: '13px', fontWeight: 700,
+                letterSpacing: '0.1em', textTransform: 'uppercase',
+              }}
+            >
+              Ouvrir dans un nouvel onglet
+            </a>
+          </div>
+        ) : (
+          <iframe
+            src={absoluteUrl}
+            title={doc.title}
+            style={{ width: '100%', height: '100%', border: 'none' }}
+            onError={() => setFallback(true)}
+          />
+        )}
       </div>
     </div>
   )
