@@ -333,7 +333,7 @@ function AuthGate() {
             <Suspense fallback={<PageLoader />}>
               <DataroomDocsPage
                 isProspect={isProspect}
-                isApproved={role === 'founder' || role === 'assistant'}
+                isApproved={isSignedIn || !!previewUser}
                 isAuthenticated={isSignedIn || !!previewUser}
               />
             </Suspense>
