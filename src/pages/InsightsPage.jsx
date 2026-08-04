@@ -196,7 +196,7 @@ const FALLBACK_ARTICLES = [
 ]
 
 
-const FILTERS = ['Tout', 'Vision', 'Veille Marché', 'Afrique', 'Marché Luxe', 'Stratégie', 'Géopolitique', 'Tech & IA', 'Distribution']
+const FILTERS = ['Tout', 'Veille Marché', 'Mode africaine', 'Marché Luxe', 'IA luxe', 'Tech & IA', 'Gen Z', 'Hôtellerie luxe', 'Investissement', 'Afrique', 'Vision']
 
 // ─── ARTICLE FEATURED (pleine largeur) ───────────────────────
 function FeaturedArticle({ article, onOpen }) {
