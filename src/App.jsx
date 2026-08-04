@@ -2,6 +2,7 @@ import { lazy, Suspense, useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 import { supabase } from './lib/supabase'
+import ErrorBoundary from './components/ErrorBoundary'
 import './i18n/index.js'
 import './index.css'
 
@@ -172,6 +173,15 @@ function getPreviewRole() {
 // ── Composant racine ────────────────────────────────────────────────────────
 export default function App() {
   return (
+    <ErrorBoundary fallback={
+      <div style={{ minHeight: '100vh', backgroundColor: '#FAF7F2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px', fontFamily: 'Manrope, sans-serif' }}>
+        <div style={{ fontFamily: 'Newsreader, serif', fontStyle: 'italic', fontSize: '28px', color: '#1A3A6B' }}>Retbaa Circle</div>
+        <div style={{ fontSize: '14px', color: '#6B7280' }}>Une erreur inattendue s'est produite.</div>
+        <button onClick={() => window.location.reload()} style={{ padding: '10px 24px', background: '#1A3A6B', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, letterSpacing: '0.1em' }}>
+          Recharger la page
+        </button>
+      </div>
+    }>
     <BrowserRouter>
       <Routes>
         {/* Auth */}
@@ -203,6 +213,7 @@ export default function App() {
         <Route path="/*" element={<AuthGate />} />
       </Routes>
     </BrowserRouter>
+    </ErrorBoundary>
   )
 }
 

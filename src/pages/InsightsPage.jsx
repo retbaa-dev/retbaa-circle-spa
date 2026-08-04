@@ -297,16 +297,31 @@ function ArticleCard({ article, onOpen }) {
       onMouseLeave={() => setHovered(false)}
     >
       {/* Image */}
-      <div style={{ overflow: 'hidden', height: '200px', position: 'relative', flexShrink: 0 }}>
-        <img
-          src={article.img}
-          alt={article.title}
-          style={{
-            width: '100%', height: '100%', objectFit: 'cover',
-            transition: 'transform 1s ease',
-            transform: hovered ? 'scale(1.06)' : 'scale(1)',
-          }}
-        />
+      <div style={{ overflow: 'hidden', height: '200px', position: 'relative', flexShrink: 0, backgroundColor: '#1A3A6B' }}>
+        {article.img ? (
+          <img
+            src={article.img}
+            alt={article.title}
+            onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }}
+            style={{
+              width: '100%', height: '100%', objectFit: 'cover',
+              transition: 'transform 1s ease',
+              transform: hovered ? 'scale(1.06)' : 'scale(1)',
+            }}
+          />
+        ) : null}
+        {/* Placeholder si image absente ou cassée */}
+        <div style={{
+          display: article.img ? 'none' : 'flex',
+          position: article.img ? 'absolute' : 'relative',
+          inset: 0, width: '100%', height: '100%',
+          alignItems: 'center', justifyContent: 'center',
+          background: 'linear-gradient(135deg, #1A3A6B 0%, #0D2D1A 100%)',
+          flexDirection: 'column', gap: '8px',
+        }}>
+          <span style={{ fontFamily: 'Newsreader, serif', fontStyle: 'italic', fontSize: '22px', color: 'rgba(239,192,212,0.6)' }}>Retbaa</span>
+          <span style={{ fontSize: '9px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)' }}>Insights</span>
+        </div>
         <div style={{
           position: 'absolute', bottom: 0, left: 0, right: 0,
           height: '4px', background: '#EFC0D4',
