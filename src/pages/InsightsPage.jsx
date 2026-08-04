@@ -141,20 +141,35 @@ function FeaturedArticle({ article, onOpen }) {
       className="featured-article-grid"
     >
       {/* Image gauche */}
-      <div className="featured-article-image" style={{ overflow: 'hidden', position: 'relative', minHeight: '420px' }}>
-        <img
-          src={article.img}
-          alt={article.title}
-          style={{
-            width: '100%', height: '100%', objectFit: 'cover',
-            transition: 'transform 1.2s ease',
-            transform: hovered ? 'scale(1.04)' : 'scale(1)',
+      <div className="featured-article-image" style={{ overflow: 'hidden', position: 'relative', minHeight: '420px', background: 'linear-gradient(135deg, #1A3A6B 0%, #0D2244 60%, #0D2D1A 100%)' }}>
+        {article.img && (
+          <img
+            src={article.img}
+            alt={article.title}
+            onError={e => { e.target.style.display = 'none' }}
+            style={{
+              width: '100%', height: '100%', objectFit: 'cover',
+              transition: 'transform 1.2s ease',
+              transform: hovered ? 'scale(1.04)' : 'scale(1)',
+              position: 'absolute', inset: 0,
+            }}
+          />
+        )}
+        {/* Placeholder décoratif si pas d'image */}
+        {!article.img && (
+          <div style={{
             position: 'absolute', inset: 0,
-          }}
-        />
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center', gap: '12px',
+          }}>
+            <span style={{ fontFamily: 'Newsreader, serif', fontStyle: 'italic', fontSize: '48px', color: 'rgba(196,169,106,0.25)', letterSpacing: '-0.02em' }}>Retbaa</span>
+            <div style={{ width: '32px', height: '1px', background: 'rgba(196,169,106,0.3)' }} />
+            <span style={{ fontSize: '10px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)' }}>Insights</span>
+          </div>
+        )}
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'linear-gradient(to right, rgba(26,58,107,0.15) 0%, transparent 60%)',
+          background: 'linear-gradient(to right, rgba(26,58,107,0.3) 0%, transparent 60%)',
         }} />
         {/* Tag sur l'image */}
         <div style={{
