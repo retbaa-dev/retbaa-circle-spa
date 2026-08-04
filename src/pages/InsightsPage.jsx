@@ -2,6 +2,7 @@
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import InsightsCover from '../components/InsightsCover'
 
 // Rendu markdown simple (gras, italique, titres, listes, images [[IMG:url|caption]])
 function renderMarkdown(text) {
@@ -140,37 +141,15 @@ function FeaturedArticle({ article, onOpen }) {
       }}
       className="featured-article-grid"
     >
-      {/* Image gauche */}
-      <div className="featured-article-image" style={{ overflow: 'hidden', position: 'relative', minHeight: '420px', background: 'linear-gradient(135deg, #1A3A6B 0%, #0D2244 60%, #0D2D1A 100%)' }}>
-        {article.img && (
-          <img
-            src={article.img}
-            alt={article.title}
-            onError={e => { e.target.style.display = 'none' }}
-            style={{
-              width: '100%', height: '100%', objectFit: 'cover',
-              transition: 'transform 1.2s ease',
-              transform: hovered ? 'scale(1.04)' : 'scale(1)',
-              position: 'absolute', inset: 0,
-            }}
-          />
-        )}
-        {/* Placeholder décoratif si pas d'image */}
-        {!article.img && (
-          <div style={{
-            position: 'absolute', inset: 0,
-            display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center', gap: '12px',
-          }}>
-            <span style={{ fontFamily: 'Newsreader, serif', fontStyle: 'italic', fontSize: '48px', color: 'rgba(196,169,106,0.25)', letterSpacing: '-0.02em' }}>Retbaa</span>
-            <div style={{ width: '32px', height: '1px', background: 'rgba(196,169,106,0.3)' }} />
-            <span style={{ fontSize: '10px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)' }}>Insights</span>
-          </div>
-        )}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(to right, rgba(26,58,107,0.3) 0%, transparent 60%)',
-        }} />
+      {/* Couverture featured — InsightsCover texturé */}
+      <div className="featured-article-image" style={{ overflow: 'hidden', position: 'relative', minHeight: '420px' }}>
+        <InsightsCover
+          tags={article.tags || [article.tag]}
+          title={article.title}
+          height={420}
+          hovered={hovered}
+          featured={true}
+        />
         {/* Tag sur l'image */}
         <div style={{
           position: 'absolute', top: '24px', left: '24px',
@@ -178,6 +157,7 @@ function FeaturedArticle({ article, onOpen }) {
           backdropFilter: 'blur(6px)',
           padding: '6px 14px',
           borderRadius: '2px',
+          zIndex: 2,
         }}>
           <span style={{
             fontFamily: 'Manrope, sans-serif', fontSize: '10px',
@@ -311,35 +291,18 @@ function ArticleCard({ article, onOpen }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Image */}
-      <div style={{ overflow: 'hidden', height: '200px', position: 'relative', flexShrink: 0, backgroundColor: '#1A3A6B' }}>
-        {article.img ? (
-          <img
-            src={article.img}
-            alt={article.title}
-            onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }}
-            style={{
-              width: '100%', height: '100%', objectFit: 'cover',
-              transition: 'transform 1s ease',
-              transform: hovered ? 'scale(1.06)' : 'scale(1)',
-            }}
-          />
-        ) : null}
-        {/* Placeholder si image absente ou cassée */}
-        <div style={{
-          display: article.img ? 'none' : 'flex',
-          position: article.img ? 'absolute' : 'relative',
-          inset: 0, width: '100%', height: '100%',
-          alignItems: 'center', justifyContent: 'center',
-          background: 'linear-gradient(135deg, #1A3A6B 0%, #0D2D1A 100%)',
-          flexDirection: 'column', gap: '8px',
-        }}>
-          <span style={{ fontFamily: 'Newsreader, serif', fontStyle: 'italic', fontSize: '22px', color: 'rgba(239,192,212,0.6)' }}>Retbaa</span>
-          <span style={{ fontSize: '9px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)' }}>Insights</span>
-        </div>
+      {/* Couverture card — InsightsCover texturé */}
+      <div style={{ overflow: 'hidden', height: '200px', position: 'relative', flexShrink: 0 }}>
+        <InsightsCover
+          tags={article.tags || [article.tag]}
+          title={article.title}
+          height={200}
+          hovered={hovered}
+          featured={false}
+        />
         <div style={{
           position: 'absolute', bottom: 0, left: 0, right: 0,
-          height: '4px', background: '#EFC0D4',
+          height: '3px', background: '#EFC0D4',
         }} />
       </div>
 
