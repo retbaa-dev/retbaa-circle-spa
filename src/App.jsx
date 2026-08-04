@@ -1,8 +1,9 @@
 import { lazy, Suspense, useState, useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 import { supabase } from './lib/supabase'
 import ErrorBoundary from './components/ErrorBoundary'
+import GatedPage from './components/GatedPage'
 import './i18n/index.js'
 import './index.css'
 
@@ -209,6 +210,23 @@ export default function App() {
         {/* Observateur — gate prospect */}
         <Route path="/observateur" element={<ObservateurGate />} />
 
+        {/* ── Routes publiques — accessibles sans auth ── */}
+        <Route path="/insights" element={
+          <Suspense fallback={<PageLoader />}>
+            <PublicShell><InsightsPage /></PublicShell>
+          </Suspense>
+        } />
+        <Route path="/insights/:slug" element={
+          <Suspense fallback={<PageLoader />}>
+            <PublicShell><ArticlePage /></PublicShell>
+          </Suspense>
+        } />
+        <Route path="/podcast" element={
+          <Suspense fallback={<PageLoader />}>
+            <PublicShell><PodcastPage /></PublicShell>
+          </Suspense>
+        } />
+
         {/* App principale — tout ce qui reste */}
         <Route path="/*" element={<AuthGate />} />
       </Routes>
@@ -345,6 +363,59 @@ function AuthGate() {
         </Routes>
       </Suspense>
     </AppShell>
+  )
+}
+
+// ── PublicShell — layout minimal pour pages publiques (sans auth) ────────────
+function PublicShell({ children }) {
+  // navigation via window.location
+  return (
+    <div style={{ minHeight: '100vh', backgroundColor: '#FAF7F2', fontFamily: 'Manrope, sans-serif' }}>
+      {/* Header minimal */}
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 100,
+        background: '#1A3A6B',
+        padding: '0 24px',
+        height: '56px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        boxShadow: '0 1px 8px rgba(0,0,0,0.15)',
+      }}>
+        <button
+          onClick={() => window.location.href = '/'}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
+        >
+          <span style={{ fontFamily: 'Newsreader, serif', fontStyle: 'italic', fontSize: '20px', color: '#C4A96A', letterSpacing: '0.02em' }}>
+            Retbaa Circle
+          </span>
+        </button>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <button
+            onClick={() => window.location.href = '/dataroom'}
+            style={{
+              padding: '7px 16px', background: 'transparent',
+              border: '1px solid rgba(196,169,106,0.5)', borderRadius: '4px',
+              color: '#C4A96A', fontSize: '11px', fontWeight: 700,
+              letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer',
+            }}
+          >
+            Devenir prospect
+          </button>
+          <button
+            onClick={() => window.location.href = '/login'}
+            style={{
+              padding: '7px 16px', background: '#C4A96A',
+              border: 'none', borderRadius: '4px',
+              color: '#1A3A6B', fontSize: '11px', fontWeight: 700,
+              letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer',
+            }}
+          >
+            Connexion
+          </button>
+        </div>
+      </div>
+      {/* Contenu */}
+      <div>{children}</div>
+    </div>
   )
 }
 
