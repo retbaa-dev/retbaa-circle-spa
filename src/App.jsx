@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { useAuth } from './hooks/useAuth'
 import { supabase } from './lib/supabase'
 import ErrorBoundary from './components/ErrorBoundary'
+import HomePage from './pages/HomePage'
 import GatedPage from './components/GatedPage'
 import './i18n/index.js'
 import './index.css'
@@ -193,6 +194,9 @@ export default function App() {
           <Suspense fallback={<PageLoader />}><BienvenueOnboarding /></Suspense>
         } />
 
+        {/* ── Route racine — manifesto si non connecté, dashboard si connecté ── */}
+        <Route path="/" element={<HomeOrDashboard />} />
+
         {/* Dataroom landing — public */}
         <Route path="/dataroom" element={
           <Suspense fallback={<PageLoader />}><DataroomLanding /></Suspense>
@@ -221,6 +225,20 @@ export default function App() {
     </BrowserRouter>
     </ErrorBoundary>
   )
+}
+
+// ── HomeOrDashboard — manifesto si non connecté, dashboard si connecté ──────
+function HomeOrDashboard() {
+  const previewUser = getPreviewUser()
+  const { isLoaded, isSignedIn } = useAuth()
+
+  if (!isLoaded) return <PageLoader />
+
+  // Connecté → AuthGate → dashboard normal
+  if (isSignedIn || previewUser) return <AuthGate />
+
+  // Non connecté → manifesto + deux chemins
+  return <HomePage />
 }
 
 // ── PublicOrAuthRoute — public si non connecté, AuthGate si connecté ────────
