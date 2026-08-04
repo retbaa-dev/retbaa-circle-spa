@@ -210,28 +210,35 @@ export default function App() {
         {/* Observateur — gate prospect */}
         <Route path="/observateur" element={<ObservateurGate />} />
 
-        {/* ── Routes publiques — accessibles sans auth ── */}
-        <Route path="/insights" element={
-          <Suspense fallback={<PageLoader />}>
-            <PublicShell><InsightsPage /></PublicShell>
-          </Suspense>
-        } />
-        <Route path="/insights/:slug" element={
-          <Suspense fallback={<PageLoader />}>
-            <PublicShell><ArticlePage /></PublicShell>
-          </Suspense>
-        } />
-        <Route path="/podcast" element={
-          <Suspense fallback={<PageLoader />}>
-            <PublicShell><PodcastPage /></PublicShell>
-          </Suspense>
-        } />
+        {/* ── Routes publiques — accessibles sans auth, mais AuthGate si connecté ── */}
+        <Route path="/insights"       element={<PublicOrAuthRoute><InsightsPage /></PublicOrAuthRoute>} />
+        <Route path="/insights/:slug" element={<PublicOrAuthRoute><ArticlePage /></PublicOrAuthRoute>} />
+        <Route path="/podcast"        element={<PublicOrAuthRoute><PodcastPage /></PublicOrAuthRoute>} />
 
         {/* App principale — tout ce qui reste */}
         <Route path="/*" element={<AuthGate />} />
       </Routes>
     </BrowserRouter>
     </ErrorBoundary>
+  )
+}
+
+// ── PublicOrAuthRoute — public si non connecté, AuthGate si connecté ────────
+// Permet d'afficher le sidebar quand l'utilisateur est déjà connecté
+function PublicOrAuthRoute({ children }) {
+  const previewUser = getPreviewUser()
+  const { isLoaded, isSignedIn } = useAuth()
+
+  if (!isLoaded) return <PageLoader />
+
+  // Connecté → passe par AuthGate (sidebar + session)
+  if (isSignedIn || previewUser) return <AuthGate />
+
+  // Non connecté → PublicShell (header minimal)
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <PublicShell>{children}</PublicShell>
+    </Suspense>
   )
 }
 

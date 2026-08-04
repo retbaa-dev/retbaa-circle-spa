@@ -1,6 +1,7 @@
 // pages/InsightsPage.jsx — Retbaa Circle — Revue éditoriale investisseurs
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { supabase } from '../lib/supabase'
 import InsightsCover from '../components/InsightsCover'
 
@@ -835,7 +836,10 @@ export default function InsightsPage() {
         }
       `}</style>
     </div>
-    {selectedArticle && <ArticleModal article={selectedArticle} onClose={() => setSelectedArticle(null)} />}
+    {selectedArticle && createPortal(
+      <ArticleModal article={selectedArticle} onClose={() => setSelectedArticle(null)} />,
+      document.body
+    )}
     </>
   )
 }
