@@ -1,6 +1,7 @@
 // pages/DataroomDocsPage.jsx — Navigation libre + onboarding à la demande
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
+import { useDataroomDocs } from '../hooks/queries/useDataroomDocs'
 import { useAuth } from '../hooks/useAuth'
 import OnboardingModal from '../components/OnboardingModal'
 import ErrorBoundary from '../components/ErrorBoundary'
@@ -459,8 +460,6 @@ const CATEGORY_ORDER = ['Financier', 'Juridique', 'Recherche & Marché', 'Strat�
 // ── Page principale ──────────────────────────────────────────────────────────
 export default function DataroomDocsPage({ isProspect = false, isApproved: isApprovedProp = false, isAuthenticated: isAuthProp = false }) {
   const { user, isSignedIn } = useAuth()
-  const [docs, setDocs]           = useState([])
-  const [loading, setLoading]     = useState(true)
   const [viewerDoc, setViewerDoc] = useState(null)
   const [showOnboarding, setShowOnboarding] = useState(false)
 
@@ -483,18 +482,8 @@ export default function DataroomDocsPage({ isProspect = false, isApproved: isApp
   // TEST MODE : tout utilisateur connecté ou preview = approuvé
   const isApproved = isApprovedProp || isAuthenticated || prospectStatus === 'approved'
 
-  // Charger tous les docs (public — pas de filtre auth)
-  useEffect(() => {
-    supabase
-      .from('dataroom_docs')
-      .select('*')
-      .order('sort_order', { ascending: true })
-      .then(({ data, error }) => {
-        if (error) console.error('dataroom_docs error:', error)
-        if (data) setDocs(data)
-        setLoading(false)
-      })
-  }, [])
+  // ── TanStack Query — fetch docs dataroom ──────────────────────────────────
+  const { data: docs = [], isLoading: loading } = useDataroomDocs()
 
 useEffect(() => {
     if (!isProspect || !user?.email) return

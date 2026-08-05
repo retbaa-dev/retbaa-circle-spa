@@ -2,6 +2,8 @@
 import { Fragment, useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useProspects } from '../hooks/queries/useProspects'
 
 // ── Helpers NDA meta ──────────────────────────────────────────────────────────
 const JURISDICTION_LABEL = {
@@ -70,20 +72,19 @@ function NdaDetail({ ndaMeta }) {
 
 // ── Onglet Vues docs ──────────────────────────────────────────────────────────
 function DocViewsTab() {
-  const [views, setViews] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    supabase
-      .from('dataroom_doc_views')
-      .select('*')
-      .order('viewed_at', { ascending: false })
-      .limit(50)
-      .then(({ data, error }) => {
-        if (!error) setViews(data || [])
-        setLoading(false)
-      })
-  }, [])
+  const { data: views = [], isLoading: loading } = useQuery({
+    queryKey: ['dataroom_doc_views'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('dataroom_doc_views')
+        .select('*')
+        .order('viewed_at', { ascending: false })
+        .limit(50)
+      if (error) throw new Error(error.message)
+      return data || []
+    },
+    staleTime: 2 * 60 * 1000,
+  })
 
   if (loading) return <p style={{ color: '#9CA3AF', fontSize: '13px' }}>Chargement…</p>
   if (views.length === 0) return <p style={{ color: '#9CA3AF', fontSize: '13px' }}>Aucune vue enregistrée.</p>
@@ -130,22 +131,11 @@ const AMOUNT_LABEL  = { lt_10k: '< 10k€', '10k_50k': '10–50k€', '50k_100k'
 
 // ── Onglet Prospects ──────────────────────────────────────────────────────────
 function ProspectsTab() {
-  const [prospects, setProspects] = useState([])
-  const [loading, setLoading]     = useState(true)
-  const [msg, setMsg]             = useState('')
+  const queryClient = useQueryClient()
+  const [msg, setMsg] = useState('')
   const [expandedId, setExpandedId] = useState(null)
 
-  const fetchProspects = async () => {
-    setLoading(true)
-    const { data, error } = await supabase
-      .from('dataroom_prospects')
-      .select('*')
-      .order('created_at', { ascending: false })
-    if (!error) setProspects(data || [])
-    setLoading(false)
-  }
-
-  useEffect(() => { fetchProspects() }, [])
+  const { data: prospects = [], isLoading: loading } = useProspects()
 
   const updateStatus = async (id, status) => {
     const patch = { status }
@@ -155,7 +145,8 @@ function ProspectsTab() {
       setMsg('❌ Erreur : ' + error.message)
     } else {
       setMsg(status === 'approved' ? '✅ Prospect approuvé' : '❌ Prospect rejeté')
-      fetchProspects()
+      // Invalider le cache → refetch automatique
+      queryClient.invalidateQueries({ queryKey: ['prospects'] })
     }
     setTimeout(() => setMsg(''), 3500)
   }

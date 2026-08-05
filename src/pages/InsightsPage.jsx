@@ -2,7 +2,7 @@
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { supabase } from '../lib/supabase'
+import { useInsights } from '../hooks/queries/useInsights'
 import InsightsCover from '../components/InsightsCover'
 
 // Rendu markdown simple (gras, italique, titres, listes, images [[IMG:url|caption]])
@@ -459,85 +459,45 @@ export default function InsightsPage() {
   const { i18n } = useTranslation()
   const [activeFilter, setActiveFilter] = useState('Tout')
   const [selectedArticle, setSelectedArticle] = useState(null)
-  const [articles, setArticles] = useState([])
-  const [loading, setLoading] = useState(true)
   const [availableFilters, setAvailableFilters] = useState(FILTERS)
 
-  // Charger les articles depuis Supabase via supabase-js (clé depuis env vars)
+  // ── TanStack Query — fetch articles Insights ──────────────────────────────
+  const { data: rawArticles, isLoading: loading, isError } = useInsights()
+
+  // Mapper et calculer les filtres dynamiques quand les données arrivent
+  const articles = rawArticles
+    ? rawArticles.map(a => ({
+        id: a.slug || a.id,
+        tag: (Array.isArray(a.tags) && a.tags[0]) || a.content_type || 'Veille Marché',
+        title: a.title,
+        subtitle: '',
+        date: a.published_at
+          ? new Date(a.published_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+          : '',
+        author: a.author || 'Kemia',
+        source: '',
+        sourceUrl: a.source_url || null,
+        summary: a.content_short || '',
+        img: a.img || null,
+        content_md: a.content_long || '',
+        content_md_en: a.content_long_en || '',
+        signal_retbaa: Array.isArray(a.signal_retbaa) ? a.signal_retbaa : [],
+        tags: Array.isArray(a.tags) ? a.tags : [],
+        category: (Array.isArray(a.tags) && a.tags[0]) || a.content_type || 'Veille Marché',
+        featured: !!a.featured,
+      }))
+    : (isError ? FALLBACK_ARTICLES : [])
+
+  // Filtres dynamiques depuis les catégories réelles
   useEffect(() => {
-    let mounted = true
-    let retryTimer = null
-    let retryCount = 0
-
-    async function loadArticles() {
-      try {
-        const { data, error } = await supabase
-          .from('insights')
-          .select('id, title, slug, content_type, tags, content_short, content_long, content_long_en, signal_retbaa, author, status, published_at, img, source_url, featured')
-          .eq('status', 'published')
-          .order('published_at', { ascending: false })
-
-        if (error) throw error
-
-        if (mounted) {
-          if (data && data.length > 0) {
-            const mapped = data.map(a => ({
-              id: a.slug || a.id,
-              tag: (Array.isArray(a.tags) && a.tags[0]) || a.content_type || 'Veille Marché',
-              title: a.title,
-              subtitle: '',
-              date: a.published_at
-                ? new Date(a.published_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-                : '',
-              author: a.author || 'Kemia',
-              source: '',
-              sourceUrl: a.source_url || null,
-              summary: a.content_short || '',
-              img: a.img || null,
-              content_md: a.content_long || '',
-              content_md_en: a.content_long_en || '',
-              signal_retbaa: Array.isArray(a.signal_retbaa) ? a.signal_retbaa : [],
-              tags: Array.isArray(a.tags) ? a.tags : [],
-              category: (Array.isArray(a.tags) && a.tags[0]) || a.content_type || 'Veille Marché',
-              featured: !!a.featured,
-            }))
-            setArticles(mapped)
-
-            // Filtres dynamiques depuis les catégories réelles
-            const uniqueCategories = new Set(['Tout'])
-            mapped.forEach(a => { if (a.category && a.category !== 'Article') uniqueCategories.add(a.category) })
-            const mergedFilters = ['Tout']
-            FILTERS.slice(1).forEach(f => { if (uniqueCategories.has(f)) mergedFilters.push(f) })
-            uniqueCategories.forEach(cat => { if (!mergedFilters.includes(cat)) mergedFilters.push(cat) })
-            setAvailableFilters(mergedFilters.length > 1 ? mergedFilters : FILTERS)
-            setLoading(false)
-          } else {
-            // Retry une fois si vide (cold start Supabase)
-            if (retryCount < 1) {
-              retryCount++
-              retryTimer = setTimeout(loadArticles, 2000)
-            } else {
-              setArticles(FALLBACK_ARTICLES)
-              setAvailableFilters(FILTERS)
-              setLoading(false)
-            }
-          }
-        }
-      } catch {
-        if (mounted) {
-          setArticles(FALLBACK_ARTICLES)
-          setAvailableFilters(FILTERS)
-          setLoading(false)
-        }
-      }
-    }
-
-    loadArticles()
-    return () => {
-      mounted = false
-      if (retryTimer) clearTimeout(retryTimer)
-    }
-  }, [])
+    if (!rawArticles?.length) return
+    const uniqueCategories = new Set(['Tout'])
+    articles.forEach(a => { if (a.category && a.category !== 'Article') uniqueCategories.add(a.category) })
+    const mergedFilters = ['Tout']
+    FILTERS.slice(1).forEach(f => { if (uniqueCategories.has(f)) mergedFilters.push(f) })
+    uniqueCategories.forEach(cat => { if (!mergedFilters.includes(cat)) mergedFilters.push(cat) })
+    setAvailableFilters(mergedFilters.length > 1 ? mergedFilters : FILTERS)
+  }, [rawArticles])
   const filteredArticles = activeFilter === 'Tout'
     ? articles
     : articles.filter(a => (a.category || 'Article') === activeFilter)

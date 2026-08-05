@@ -1,7 +1,9 @@
 import { lazy, Suspense, useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { useAuth } from './hooks/useAuth'
 import { supabase } from './lib/supabase'
+import { queryClient } from './lib/queryClient'
 import ErrorBoundary from './components/ErrorBoundary'
 import HomePage from './pages/HomePage'
 import GatedPage from './components/GatedPage'
@@ -175,6 +177,7 @@ function getPreviewRole() {
 // ── Composant racine ────────────────────────────────────────────────────────
 export default function App() {
   return (
+    <QueryClientProvider client={queryClient}>
     <ErrorBoundary fallback={
       <div style={{ minHeight: '100vh', backgroundColor: '#FAF7F2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px', fontFamily: 'Manrope, sans-serif' }}>
         <div style={{ fontFamily: 'Newsreader, serif', fontStyle: 'italic', fontSize: '28px', color: '#1A3A6B' }}>Retbaa Circle</div>
@@ -224,6 +227,7 @@ export default function App() {
       </Routes>
     </BrowserRouter>
     </ErrorBoundary>
+    </QueryClientProvider>
   )
 }
 
