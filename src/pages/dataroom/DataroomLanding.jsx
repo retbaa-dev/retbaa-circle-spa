@@ -1271,12 +1271,55 @@ function StepQualification({ ndaMeta, ndaDate, onSuccess }) {
     setError('')
 
     try {
+      const prospectEmail = email.trim().toLowerCase()
+      const prospectFirst = firstName.trim()
+      const prospectLast  = lastName.trim()
+
+      // ── Vérifier si le prospect existe déjà en base ──────────────────────
+      const { data: existing } = await supabase
+        .from('dataroom_prospects')
+        .select('status, email')
+        .eq('email', prospectEmail)
+        .maybeSingle()
+
+      if (existing) {
+        // Cas 1 — Prospect approuvé → magic link direct, skip le flow
+        if (existing.status === 'approved') {
+          const { error: otpErr } = await supabase.auth.signInWithOtp({
+            email: prospectEmail,
+            options: { emailRedirectTo: window.location.origin + '/dataroom/access' },
+          })
+          if (otpErr) throw otpErr
+          onSuccess(prospectEmail)
+          return
+        }
+
+        // Cas 2 — Dossier en attente d'examen
+        if (existing.status === 'pending') {
+          setError('Votre dossier est en cours d\'examen. Vous recevrez un email dès qu\'il sera traité.')
+          setLoading(false)
+          return
+        }
+
+        // Cas 3 — Accès demandé mais pas encore approuvé → renvoi du magic link
+        if (existing.status === 'access_requested') {
+          const { error: otpErr } = await supabase.auth.signInWithOtp({
+            email: prospectEmail,
+            options: { emailRedirectTo: window.location.origin + '/dataroom/access' },
+          })
+          if (otpErr) throw otpErr
+          onSuccess(prospectEmail)
+          return
+        }
+      }
+
+      // ── Nouveau prospect — flow normal ────────────────────────────────────
       const { error: insertErr } = await supabase
         .from('dataroom_prospects')
         .insert({
-          first_name:      firstName.trim(),
-          last_name:       lastName.trim(),
-          email:           email.trim().toLowerCase(),
+          first_name:      prospectFirst,
+          last_name:       prospectLast,
+          email:           prospectEmail,
           type,
           entity_name:     type === 'entity' ? entityName.trim() : null,
           entity_siren:    type === 'entity' ? entitySiren.trim() : null,
@@ -1290,10 +1333,7 @@ function StepQualification({ ndaMeta, ndaDate, onSuccess }) {
 
       if (insertErr) throw insertErr
 
-      // ── Emails automatiques Brevo (best-effort, ne bloque pas l'onboarding) ──
-      const prospectEmail = email.trim().toLowerCase()
-      const prospectFirst = firstName.trim()
-      const prospectLast  = lastName.trim()
+      // ── Emails automatiques Brevo (best-effort) ───────────────────────────
       await Promise.allSettled([
         sendEmail({
           to:      prospectEmail,
@@ -1314,13 +1354,13 @@ function StepQualification({ ndaMeta, ndaDate, onSuccess }) {
       ])
 
       const { error: otpErr } = await supabase.auth.signInWithOtp({
-        email: email.trim().toLowerCase(),
+        email: prospectEmail,
         options: { emailRedirectTo: window.location.origin + '/dataroom/access' },
       })
 
       if (otpErr) throw otpErr
 
-      onSuccess(email.trim().toLowerCase())
+      onSuccess(prospectEmail)
     } catch (err) {
       setError(err.message || 'Une erreur est survenue. Veuillez réessayer.')
     } finally {
