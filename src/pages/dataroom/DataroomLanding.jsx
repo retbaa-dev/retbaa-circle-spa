@@ -1,10 +1,7 @@
 // pages/dataroom/DataroomLanding.jsx — Retbaa Circle
-// Portail public prospects — Stepper 2 étapes : Présentation → Qualification
-// NDA géré en amont sur HomePage via NDAModal
+// Portail public prospects — Stepper 3 étapes : Présentation → NDA (pleine page) → Qualification
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
-import { sendEmail } from '../../lib/brevo'
-import { welcomeProspect, notifyAdmin } from '../../lib/emailTemplates'
 
 // ── Styles partagés ───────────────────────────────────────────────────────────
 const s = {
@@ -249,17 +246,17 @@ const s = {
   },
 }
 
-const STEP_LABELS = ['Présentation', 'Qualification']
+const STEP_LABELS = ['Présentation', 'Confidentialité', 'Qualification']
 
 function StepIndicator({ step }) {
   return (
     <div style={s.stepIndicator}>
       {STEP_LABELS.map((label, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: i < 1 ? 1 : 'none' }}>
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: i < 2 ? 1 : 'none' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
             <div style={s.dot(i === step, i < step)} />
           </div>
-          {i < 1 && <div style={s.dotLine} />}
+          {i < 2 && <div style={s.dotLine} />}
         </div>
       ))}
     </div>
@@ -273,43 +270,31 @@ function StepPresentation({ onNext }) {
       num: 'I',
       title: "Nous ne vendons pas des produits.",
       subtitle: "Nous transformons un héritage en patrimoine.",
-      body: `Nous venons de territoires où chaque matière porte une mémoire, où chaque geste transmis raconte une manière d'habiter le monde. L'Afrique possède la matière, le geste, les récits et la mémoire sensorielle. Mais elle a trop rarement disposé des maisons, des institutions et de la continuité nécessaires pour les inscrire dans un patrimoine désirable à l'échelle mondiale. Retbaa existe pour contribuer à combler cet écart — non en reproduisant les codes du luxe européen, mais en construisant, depuis une autre origine, une maison capable de créer ses propres codes et de les faire traverser les frontières comme les générations.`,
+      body: `Nous venons de territoires où chaque matière porte une mémoire, où chaque geste transmis raconte une manière d'habiter le monde. L'Afrique possède la matière, le geste, les récits et la mémoire sensorielle. Retbaa existe pour les inscrire dans un patrimoine désirable à l'échelle mondiale — non en reproduisant les codes du luxe européen, mais en construisant, depuis une autre origine, une maison capable de créer ses propres codes.`,
     },
     {
       num: 'II',
-      title: "Le Luxe Culturel n'est pas un segment.",
-      subtitle: "C'est une grammaire.",
-      body: `Nous ne faisons pas du luxe inspiré par l'Afrique. Nous construisons une maison dont l'Afrique est la source de vérité, et dont Paris est l'atelier de précision. Notre langage se déploie à travers trois univers — Atmosphère, Gourmet et Beauté — unis par une même exigence. Chaque création révèle une matière, un geste, un territoire ou une mémoire. Aucune ne folklorise. Aucune ne fige. Toutes transforment. Nous ne reproduisons pas le passé. Nous dialoguons avec lui pour inventer ce qui vient.`,
+      title: "Le Luxe Culturel n\'est pas un segment.",
+      subtitle: "C\'est une grammaire.",
+      body: `Nous ne faisons pas du luxe inspiré par l'Afrique. Nous construisons une maison dont l'Afrique est la source de vérité, et dont Paris est l'atelier de précision. Notre langage se déploie à travers trois univers — Atmosphère, Gourmet et Beauté — unis par une même exigence. Aucune création ne folklorise. Aucune ne fige. Toutes transforment.`,
     },
     {
       num: 'III',
       title: "La rareté ne se décrète pas.",
       subtitle: "Elle se prouve.",
-      body: `Le luxe ne réside pas dans l'ostentation. Il naît de la profondeur : celle d'une origine, d'un savoir-faire, d'une histoire et du temps consacré à leur donner forme. Une matière première rare. Un savoir-faire humain rare. Un temps de fabrication rare. Une transmission rare. C'est cette quadruple exigence qui distingue un objet précieux d'un objet simplement cher. Nous refusons la rareté artificielle produite par le marketing. Nous cultivons une rareté réelle — géologique, humaine, culturelle et temporelle — celle qui résiste à l'échelle, à l'oubli et à la copie.`,
+      body: `Une matière première rare. Un savoir-faire humain rare. Un temps de fabrication rare. Une transmission rare. C'est cette quadruple exigence qui distingue un objet précieux d'un objet simplement cher. Nous refusons la rareté artificielle produite par le marketing. Nous cultivons une rareté réelle — géologique, humaine, culturelle et temporelle.`,
     },
     {
       num: 'IV',
-      title: "Nous ne proposons pas des objets silencieux.",
-      subtitle: "Nos objets ne représentent pas une culture. Ils permettent de la vivre.",
-      body: `Nous croyons qu'un objet peut être beau et avoir quelque chose à dire. Qu'un parfum peut réveiller une mémoire. Qu'une saveur peut révéler un territoire. Qu'un geste de beauté peut devenir un rituel. Qu'un espace peut être un lieu de rencontre et de transmission. Chaque création Retbaa est un fragment de culture mis en mouvement : une rencontre entre héritage et création, artisanat et innovation, ancrage africain et exigence internationale.`,
+      title: "Nos objets ne représentent pas une culture.",
+      subtitle: "Ils permettent de la vivre.",
+      body: `Nous croyons qu'un objet peut être beau et avoir quelque chose à dire. Qu'un parfum peut réveiller une mémoire. Qu'une saveur peut révéler un territoire. Chaque création Retbaa est un fragment de culture mis en mouvement : une rencontre entre héritage et création, artisanat et innovation, ancrage africain et exigence internationale.`,
     },
     {
       num: 'V',
-      title: "Nous n'entrons pas sur un marché.",
-      subtitle: "Nous y déposons une méthode.",
-      body: `Dakar, Abidjan, Kigali, Casablanca, Paris, Dubaï ou Tokyo : chaque territoire possède sa propre lecture du beau, du précieux et du désirable. Nous refusons l'expansion par duplication. Le Retbaa Compass est notre discipline d'entrée : comprendre avant de proposer, dialoguer avant de traduire, s'ancrer avant de s'étendre. Nous ne reproduisons pas un concept d'une ville à l'autre. Nous traduisons une doctrine sans jamais en diluer l'origine.`,
-    },
-    {
-      num: 'VI',
-      title: "La transmission est notre destination.",
-      subtitle: "Nous créons ce qui mérite de rester.",
-      body: `Une création Retbaa n'est pas achevée lorsqu'elle est fabriquée. Elle ne l'est pas davantage lorsqu'elle est achetée. Elle le devient lorsqu'elle est vécue, racontée et transmise — à un proche, à un cercle, à une génération, à une mémoire. C'est pourquoi nous ne créons pas seulement pour le présent.`,
-    },
-    {
-      num: 'VII',
       title: "Notre ambition n'est pas régionale.",
       subtitle: "Elle est fondatrice.",
-      body: `Retbaa n'est pas une maison africaine qui cherche à devenir internationale. Retbaa est une maison de luxe internationale dont l'Afrique constitue l'origine de vérité — comme la Provence pour un parfumeur, Kyoto pour un maître artisan ou Murano pour un verrier. Née au bord du Lac Rose, façonnée entre Dakar et Paris, Retbaa porte une conviction simple : les cultures africaines ne sont pas seulement des héritages à préserver. Elles sont des forces contemporaines capables d'inventer de nouvelles expressions du beau, du rare et du durable. Nous partons de nos racines, non pour y rester, mais pour aller plus loin.`,
+      body: `Retbaa n'est pas une maison africaine qui cherche à devenir internationale. Retbaa est une maison de luxe internationale dont l'Afrique constitue l'origine de vérité — comme la Provence pour un parfumeur, Kyoto pour un maître artisan ou Murano pour un verrier. Née au bord du Lac Rose, façonnée entre Dakar et Paris.`,
     },
   ]
 
@@ -514,9 +499,8 @@ function StepPresentation({ onNext }) {
               "L'exotisme de façade.",
               "Le folklore comme raccourci.",
               "La nostalgie comme argument de vente.",
-              "Les récits qui enferment l'Afrique dans l'anonymat, l'imitation ou le passé.",
+              "Les récits qui enferment l'Afrique dans l'anonymat ou le passé.",
               "De choisir entre fierté d'origine et exigence de fabrication.",
-              "Le Luxe Culturel n'a pas à s'excuser d'où il vient. Il doit démontrer ce qu'il apporte au monde.",
             ].map((item, i) => (
               <div key={i} style={{
                 display: 'flex', gap: '16px', alignItems: 'flex-start',
@@ -1245,14 +1229,8 @@ function StepNDA({ onNext, onBack, ndaMeta, setNdaMeta, ndaAccepted, setNdaAccep
   )
 }
 
-// ── Étape 2 — Qualification ───────────────────────────────────────────────────
+// ── Étape 3 — Qualification ───────────────────────────────────────────────────
 function StepQualification({ ndaMeta, ndaDate, onSuccess }) {
-  // Détection NDA institutionnel depuis localStorage
-  const ndaSigned = (() => {
-    try { return JSON.parse(localStorage.getItem('retbaa_nda_signed') || 'null') } catch { return null }
-  })()
-  const isInstitutional = ndaSigned?.profile_type === 'prospect_institutional'
-
   const initFirstName = () => ndaMeta.counterparty_type === 'personal' ? (ndaMeta.cp_first_name || '') : ''
   const initLastName  = () => ndaMeta.counterparty_type === 'personal' ? (ndaMeta.cp_last_name  || '') : ''
   const initEntityName= () => ndaMeta.counterparty_type === 'entity'   ? (ndaMeta.counterparty_name || '') : ''
@@ -1278,55 +1256,12 @@ function StepQualification({ ndaMeta, ndaDate, onSuccess }) {
     setError('')
 
     try {
-      const prospectEmail = email.trim().toLowerCase()
-      const prospectFirst = firstName.trim()
-      const prospectLast  = lastName.trim()
-
-      // ── Vérifier si le prospect existe déjà en base ──────────────────────
-      const { data: existing } = await supabase
-        .from('dataroom_prospects')
-        .select('status, email')
-        .eq('email', prospectEmail)
-        .maybeSingle()
-
-      if (existing) {
-        // Cas 1 — Prospect approuvé → magic link direct, skip le flow
-        if (existing.status === 'approved') {
-          const { error: otpErr } = await supabase.auth.signInWithOtp({
-            email: prospectEmail,
-            options: { emailRedirectTo: window.location.origin + '/dataroom/access' },
-          })
-          if (otpErr) throw otpErr
-          onSuccess(prospectEmail)
-          return
-        }
-
-        // Cas 2 — Dossier en attente d'examen
-        if (existing.status === 'pending') {
-          setError('Votre dossier est en cours d\'examen. Vous recevrez un email dès qu\'il sera traité.')
-          setLoading(false)
-          return
-        }
-
-        // Cas 3 — Accès demandé mais pas encore approuvé → renvoi du magic link
-        if (existing.status === 'access_requested') {
-          const { error: otpErr } = await supabase.auth.signInWithOtp({
-            email: prospectEmail,
-            options: { emailRedirectTo: window.location.origin + '/dataroom/access' },
-          })
-          if (otpErr) throw otpErr
-          onSuccess(prospectEmail)
-          return
-        }
-      }
-
-      // ── Nouveau prospect — flow normal ────────────────────────────────────
       const { error: insertErr } = await supabase
         .from('dataroom_prospects')
         .insert({
-          first_name:      prospectFirst,
-          last_name:       prospectLast,
-          email:           prospectEmail,
+          first_name:      firstName.trim(),
+          last_name:       lastName.trim(),
+          email:           email.trim().toLowerCase(),
           type,
           entity_name:     type === 'entity' ? entityName.trim() : null,
           entity_siren:    type === 'entity' ? entitySiren.trim() : null,
@@ -1336,41 +1271,18 @@ function StepQualification({ ndaMeta, ndaDate, onSuccess }) {
           nda_signer_name: ndaMeta.counterparty_name || '',
           nda_meta:        ndaMeta,
           status:          'pending',
-          prospect_tier:   isInstitutional ? 'institutional' : 'standard',
-          institution_name: isInstitutional ? (ndaSigned?.institution_name || null) : null,
-          institution_type: isInstitutional ? (ndaSigned?.institution_type || null) : null,
         })
 
       if (insertErr) throw insertErr
 
-      // ── Emails automatiques Brevo (best-effort) ───────────────────────────
-      await Promise.allSettled([
-        sendEmail({
-          to:      prospectEmail,
-          subject: 'Bienvenue dans Retbaa Circle',
-          html:    welcomeProspect({ firstName: prospectFirst, lastName: prospectLast }),
-        }),
-        sendEmail({
-          to:      'massata@retbaa.com',
-          subject: `🔔 Nouveau prospect Retbaa Circle — ${prospectFirst} ${prospectLast}`,
-          html:    notifyAdmin({
-            firstName: prospectFirst,
-            lastName:  prospectLast,
-            email:     prospectEmail,
-            canal:     channel,
-            montant:   amount,
-          }),
-        }),
-      ])
-
       const { error: otpErr } = await supabase.auth.signInWithOtp({
-        email: prospectEmail,
+        email: email.trim().toLowerCase(),
         options: { emailRedirectTo: window.location.origin + '/dataroom/access' },
       })
 
       if (otpErr) throw otpErr
 
-      onSuccess(prospectEmail)
+      onSuccess(email.trim().toLowerCase())
     } catch (err) {
       setError(err.message || 'Une erreur est survenue. Veuillez réessayer.')
     } finally {
@@ -1380,7 +1292,7 @@ function StepQualification({ ndaMeta, ndaDate, onSuccess }) {
 
   return (
     <form onSubmit={handleSubmit}>
-      <div style={s.stepLabel(true)}>Étape 2 — Qualification</div>
+      <div style={s.stepLabel(true)}>Étape 3 — Qualification</div>
       <div style={s.title}>Votre profil</div>
 
       <div style={s.grid2}>
@@ -1396,30 +1308,6 @@ function StepQualification({ ndaMeta, ndaDate, onSuccess }) {
 
       <label style={s.label}>Adresse e-mail *</label>
       <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="vous@exemple.com" required style={s.input} />
-
-      {/* Infos institutionnelles en lecture seule */}
-      {isInstitutional && ndaSigned?.institution_name && (
-        <div style={{
-          marginTop: '20px', padding: '14px 16px',
-          background: 'rgba(196,169,106,0.08)',
-          border: '1px solid rgba(196,169,106,0.3)',
-          borderRadius: '3px',
-        }}>
-          <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.25em', textTransform: 'uppercase', color: '#C4A96A', marginBottom: '10px' }}>
-            PROFIL INSTITUTIONNEL · NDA SIGNÉ
-          </div>
-          <div style={s.grid2}>
-            <div>
-              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#1A3A6B', marginBottom: '4px' }}>Institution</div>
-              <input type="text" value={ndaSigned.institution_name} readOnly style={s.inputReadonly} />
-            </div>
-            <div>
-              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#1A3A6B', marginBottom: '4px' }}>Type</div>
-              <input type="text" value={ndaSigned.institution_type || ''} readOnly style={s.inputReadonly} />
-            </div>
-          </div>
-        </div>
-      )}
 
       <label style={s.label}>Vous investissez *</label>
       <div style={s.radioGroup}>
@@ -1615,13 +1503,28 @@ export default function DataroomLanding() {
   const draft = loadDraft()
 
   const [step, setStep]               = useState(draft?.step ?? 0)
-  const [ndaMeta]                     = useState(draft?.ndaMeta ?? {})
+  const [ndaMeta, setNdaMeta]         = useState(draft?.ndaMeta ?? {})
+  const [ndaAccepted, setNdaAccepted] = useState(draft?.ndaAccepted ?? false)
   const [ndaDate]                     = useState(draft?.ndaDate ?? new Date().toISOString())
   const [sentTo, setSentTo]           = useState(null)
 
   // Sauvegarde auto à chaque changement d'état
   const saveProgress = (patch) => {
-    saveDraft({ step, ndaMeta, ndaDate, ...patch })
+    saveDraft({ step, ndaMeta, ndaAccepted, ndaDate, ...patch })
+  }
+
+  // L'étape NDA prend toute la page — on sort du layout card
+  if (step === 1) {
+    return (
+      <StepNDA
+        onNext={() => { saveProgress({ step: 2 }); setStep(2) }}
+        onBack={() => { saveProgress({ step: 0 }); setStep(0) }}
+        ndaMeta={ndaMeta}
+        setNdaMeta={(meta) => { setNdaMeta(meta); saveProgress({ ndaMeta: meta }) }}
+        ndaAccepted={ndaAccepted}
+        setNdaAccepted={(v) => { setNdaAccepted(v); saveProgress({ ndaAccepted: v }) }}
+      />
+    )
   }
 
   return (
@@ -1643,7 +1546,7 @@ export default function DataroomLanding() {
         </div>
       ) : step === 0 ? (
         <StepPresentation onNext={() => { saveProgress({ step: 1 }); setStep(1) }} />
-      ) : step === 1 ? (
+      ) : step === 2 ? (
         <div style={s.page}>
           <div style={s.card}>
             <div style={s.logo}>Retbaa Circle</div>

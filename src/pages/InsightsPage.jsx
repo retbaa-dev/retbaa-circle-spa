@@ -1,9 +1,7 @@
 // pages/InsightsPage.jsx — Retbaa Circle — Revue éditoriale investisseurs
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
-import { createPortal } from 'react-dom'
-import { useInsights } from '../hooks/queries/useInsights'
-import InsightsCover from '../components/InsightsCover'
+import { supabase } from '../lib/supabase'
 
 // Rendu markdown simple (gras, italique, titres, listes, images [[IMG:url|caption]])
 function renderMarkdown(text) {
@@ -48,12 +46,6 @@ function renderMarkdown(text) {
 
 // Modal article complet
 function ArticleModal({ article, onClose }) {
-  const [lang, setLang] = useState('fr')
-  const [signalOpen, setSignalOpen] = useState(false)
-  const hasEN = !!article.content_md_en
-  const hasSignal = Array.isArray(article.signal_retbaa) && article.signal_retbaa.length > 0
-  const content = lang === 'en' && hasEN ? article.content_md_en : article.content_md
-
   useEffect(() => {
     document.body.style.overflow = 'hidden'
     const handler = (e) => { if (e.key === 'Escape') onClose() }
@@ -64,110 +56,42 @@ function ArticleModal({ article, onClose }) {
   return (
     <div className="article-modal-wrapper" onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,40,0.7)', zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '40px 16px', overflowY: 'auto' }}>
       <div className="article-modal-inner" onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: '6px', maxWidth: '720px', width: '100%', overflow: 'hidden', boxShadow: '0 40px 80px rgba(0,0,0,0.3)' }}>
-
-        {/* Header — InsightsCover à la place de l'image */}
-        <div style={{ position: 'relative', height: '200px', overflow: 'hidden' }}>
-          <InsightsCover tags={article.tags || [article.tag]} title={article.title} height={200} featured={true} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 30%, rgba(10,20,40,0.85))' }} />
-          <button onClick={onClose} style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.12)', border: 'none', borderRadius: '50%', width: '36px', height: '36px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', backdropFilter: 'blur(4px)' }}>
-            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
-          </button>
-          {/* Toggle FR/EN */}
-          {hasEN && (
-            <div style={{ position: 'absolute', top: '16px', left: '16px', display: 'flex', gap: '4px' }}>
-              {['fr', 'en'].map(l => (
-                <button key={l} onClick={() => setLang(l)} style={{
-                  padding: '4px 10px', borderRadius: '3px', border: 'none', cursor: 'pointer',
-                  fontFamily: 'Manrope, sans-serif', fontSize: '10px', fontWeight: 700,
-                  letterSpacing: '0.1em', textTransform: 'uppercase',
-                  background: lang === l ? '#C4A96A' : 'rgba(255,255,255,0.15)',
-                  color: lang === l ? '#1A3A6B' : '#fff',
-                  backdropFilter: 'blur(4px)',
-                }}>
-                  {l.toUpperCase()}
-                </button>
-              ))}
+        {/* Image header */}
+        {article.img && (
+          <div style={{ position: 'relative', height: '240px', overflow: 'hidden' }}>
+            <img src={article.img} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(26,58,107,0.85))' }} />
+            <button onClick={onClose} style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%', width: '36px', height: '36px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', backdropFilter: 'blur(4px)' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
+            </button>
+            <div style={{ position: 'absolute', bottom: '16px', left: '24px', right: '24px' }}>
+              <span style={{ fontFamily: 'Manrope, sans-serif', fontSize: '9px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#EFC0D4' }}>{article.tag}</span>
+              <h2 style={{ fontFamily: 'Newsreader, serif', fontSize: '22px', color: '#fff', margin: '6px 0 4px', fontStyle: 'italic', lineHeight: 1.3 }}>{article.title}</h2>
             </div>
-          )}
-          <div style={{ position: 'absolute', bottom: '16px', left: '24px', right: '24px' }}>
-            <span style={{ fontFamily: 'Manrope, sans-serif', fontSize: '9px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#EFC0D4' }}>{article.tag}</span>
-            <h2 style={{ fontFamily: 'Newsreader, serif', fontSize: '20px', color: '#fff', margin: '6px 0 4px', fontStyle: 'italic', lineHeight: 1.3 }}>{article.title}</h2>
           </div>
-        </div>
-
+        )}
         {/* Contenu */}
         <div style={{ padding: '28px 32px 40px' }}>
+          {!article.img && (
+            <button onClick={onClose} style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}>
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          )}
           <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '11px', color: '#9CA3AF', marginBottom: '16px' }}>
-            {article.date} · {article.author}{article.sourceUrl ? '' : ''}
+            {article.date} · {article.author} · Source : {article.source}
           </p>
           <p style={{ fontFamily: 'Manrope, sans-serif', fontSize: '14px', color: '#4B5563', lineHeight: 1.7, marginBottom: '24px', borderLeft: '3px solid #EFC0D4', paddingLeft: '16px', fontStyle: 'italic' }}>
             {article.summary}
           </p>
           <div style={{ borderTop: '1px solid #F3F4F6', paddingTop: '20px' }}>
-            {renderMarkdown(content)}
+            {renderMarkdown(article.content_md)}
           </div>
-
-          {/* Source */}
           {article.sourceUrl && (
-            <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #F3F4F6' }}>
+            <div style={{ marginTop: '32px', paddingTop: '16px', borderTop: '1px solid #F3F4F6' }}>
               <a href={article.sourceUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'Manrope, sans-serif', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1A3A6B', textDecoration: 'none' }}>
                 <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>open_in_new</span>
                 Source originale
               </a>
-            </div>
-          )}
-
-          {/* Signal Retbaa — bouton + section dépliable */}
-          {hasSignal && (
-            <div style={{ marginTop: '32px' }}>
-              <button
-                onClick={() => setSignalOpen(o => !o)}
-                style={{
-                  width: '100%', padding: '14px 20px',
-                  background: signalOpen ? '#1A3A6B' : 'rgba(26,58,107,0.04)',
-                  border: '1px solid rgba(26,58,107,0.15)',
-                  borderRadius: '4px', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  fontFamily: 'Manrope, sans-serif', fontSize: '11px', fontWeight: 700,
-                  letterSpacing: '0.15em', textTransform: 'uppercase',
-                  color: signalOpen ? '#C4A96A' : '#1A3A6B',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>insights</span>
-                  Ce que cela signifie pour Retbaa
-                </span>
-                <span className="material-symbols-outlined" style={{ fontSize: '18px', transition: 'transform 0.2s', transform: signalOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-                  expand_more
-                </span>
-              </button>
-
-              {signalOpen && (
-                <div style={{ padding: '24px 20px', background: '#FAF7F2', border: '1px solid rgba(26,58,107,0.08)', borderTop: 'none', borderRadius: '0 0 4px 4px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    {article.signal_retbaa.map((s, i) => (
-                      <div key={i} style={{ display: 'flex', gap: '16px' }}>
-                        <div style={{
-                          flexShrink: 0, width: '28px', height: '28px', borderRadius: '50%',
-                          background: '#1A3A6B', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontFamily: 'Newsreader, serif', fontStyle: 'italic', fontSize: '13px', color: '#C4A96A',
-                        }}>
-                          {i + 1}
-                        </div>
-                        <div>
-                          <div style={{ fontFamily: 'Manrope, sans-serif', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1A3A6B', marginBottom: '6px' }}>
-                            {s.critere}
-                          </div>
-                          <div style={{ fontFamily: 'Manrope, sans-serif', fontSize: '13px', color: '#4B5563', lineHeight: 1.7 }}>
-                            {s.analyse}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>
@@ -196,7 +120,7 @@ const FALLBACK_ARTICLES = [
 ]
 
 
-const FILTERS = ['Tout', 'Veille Marché', 'Mode africaine', 'Marché Luxe', 'IA luxe', 'Tech & IA', 'Gen Z', 'Hôtellerie luxe', 'Investissement', 'Afrique', 'Vision']
+const FILTERS = ['Tout', 'Vision', 'Veille Marché', 'Afrique', 'Marché Luxe', 'Stratégie', 'Géopolitique', 'Tech & IA', 'Distribution']
 
 // ─── ARTICLE FEATURED (pleine largeur) ───────────────────────
 function FeaturedArticle({ article, onOpen }) {
@@ -216,15 +140,22 @@ function FeaturedArticle({ article, onOpen }) {
       }}
       className="featured-article-grid"
     >
-      {/* Couverture featured — InsightsCover texturé */}
+      {/* Image gauche */}
       <div className="featured-article-image" style={{ overflow: 'hidden', position: 'relative', minHeight: '420px' }}>
-        <InsightsCover
-          tags={article.tags || [article.tag]}
-          title={article.title}
-          height={420}
-          hovered={hovered}
-          featured={true}
+        <img
+          src={article.img}
+          alt={article.title}
+          style={{
+            width: '100%', height: '100%', objectFit: 'cover',
+            transition: 'transform 1.2s ease',
+            transform: hovered ? 'scale(1.04)' : 'scale(1)',
+            position: 'absolute', inset: 0,
+          }}
         />
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(to right, rgba(26,58,107,0.15) 0%, transparent 60%)',
+        }} />
         {/* Tag sur l'image */}
         <div style={{
           position: 'absolute', top: '24px', left: '24px',
@@ -232,7 +163,6 @@ function FeaturedArticle({ article, onOpen }) {
           backdropFilter: 'blur(6px)',
           padding: '6px 14px',
           borderRadius: '2px',
-          zIndex: 2,
         }}>
           <span style={{
             fontFamily: 'Manrope, sans-serif', fontSize: '10px',
@@ -366,18 +296,20 @@ function ArticleCard({ article, onOpen }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Couverture card — InsightsCover texturé */}
+      {/* Image */}
       <div style={{ overflow: 'hidden', height: '200px', position: 'relative', flexShrink: 0 }}>
-        <InsightsCover
-          tags={article.tags || [article.tag]}
-          title={article.title}
-          height={200}
-          hovered={hovered}
-          featured={false}
+        <img
+          src={article.img}
+          alt={article.title}
+          style={{
+            width: '100%', height: '100%', objectFit: 'cover',
+            transition: 'transform 1s ease',
+            transform: hovered ? 'scale(1.06)' : 'scale(1)',
+          }}
         />
         <div style={{
           position: 'absolute', bottom: 0, left: 0, right: 0,
-          height: '3px', background: '#EFC0D4',
+          height: '4px', background: '#EFC0D4',
         }} />
       </div>
 
@@ -459,45 +391,82 @@ export default function InsightsPage() {
   const { i18n } = useTranslation()
   const [activeFilter, setActiveFilter] = useState('Tout')
   const [selectedArticle, setSelectedArticle] = useState(null)
+  const [articles, setArticles] = useState([])
+  const [loading, setLoading] = useState(true)
   const [availableFilters, setAvailableFilters] = useState(FILTERS)
 
-  // ── TanStack Query — fetch articles Insights ──────────────────────────────
-  const { data: rawArticles, isLoading: loading, isError } = useInsights()
-
-  // Mapper et calculer les filtres dynamiques quand les données arrivent
-  const articles = rawArticles
-    ? rawArticles.map(a => ({
-        id: a.slug || a.id,
-        tag: (Array.isArray(a.tags) && a.tags[0]) || a.content_type || 'Veille Marché',
-        title: a.title,
-        subtitle: '',
-        date: a.published_at
-          ? new Date(a.published_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-          : '',
-        author: a.author || 'Kemia',
-        source: '',
-        sourceUrl: a.source_url || null,
-        summary: a.content_short || '',
-        img: a.img || null,
-        content_md: a.content_long || '',
-        content_md_en: a.content_long_en || '',
-        signal_retbaa: Array.isArray(a.signal_retbaa) ? a.signal_retbaa : [],
-        tags: Array.isArray(a.tags) ? a.tags : [],
-        category: (Array.isArray(a.tags) && a.tags[0]) || a.content_type || 'Veille Marché',
-        featured: !!a.featured,
-      }))
-    : (isError ? FALLBACK_ARTICLES : [])
-
-  // Filtres dynamiques depuis les catégories réelles
+  // Charger les articles depuis Supabase via supabase-js (clé depuis env vars)
   useEffect(() => {
-    if (!rawArticles?.length) return
-    const uniqueCategories = new Set(['Tout'])
-    articles.forEach(a => { if (a.category && a.category !== 'Article') uniqueCategories.add(a.category) })
-    const mergedFilters = ['Tout']
-    FILTERS.slice(1).forEach(f => { if (uniqueCategories.has(f)) mergedFilters.push(f) })
-    uniqueCategories.forEach(cat => { if (!mergedFilters.includes(cat)) mergedFilters.push(cat) })
-    setAvailableFilters(mergedFilters.length > 1 ? mergedFilters : FILTERS)
-  }, [rawArticles])
+    let mounted = true
+    let retryTimer = null
+    let retryCount = 0
+
+    async function loadArticles() {
+      try {
+        const { data, error } = await supabase
+          .from('insights')
+          .select('id, title, slug, content_type, tags, content_short, content_long, author, status, published_at, img, source_url, featured')
+          .eq('status', 'published')
+          .order('published_at', { ascending: false })
+
+        if (error) throw error
+
+        if (mounted) {
+          if (data && data.length > 0) {
+            const mapped = data.map(a => ({
+              id: a.slug || a.id,
+              tag: (Array.isArray(a.tags) && a.tags[0]) || a.content_type || 'Veille Marché',
+              title: a.title,
+              subtitle: '',
+              date: a.published_at
+                ? new Date(a.published_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+                : '',
+              author: a.author || 'Kemia',
+              source: '',
+              sourceUrl: a.source_url || null,
+              summary: a.content_short || '',
+              img: a.img || null,
+              content_md: a.content_long || '',
+              category: (Array.isArray(a.tags) && a.tags[0]) || a.content_type || 'Veille Marché',
+              featured: !!a.featured,
+            }))
+            setArticles(mapped)
+
+            // Filtres dynamiques depuis les catégories réelles
+            const uniqueCategories = new Set(['Tout'])
+            mapped.forEach(a => { if (a.category && a.category !== 'Article') uniqueCategories.add(a.category) })
+            const mergedFilters = ['Tout']
+            FILTERS.slice(1).forEach(f => { if (uniqueCategories.has(f)) mergedFilters.push(f) })
+            uniqueCategories.forEach(cat => { if (!mergedFilters.includes(cat)) mergedFilters.push(cat) })
+            setAvailableFilters(mergedFilters.length > 1 ? mergedFilters : FILTERS)
+            setLoading(false)
+          } else {
+            // Retry une fois si vide (cold start Supabase)
+            if (retryCount < 1) {
+              retryCount++
+              retryTimer = setTimeout(loadArticles, 2000)
+            } else {
+              setArticles(FALLBACK_ARTICLES)
+              setAvailableFilters(FILTERS)
+              setLoading(false)
+            }
+          }
+        }
+      } catch {
+        if (mounted) {
+          setArticles(FALLBACK_ARTICLES)
+          setAvailableFilters(FILTERS)
+          setLoading(false)
+        }
+      }
+    }
+
+    loadArticles()
+    return () => {
+      mounted = false
+      if (retryTimer) clearTimeout(retryTimer)
+    }
+  }, [])
   const filteredArticles = activeFilter === 'Tout'
     ? articles
     : articles.filter(a => (a.category || 'Article') === activeFilter)
@@ -796,10 +765,7 @@ export default function InsightsPage() {
         }
       `}</style>
     </div>
-    {selectedArticle && createPortal(
-      <ArticleModal article={selectedArticle} onClose={() => setSelectedArticle(null)} />,
-      document.body
-    )}
+    {selectedArticle && <ArticleModal article={selectedArticle} onClose={() => setSelectedArticle(null)} />}
     </>
   )
 }

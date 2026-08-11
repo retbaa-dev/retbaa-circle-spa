@@ -2,8 +2,6 @@
 import { Fragment, useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useProspects } from '../hooks/queries/useProspects'
 
 // ── Helpers NDA meta ──────────────────────────────────────────────────────────
 const JURISDICTION_LABEL = {
@@ -70,54 +68,6 @@ function NdaDetail({ ndaMeta }) {
   )
 }
 
-// ── Onglet Vues docs ──────────────────────────────────────────────────────────
-function DocViewsTab() {
-  const { data: views = [], isLoading: loading } = useQuery({
-    queryKey: ['dataroom_doc_views'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('dataroom_doc_views')
-        .select('*')
-        .order('viewed_at', { ascending: false })
-        .limit(50)
-      if (error) throw new Error(error.message)
-      return data || []
-    },
-    staleTime: 2 * 60 * 1000,
-  })
-
-  if (loading) return <p style={{ color: '#9CA3AF', fontSize: '13px' }}>Chargement…</p>
-  if (views.length === 0) return <p style={{ color: '#9CA3AF', fontSize: '13px' }}>Aucune vue enregistrée.</p>
-
-  return (
-    <section>
-      <h2 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1A3A6B', marginBottom: '16px' }}>
-        Vues documents ({views.length})
-      </h2>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', fontFamily: 'system-ui, sans-serif' }}>
-        <thead>
-          <tr style={{ borderBottom: '2px solid rgba(26,58,107,0.12)' }}>
-            <th style={{ textAlign: 'left', padding: '8px 12px', color: '#6B7280', fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Email</th>
-            <th style={{ textAlign: 'left', padding: '8px 12px', color: '#6B7280', fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Document</th>
-            <th style={{ textAlign: 'left', padding: '8px 12px', color: '#6B7280', fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Date</th>
-            <th style={{ textAlign: 'right', padding: '8px 12px', color: '#6B7280', fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Durée (s)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {views.map((v) => (
-            <tr key={v.id} style={{ borderBottom: '1px solid rgba(26,58,107,0.06)' }}>
-              <td style={{ padding: '10px 12px', color: '#374151' }}>{v.viewer_email || <span style={{ color: '#9CA3AF', fontStyle: 'italic' }}>Anonyme</span>}</td>
-              <td style={{ padding: '10px 12px', color: '#1A3A6B' }}>{v.doc_title || `#${v.doc_id}`}</td>
-              <td style={{ padding: '10px 12px', color: '#6B7280' }}>{v.viewed_at ? new Date(v.viewed_at).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : '—'}</td>
-              <td style={{ padding: '10px 12px', color: '#374151', textAlign: 'right' }}>{v.duration_seconds != null ? v.duration_seconds : '—'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </section>
-  )
-}
-
 // ── Badge statut prospects ────────────────────────────────────────────────────
 const STATUS_BADGE = {
   pending:          { label: 'En attente',        bg: 'rgba(196,169,106,0.12)', color: '#7A5C00', border: 'rgba(196,169,106,0.4)' },
@@ -131,11 +81,22 @@ const AMOUNT_LABEL  = { lt_10k: '< 10k€', '10k_50k': '10–50k€', '50k_100k'
 
 // ── Onglet Prospects ──────────────────────────────────────────────────────────
 function ProspectsTab() {
-  const queryClient = useQueryClient()
-  const [msg, setMsg] = useState('')
+  const [prospects, setProspects] = useState([])
+  const [loading, setLoading]     = useState(true)
+  const [msg, setMsg]             = useState('')
   const [expandedId, setExpandedId] = useState(null)
 
-  const { data: prospects = [], isLoading: loading } = useProspects()
+  const fetchProspects = async () => {
+    setLoading(true)
+    const { data, error } = await supabase
+      .from('dataroom_prospects')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (!error) setProspects(data || [])
+    setLoading(false)
+  }
+
+  useEffect(() => { fetchProspects() }, [])
 
   const updateStatus = async (id, status) => {
     const patch = { status }
@@ -145,8 +106,7 @@ function ProspectsTab() {
       setMsg('❌ Erreur : ' + error.message)
     } else {
       setMsg(status === 'approved' ? '✅ Prospect approuvé' : '❌ Prospect rejeté')
-      // Invalider le cache → refetch automatique
-      queryClient.invalidateQueries({ queryKey: ['prospects'] })
+      fetchProspects()
     }
     setTimeout(() => setMsg(''), 3500)
   }
@@ -412,7 +372,6 @@ export default function AdminPage() {
         <button style={tabStyle('users')}    onClick={() => setActiveTab('users')}>Investisseurs</button>
         <button style={tabStyle('prospects')} onClick={() => setActiveTab('prospects')}>Prospects</button>
         <button style={tabStyle('invites')}  onClick={() => setActiveTab('invites')}>Invitations</button>
-        <button style={tabStyle('doc_views')} onClick={() => setActiveTab('doc_views')}>Vues docs</button>
       </div>
 
       {actionMsg && (
@@ -452,9 +411,6 @@ export default function AdminPage() {
 
       {/* ── Tab: Prospects ── */}
       {activeTab === 'prospects' && <ProspectsTab />}
-
-      {/* ── Tab: Vues docs ── */}
-      {activeTab === 'doc_views' && <DocViewsTab />}
 
       {/* ── Tab: Invitations ── */}
       {activeTab === 'invites' && (

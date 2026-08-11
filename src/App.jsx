@@ -1,12 +1,7 @@
 import { lazy, Suspense, useState, useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { QueryClientProvider } from '@tanstack/react-query'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 import { supabase } from './lib/supabase'
-import { queryClient } from './lib/queryClient'
-import ErrorBoundary from './components/ErrorBoundary'
-import HomePage from './pages/HomePage'
-import GatedPage from './components/GatedPage'
 import './i18n/index.js'
 import './index.css'
 
@@ -21,7 +16,6 @@ import AppShell             from './components/AppShell'
 
 // ── Dataroom prospects (public) — lazy ─────────────────────────────────────
 const DataroomLanding       = lazy(() => import('./pages/dataroom/DataroomLanding'))
-const DataroomDocsPage      = lazy(() => import('./pages/DataroomDocsPage'))
 
 // ── Pages lourdes — lazy ────────────────────────────────────────────────────
 const Dashboard             = lazy(() => import('./pages/Dashboard'))
@@ -36,6 +30,7 @@ const CataloguePage         = lazy(() => import('./pages/CataloguePage'))
 const DocumentsPage         = lazy(() => import('./pages/DocumentsPage'))
 const ObservateurDashboard  = lazy(() => import('./pages/ObservateurDashboard'))
 const ArticlePage           = lazy(() => import('./pages/ArticlePage'))
+const DataroomDocsPage      = lazy(() => import('./pages/DataroomDocsPage'))
 const ProspectDashboard     = lazy(() => import('./pages/ProspectDashboard'))
 
 // ── Splash screen animé ─────────────────────────────────────────────────────
@@ -177,16 +172,6 @@ function getPreviewRole() {
 // ── Composant racine ────────────────────────────────────────────────────────
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-    <ErrorBoundary fallback={
-      <div style={{ minHeight: '100vh', backgroundColor: '#FAF7F2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px', fontFamily: 'Manrope, sans-serif' }}>
-        <div style={{ fontFamily: 'Newsreader, serif', fontStyle: 'italic', fontSize: '28px', color: '#1A3A6B' }}>Retbaa Circle</div>
-        <div style={{ fontSize: '14px', color: '#6B7280' }}>Une erreur inattendue s'est produite.</div>
-        <button onClick={() => window.location.reload()} style={{ padding: '10px 24px', background: '#1A3A6B', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, letterSpacing: '0.1em' }}>
-          Recharger la page
-        </button>
-      </div>
-    }>
     <BrowserRouter>
       <Routes>
         {/* Auth */}
@@ -197,16 +182,13 @@ export default function App() {
           <Suspense fallback={<PageLoader />}><BienvenueOnboarding /></Suspense>
         } />
 
-        {/* ── Route racine — manifesto si non connecté, dashboard si connecté ── */}
-        <Route path="/" element={<HomeOrDashboard />} />
-
         {/* Dataroom landing — public */}
         <Route path="/dataroom" element={
           <Suspense fallback={<PageLoader />}><DataroomLanding /></Suspense>
         } />
 
-        {/* Dataroom access — redirige vers /dataroom-docs */}
-        <Route path="/dataroom/access" element={<Navigate to="/dataroom-docs" replace />} />
+        {/* Dataroom access — redirige vers / (prospect géré par AuthGate) */}
+        <Route path="/dataroom/access" element={<Navigate to="/" replace />} />
 
         {/* Invitation investisseur */}
         <Route path="/invite/:token" element={<InvitePage />} />
@@ -217,50 +199,10 @@ export default function App() {
         {/* Observateur — gate prospect */}
         <Route path="/observateur" element={<ObservateurGate />} />
 
-        {/* ── Routes publiques — accessibles sans auth, mais AuthGate si connecté ── */}
-        <Route path="/insights"       element={<PublicOrAuthRoute><InsightsPage /></PublicOrAuthRoute>} />
-        <Route path="/insights/:slug" element={<PublicOrAuthRoute><ArticlePage /></PublicOrAuthRoute>} />
-        <Route path="/podcast"        element={<PublicOrAuthRoute><PodcastPage /></PublicOrAuthRoute>} />
-
         {/* App principale — tout ce qui reste */}
         <Route path="/*" element={<AuthGate />} />
       </Routes>
     </BrowserRouter>
-    </ErrorBoundary>
-    </QueryClientProvider>
-  )
-}
-
-// ── HomeOrDashboard — manifesto si non connecté, dashboard si connecté ──────
-function HomeOrDashboard() {
-  const previewUser = getPreviewUser()
-  const { isLoaded, isSignedIn } = useAuth()
-
-  if (!isLoaded) return <PageLoader />
-
-  // Connecté → AuthGate → dashboard normal
-  if (isSignedIn || previewUser) return <AuthGate />
-
-  // Non connecté → manifesto + deux chemins
-  return <HomePage />
-}
-
-// ── PublicOrAuthRoute — public si non connecté, AuthGate si connecté ────────
-// Permet d'afficher le sidebar quand l'utilisateur est déjà connecté
-function PublicOrAuthRoute({ children }) {
-  const previewUser = getPreviewUser()
-  const { isLoaded, isSignedIn } = useAuth()
-
-  if (!isLoaded) return <PageLoader />
-
-  // Connecté → passe par AuthGate (sidebar + session)
-  if (isSignedIn || previewUser) return <AuthGate />
-
-  // Non connecté → PublicShell (header minimal)
-  return (
-    <Suspense fallback={<PageLoader />}>
-      <PublicShell>{children}</PublicShell>
-    </Suspense>
   )
 }
 
@@ -316,6 +258,32 @@ function AuthGate() {
 
   if (!isSignedIn && !previewUser) return <LoginPage />
 
+  // Accès non autorisé — sauf si c'est un prospect
+  if (isSignedIn && role === 'no_access' && !isProspect) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: '#FAF7F2' }}>
+        <div style={{ textAlign: 'center', padding: '40px' }}>
+          <div style={{ fontFamily: 'Newsreader, serif', fontSize: '32px', fontWeight: 300, color: '#1A3A6B', fontStyle: 'italic', marginBottom: '12px' }}>
+            Accès non autorisé
+          </div>
+          <div style={{ fontFamily: 'Manrope, sans-serif', fontSize: '14px', color: '#6B7280', marginBottom: '32px' }}>
+            Votre compte n'a pas accès à Retbaa Circle.
+          </div>
+          <button onClick={signOut} style={{
+            fontFamily: 'Manrope, sans-serif', fontSize: '12px', fontWeight: 700,
+            letterSpacing: '0.15em', textTransform: 'uppercase',
+            color: '#1A3A6B', background: 'none', border: '1px solid #1A3A6B',
+            padding: '10px 24px', cursor: 'pointer',
+          }}>
+            Se déconnecter
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (isSignedIn && role === 'pending') return <PendingPage />
+
   const LINKED_NAMES = { cathy: 'Cathy', barthelemy: 'Barthélemy', pape: 'Pape Amadou', raphael: 'Raphaël', massata: 'Massata' }
   const isAdmin     = (isSignedIn && role === 'founder') || previewRole === 'founder'
   const isAssistant = role === 'assistant'
@@ -360,16 +328,8 @@ function AuthGate() {
           <Route path="/investissement"      element={<MonInvestissementPage userName={effectiveName} isAssistant={isAssistant} />} />
           <Route path="/tranche2"            element={<Tranche2Page userName={effectiveName} />} />
           <Route path="/podcast"             element={<PodcastPage userName={effectiveName} />} />
+          <Route path="/dataroom-docs"       element={<DataroomDocsPage isProspect={isProspect} />} />
           <Route path="/mon-espace"          element={<ProspectDashboard />} />
-          <Route path="/dataroom-docs"       element={
-            <Suspense fallback={<PageLoader />}>
-          <DataroomDocsPage
-                isProspect={isProspect}
-                isApproved={role === 'founder' || !!previewUser || prospectStatus === 'approved'}
-                isAuthenticated={isSignedIn || !!previewUser}
-              />
-            </Suspense>
-          } />
           <Route path="/inner-circle"        element={
             isAssistant
               ? <RestrictedPage />
@@ -392,59 +352,6 @@ function AuthGate() {
   )
 }
 
-// ── PublicShell — layout minimal pour pages publiques (sans auth) ────────────
-function PublicShell({ children }) {
-  // navigation via window.location
-  return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#FAF7F2', fontFamily: 'Manrope, sans-serif' }}>
-      {/* Header minimal */}
-      <div style={{
-        position: 'sticky', top: 0, zIndex: 100,
-        background: '#1A3A6B',
-        padding: '0 24px',
-        height: '56px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        boxShadow: '0 1px 8px rgba(0,0,0,0.15)',
-      }}>
-        <button
-          onClick={() => window.location.href = '/'}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
-        >
-          <span style={{ fontFamily: 'Newsreader, serif', fontStyle: 'italic', fontSize: '20px', color: '#C4A96A', letterSpacing: '0.02em' }}>
-            Retbaa Circle
-          </span>
-        </button>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <button
-            onClick={() => window.location.href = '/dataroom'}
-            style={{
-              padding: '7px 16px', background: 'transparent',
-              border: '1px solid rgba(196,169,106,0.5)', borderRadius: '4px',
-              color: '#C4A96A', fontSize: '11px', fontWeight: 700,
-              letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer',
-            }}
-          >
-            Devenir prospect
-          </button>
-          <button
-            onClick={() => window.location.href = '/login'}
-            style={{
-              padding: '7px 16px', background: '#C4A96A',
-              border: 'none', borderRadius: '4px',
-              color: '#1A3A6B', fontSize: '11px', fontWeight: 700,
-              letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer',
-            }}
-          >
-            Connexion
-          </button>
-        </div>
-      </div>
-      {/* Contenu */}
-      <div>{children}</div>
-    </div>
-  )
-}
-
 function RestrictedPage() {
   return (
     <div style={{ maxWidth: '600px', margin: '80px auto', padding: '40px', textAlign: 'center' }}>
@@ -457,4 +364,3 @@ function RestrictedPage() {
     </div>
   )
 }
-
