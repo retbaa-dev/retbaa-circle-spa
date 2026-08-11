@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
+import ProspectTimeline from '../components/ProspectTimeline'
+import ProspectFAQ from '../components/ProspectFAQ'
 
 // CSS keyframes pour le pulse rose
 const pulseStyle = `
@@ -118,6 +120,11 @@ export default function ProspectDashboard() {
   const navigate = useNavigate()
   const [prospectStatus, setProspectStatus] = useState(null)
   const [statusLoaded, setStatusLoaded]     = useState(false)
+
+  // NDA depuis localStorage
+  const ndaData = (() => {
+    try { return JSON.parse(localStorage.getItem('retbaa_nda_signed') || 'null') } catch { return null }
+  })()
 
   useEffect(() => {
     if (!user?.email) return
@@ -268,6 +275,66 @@ export default function ProspectDashboard() {
             </div>
           )}
 
+          {/* ── Section Mon Statut ─────────────────────────────────────────── */}
+          <div style={{
+            fontSize: '9px', letterSpacing: '0.35em', textTransform: 'uppercase',
+            color: '#9CA3AF', fontWeight: 700, marginBottom: '16px', marginTop: '40px',
+          }}>
+            MON STATUT
+          </div>
+          <div style={{
+            background: '#fff',
+            border: '1px solid rgba(26,58,107,0.08)',
+            borderRadius: '12px',
+            padding: '28px 32px',
+            marginBottom: '32px',
+            boxShadow: '0 2px 12px rgba(0,27,63,0.04)',
+          }}>
+            {statusLoaded && (
+              <>
+                <ProspectTimeline
+                  status={prospectStatus}
+                  ndaSigned={!!ndaData}
+                  submittedAt={ndaData?.signed_at ?? null}
+                  approvedAt={null}
+                />
+                {prospectStatus === 'approved' ? (
+                  <div style={{
+                    marginTop: '24px', padding: '14px 18px',
+                    background: 'rgba(6,95,70,0.06)', border: '1px solid rgba(6,95,70,0.2)',
+                    borderRadius: '8px', fontSize: '13px', color: '#065F46', lineHeight: 1.6,
+                  }}>
+                    Votre accès a été validé. Bienvenue dans Retbaa Circle.
+                  </div>
+                ) : prospectStatus === 'access_requested' ? (
+                  <div style={{
+                    marginTop: '24px', padding: '14px 18px',
+                    background: 'rgba(196,169,106,0.1)', border: '1px solid rgba(196,169,106,0.3)',
+                    borderRadius: '8px', fontSize: '13px', color: '#6B5A2A', lineHeight: 1.6,
+                  }}>
+                    Nous avons bien reçu votre demande d'accès. Notre équipe l'examine.
+                  </div>
+                ) : (
+                  <div style={{
+                    marginTop: '24px', padding: '14px 18px',
+                    background: 'rgba(239,192,212,0.15)', borderLeft: '3px solid #EFC0D4',
+                    borderRadius: '0 6px 6px 0', fontSize: '13px', color: '#704C5D', lineHeight: 1.6,
+                  }}>
+                    Votre dossier est entre les mains de l'équipe Retbaa. Nous revenons vers vous sous 48h.
+                  </div>
+                )}
+                <div style={{ marginTop: '16px', fontSize: '13px', color: '#6B7280' }}>
+                  <a
+                    href="mailto:massata@retbaa.com"
+                    style={{ color: '#1A3A6B', fontWeight: 600, textDecoration: 'none', borderBottom: '1px solid rgba(26,58,107,0.3)' }}
+                  >
+                    Contacter l'équipe
+                  </a>
+                </div>
+              </>
+            )}
+          </div>
+
           {/* Liens rapides */}
           <div style={{
             fontSize: '9px', letterSpacing: '0.35em', textTransform: 'uppercase',
@@ -321,6 +388,10 @@ export default function ProspectDashboard() {
               </button>
             ))}
           </div>
+
+          {/* ── FAQ Prospect ──────────────────────────────────────────────── */}
+          <ProspectFAQ />
+
         </div>
       </div>
     </>
