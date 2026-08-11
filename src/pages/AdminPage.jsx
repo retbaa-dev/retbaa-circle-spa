@@ -540,6 +540,332 @@ function PipelineTab({ docViewsMap }) {
   )
 }
 
+// ── Onglet Vues docs — Heatmap de lecture ─────────────────────────────────────
+function DocViewsTab() {
+  const [views, setViews] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [subTab, setSubTab] = useState('by_doc') // 'by_doc' | 'by_prospect' | 'heatmap'
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('dataroom_doc_views')
+        .select('doc_id, viewer_email, viewed_at, duration_seconds, dataroom_docs(title, doc_tier)')
+        .order('viewed_at', { ascending: false })
+      if (!error && data) setViews(data)
+      setLoading(false)
+    }
+    load()
+  }, [])
+
+  const subTabStyle = (key) => ({
+    padding: '6px 16px',
+    fontSize: '11px',
+    fontWeight: 700,
+    letterSpacing: '0.1em',
+    textTransform: 'uppercase',
+    cursor: 'pointer',
+    border: 'none',
+    borderBottom: subTab === key ? '2px solid #C4A96A' : '2px solid transparent',
+    color: subTab === key ? '#1A3A6B' : '#9CA3AF',
+    background: 'transparent',
+    fontFamily: 'system-ui, sans-serif',
+  })
+
+  // ── Agréger par doc ──────────────────────────────────────────────────────
+  const byDoc = (() => {
+    const map = {}
+    for (const v of views) {
+      const id = v.doc_id
+      if (!map[id]) {
+        map[id] = {
+          doc_id: id,
+          title: v.dataroom_docs?.title || id,
+          tier: v.dataroom_docs?.doc_tier || '—',
+          total_views: 0,
+          unique_viewers: new Set(),
+          total_duration: 0,
+          last_access: null,
+        }
+      }
+      map[id].total_views += 1
+      if (v.viewer_email) map[id].unique_viewers.add(v.viewer_email)
+      map[id].total_duration += v.duration_seconds || 0
+      const d = v.viewed_at ? new Date(v.viewed_at) : null
+      if (d && (!map[id].last_access || d > map[id].last_access)) map[id].last_access = d
+    }
+    return Object.values(map).map(d => ({
+      ...d,
+      unique_viewers: d.unique_viewers.size,
+      avg_duration: d.total_views > 0 ? Math.round(d.total_duration / d.total_views) : 0,
+    })).sort((a, b) => b.total_views - a.total_views)
+  })()
+
+  // ── Agréger par prospect ─────────────────────────────────────────────────
+  const byProspect = (() => {
+    const map = {}
+    for (const v of views) {
+      const email = v.viewer_email || 'inconnu'
+      if (!map[email]) {
+        map[email] = {
+          email,
+          docs_seen: new Set(),
+          total_duration: 0,
+          last_access: null,
+        }
+      }
+      if (v.doc_id) map[email].docs_seen.add(v.doc_id)
+      map[email].total_duration += v.duration_seconds || 0
+      const d = v.viewed_at ? new Date(v.viewed_at) : null
+      if (d && (!map[email].last_access || d > map[email].last_access)) map[email].last_access = d
+    }
+    return Object.values(map).map(p => {
+      const nb_docs = p.docs_seen.size
+      const total_minutes = p.total_duration / 60
+      const score = Math.min(nb_docs * 10 + total_minutes * 2, 100)
+      return {
+        email: p.email,
+        nb_docs,
+        total_duration: p.total_duration,
+        last_access: p.last_access,
+        score: Math.round(score),
+      }
+    }).sort((a, b) => b.score - a.score)
+  })()
+
+  // ── Heatmap data (max 10×10) ─────────────────────────────────────────────
+  const heatDocs = byDoc.slice(0, 10)
+  const heatProspects = byProspect.slice(0, 10)
+  // Map: email → doc_id → total_duration_seconds
+  const heatMap = (() => {
+    const m = {}
+    for (const v of views) {
+      const email = v.viewer_email || 'inconnu'
+      const docId = v.doc_id
+      if (!m[email]) m[email] = {}
+      m[email][docId] = (m[email][docId] || 0) + (v.duration_seconds || 0)
+    }
+    return m
+  })()
+
+  const cellColor = (seconds) => {
+    if (!seconds) return '#FFFFFF'
+    if (seconds < 60) return '#FFF9C4'   // jaune pâle
+    if (seconds < 300) return '#C4A96A'  // or
+    return '#1A3A6B'                      // navy
+  }
+  const cellTextColor = (seconds) => {
+    if (!seconds) return '#D1D5DB'
+    if (seconds < 60) return '#7A5C00'
+    if (seconds < 300) return '#4A3500'
+    return '#FFFFFF'
+  }
+
+  const fmtDuration = (seconds) => {
+    if (!seconds) return '—'
+    if (seconds < 60) return `${seconds}s`
+    return `${Math.floor(seconds / 60)}min`
+  }
+
+  const engagementBadge = (score) => {
+    let bg, color, border
+    if (score <= 30) { bg = 'rgba(107,114,128,0.1)'; color = '#6B7280'; border = 'rgba(107,114,128,0.3)' }
+    else if (score <= 60) { bg = 'rgba(234,88,12,0.1)'; color = '#EA580C'; border = 'rgba(234,88,12,0.3)' }
+    else { bg = 'rgba(30,107,74,0.1)'; color = '#1E6B4A'; border = 'rgba(30,107,74,0.3)' }
+    return (
+      <span style={{
+        display: 'inline-block', padding: '2px 8px',
+        fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em',
+        color, background: bg, border: `1px solid ${border}`, whiteSpace: 'nowrap',
+      }}>
+        ⚡ {score}
+      </span>
+    )
+  }
+
+  const thStyle = {
+    padding: '10px 12px', textAlign: 'left', fontSize: '10px',
+    fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase',
+    color: '#1A3A6B', whiteSpace: 'nowrap',
+  }
+  const tdStyle = { padding: '10px 12px', fontSize: '13px', color: '#374151' }
+
+  if (loading) return <p style={{ color: '#9CA3AF', fontSize: '13px' }}>Chargement des vues…</p>
+
+  return (
+    <section style={{ fontFamily: 'system-ui, sans-serif' }}>
+      <h2 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1A3A6B', marginBottom: '20px' }}>
+        Tracking lecture documents
+      </h2>
+
+      {/* Sous-onglets */}
+      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid rgba(26,58,107,0.1)', marginBottom: '24px' }}>
+        <button style={subTabStyle('by_doc')} onClick={() => setSubTab('by_doc')}>Par document</button>
+        <button style={subTabStyle('by_prospect')} onClick={() => setSubTab('by_prospect')}>Par prospect</button>
+        <button style={subTabStyle('heatmap')} onClick={() => setSubTab('heatmap')}>Heatmap visuelle</button>
+      </div>
+
+      {/* ── Vue 1 : Par document ── */}
+      {subTab === 'by_doc' && (
+        byDoc.length === 0 ? (
+          <p style={{ color: '#9CA3AF', fontSize: '13px' }}>Aucune vue enregistrée.</p>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid rgba(26,58,107,0.1)' }}>
+                  {['Titre doc', 'Tier', 'Nb vues total', 'Lecteurs uniques', 'Durée moy.', 'Dernier accès'].map(h => (
+                    <th key={h} style={thStyle}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {byDoc.map((d, i) => (
+                  <tr key={d.doc_id || i} style={{ borderBottom: '1px solid rgba(26,58,107,0.06)' }}>
+                    <td style={{ ...tdStyle, fontWeight: 600, color: '#1A1C1C', maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {d.title}
+                    </td>
+                    <td style={tdStyle}>
+                      <span style={{
+                        display: 'inline-block', padding: '2px 8px',
+                        fontSize: '10px', fontWeight: 700,
+                        background: 'rgba(26,58,107,0.07)',
+                        color: '#1A3A6B', border: '1px solid rgba(26,58,107,0.2)',
+                      }}>
+                        {d.tier}
+                      </span>
+                    </td>
+                    <td style={{ ...tdStyle, fontWeight: 700, color: '#1A3A6B' }}>{d.total_views}</td>
+                    <td style={tdStyle}>{d.unique_viewers}</td>
+                    <td style={tdStyle}>{fmtDuration(d.avg_duration)}</td>
+                    <td style={{ ...tdStyle, color: '#9CA3AF', fontSize: '12px' }}>
+                      {d.last_access ? d.last_access.toLocaleDateString('fr-FR') : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
+      )}
+
+      {/* ── Vue 2 : Par prospect ── */}
+      {subTab === 'by_prospect' && (
+        byProspect.length === 0 ? (
+          <p style={{ color: '#9CA3AF', fontSize: '13px' }}>Aucune vue enregistrée.</p>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid rgba(26,58,107,0.1)' }}>
+                  {['Email', 'Nb docs vus', 'Temps total', 'Dernier accès', 'Score engagement'].map(h => (
+                    <th key={h} style={thStyle}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {byProspect.map((p, i) => (
+                  <tr key={p.email || i} style={{ borderBottom: '1px solid rgba(26,58,107,0.06)' }}>
+                    <td style={{ ...tdStyle, color: '#1A1C1C', fontWeight: 600, maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {p.email}
+                    </td>
+                    <td style={{ ...tdStyle, fontWeight: 700, color: '#1A3A6B' }}>{p.nb_docs}</td>
+                    <td style={tdStyle}>{fmtDuration(p.total_duration)}</td>
+                    <td style={{ ...tdStyle, color: '#9CA3AF', fontSize: '12px' }}>
+                      {p.last_access ? p.last_access.toLocaleDateString('fr-FR') : '—'}
+                    </td>
+                    <td style={tdStyle}>{engagementBadge(p.score)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
+      )}
+
+      {/* ── Vue 3 : Heatmap visuelle ── */}
+      {subTab === 'heatmap' && (
+        heatDocs.length === 0 || heatProspects.length === 0 ? (
+          <p style={{ color: '#9CA3AF', fontSize: '13px' }}>Pas assez de données pour afficher la heatmap.</p>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            {/* Légende */}
+            <div style={{ display: 'flex', gap: '16px', marginBottom: '16px', flexWrap: 'wrap' }}>
+              {[
+                { color: '#FFFFFF', border: '#D1D5DB', label: 'Non vu' },
+                { color: '#FFF9C4', border: '#C4A96A', label: '< 1 min' },
+                { color: '#C4A96A', border: '#7A5C00', label: '1–5 min' },
+                { color: '#1A3A6B', border: '#0D2347', label: '> 5 min' },
+              ].map(l => (
+                <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#6B7280' }}>
+                  <span style={{
+                    display: 'inline-block', width: '14px', height: '14px',
+                    background: l.color, border: `1px solid ${l.border}`,
+                  }} />
+                  {l.label}
+                </div>
+              ))}
+            </div>
+
+            <table style={{ borderCollapse: 'collapse', fontSize: '11px', fontFamily: 'system-ui, sans-serif' }}>
+              <thead>
+                <tr>
+                  {/* Coin vide */}
+                  <th style={{ padding: '6px 8px', minWidth: '140px', textAlign: 'left', color: '#9CA3AF', fontSize: '10px', fontWeight: 600 }}>
+                    Email ↓ / Doc →
+                  </th>
+                  {heatDocs.map(d => (
+                    <th key={d.doc_id} style={{
+                      padding: '6px 4px', textAlign: 'center',
+                      fontSize: '10px', fontWeight: 700, color: '#1A3A6B',
+                      letterSpacing: '0.05em', maxWidth: '80px',
+                      writingMode: 'vertical-lr', transform: 'rotate(180deg)',
+                      whiteSpace: 'nowrap', height: '80px',
+                    }}>
+                      {(d.title || d.doc_id).slice(0, 15)}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {heatProspects.map((p, ri) => (
+                  <tr key={p.email} style={{ borderTop: '1px solid rgba(26,58,107,0.06)' }}>
+                    <td style={{
+                      padding: '5px 8px', fontSize: '11px', color: '#374151',
+                      maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    }}>
+                      {p.email.length > 22 ? p.email.slice(0, 22) + '…' : p.email}
+                    </td>
+                    {heatDocs.map(d => {
+                      const secs = heatMap[p.email]?.[d.doc_id] || 0
+                      const bg = cellColor(secs)
+                      const tc = cellTextColor(secs)
+                      return (
+                        <td key={d.doc_id} style={{
+                          padding: 0, textAlign: 'center',
+                          background: bg,
+                          border: '1px solid rgba(26,58,107,0.08)',
+                          width: '40px', height: '32px',
+                          fontSize: '9px', color: tc, fontWeight: 600,
+                        }}
+                          title={secs ? `${p.email} — ${d.title}: ${fmtDuration(secs)}` : 'Non vu'}
+                        >
+                          {secs ? fmtDuration(secs) : ''}
+                        </td>
+                      )
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
+      )}
+    </section>
+  )
+}
+
 // ── AdminPage ─────────────────────────────────────────────────────────────────
 export default function AdminPage() {
   const { session, isLoaded, isSignedIn, role } = useAuth()
@@ -729,6 +1055,9 @@ export default function AdminPage() {
 
       {/* ── Tab: Prospects ── */}
       {activeTab === 'prospects' && <ProspectsTab docViewsMap={docViewsMap} />}
+
+      {/* ── Tab: Vues docs ── */}
+      {activeTab === 'doc_views' && <DocViewsTab />}
 
       {/* ── Tab: Invitations ── */}
       {activeTab === 'invites' && (
