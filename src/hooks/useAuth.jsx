@@ -85,7 +85,7 @@ export function AuthProvider({ children }) {
 
   // Rôle mappé (founder / active / assistant / pending / no_access / null)
   const rawRole = profile?.role ? (ROLE_MAP[profile.role] ?? profile.role) : null
-  // TEST MODE : circleAccess ignoré — tout utilisateur avec un profil a accès
+  // Rôle réel — accès restreint selon role (founder conserve accès complet)
   const role = rawRole
 
   const value = {

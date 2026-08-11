@@ -316,9 +316,6 @@ function AuthGate() {
 
   if (!isSignedIn && !previewUser) return <LoginPage />
 
-  // TEST MODE : restrictions d'accès désactivées — tout utilisateur connecté accède au site
-  // TODO: réactiver avant go-live production
-
   const LINKED_NAMES = { cathy: 'Cathy', barthelemy: 'Barthélemy', pape: 'Pape Amadou', raphael: 'Raphaël', massata: 'Massata' }
   const isAdmin     = (isSignedIn && role === 'founder') || previewRole === 'founder'
   const isAssistant = role === 'assistant'
@@ -366,9 +363,9 @@ function AuthGate() {
           <Route path="/mon-espace"          element={<ProspectDashboard />} />
           <Route path="/dataroom-docs"       element={
             <Suspense fallback={<PageLoader />}>
-              <DataroomDocsPage
+          <DataroomDocsPage
                 isProspect={isProspect}
-                isApproved={isSignedIn || !!previewUser}
+                isApproved={role === 'founder' || !!previewUser || prospectStatus === 'approved'}
                 isAuthenticated={isSignedIn || !!previewUser}
               />
             </Suspense>
