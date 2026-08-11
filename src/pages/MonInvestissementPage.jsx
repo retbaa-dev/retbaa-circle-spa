@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import SPVDashboard from '../components/SPVDashboard'
 import HoldingDashboard from '../components/HoldingDashboard'
+import RendementCalculator from '../components/RendementCalculator'
 const INVESTOR_DATA = {
   'Massata':     { amount: 1000,   pct: 86.96, shares: 100000, sharesRange: '1 à 100 000',         entry: 'Fév. 2026', id: 'RC-0001', role: 'founder',  label: 'Apport fondateur' },
   'Barthélemy':  { amount: 150000, pct: 5.43,  shares: 6250,   sharesRange: '100 001 à 106 250',   entry: 'Fév. 2026', id: 'RC-9921', role: 'investor', label: 'Tranche 1' },
@@ -402,6 +403,24 @@ export default function MonInvestissementPage({ userName, isAssistant = false, p
           <div style={{ height: '4px', background: '#E0E8FF', borderRadius: '2px', marginTop: '20px', overflow: 'hidden' }}>
             <div style={{ width: '66%', height: '100%', background: 'linear-gradient(90deg, #EFC0D4 0%, #1A3A6B 100%)', borderRadius: '2px' }} />
           </div>
+        </div>
+
+        {/* ── Calculateur de rendement ── */}
+        <div style={{ marginBottom: '32px' }}>
+          <div style={{
+            fontSize: '9px', fontWeight: 700, letterSpacing: '0.3em',
+            textTransform: 'uppercase', color: '#EFC0D4', marginBottom: '12px',
+          }}>
+            SIMULATEUR
+          </div>
+          <h2 style={{
+            fontFamily: 'Newsreader, serif', fontStyle: 'italic',
+            fontSize: '28px', fontWeight: 300, color: '#1A3A6B',
+            margin: '0 0 24px',
+          }}>
+            Projetez votre rendement
+          </h2>
+          <RendementCalculator />
         </div>
 
         {/* ── Documents personnels ── */}
