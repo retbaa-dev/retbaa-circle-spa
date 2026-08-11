@@ -18,6 +18,15 @@ const CATEGORY_META = {
   'Général':            { icon: 'folder',           color: '#6B7280', bg: 'rgba(107,114,128,0.08)'},
 }
 
+// ── Logique d'accès par tier ─────────────────────────────────────────────────
+function getDocAccess(doc, ndaSigned, isApproved, isInvestor) {
+  const tier = doc.doc_tier || 1
+  if (tier === 1) return ndaSigned ? 'open' : 'nda_required'
+  if (tier === 2) return isApproved ? 'open' : 'pending_approval'
+  if (tier === 3) return isInvestor ? 'open' : 'investor_only'
+  return 'open'
+}
+
 // ── PDF Viewer inline ────────────────────────────────────────────────────────
 function PdfViewer({ doc, onClose, viewerEmail = null }) {
   const url = doc.pdf_path || doc.file_url || doc.url
@@ -125,66 +134,66 @@ function PdfViewer({ doc, onClose, viewerEmail = null }) {
   )
 }
 
-// ── Badge ────────────────────────────────────────────────────────────────────
-function Badge({ type }) {
-  if (type === 'preview') {
-    return (
-      <span style={{
-        display: 'inline-flex', alignItems: 'center', gap: '4px',
-        padding: '3px 8px', borderRadius: '4px',
-        background: 'rgba(6,95,70,0.1)',
-        fontSize: '10px', fontWeight: 700,
-        letterSpacing: '0.1em', textTransform: 'uppercase',
-        color: '#065F46', whiteSpace: 'nowrap',
-        flexShrink: 0,
-      }}>
-        Aperçu libre
-      </span>
-    )
+// ── TierBadge ────────────────────────────────────────────────────────────────
+function TierBadge({ access }) {
+  const configs = {
+    open:             { label: 'Accessible',    bg: 'rgba(6,95,70,0.1)',     color: '#065F46' },
+    nda_required:     { label: 'NDA requis',    bg: 'rgba(156,163,175,0.1)', color: '#6B7280' },
+    pending_approval: { label: 'En attente',    bg: 'rgba(245,158,11,0.1)',  color: '#B45309' },
+    investor_only:    { label: 'Investisseurs', bg: 'rgba(26,58,107,0.1)',   color: '#1A3A6B' },
   }
+  const c = configs[access] || configs.nda_required
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: '4px',
       padding: '3px 8px', borderRadius: '4px',
-      background: 'rgba(156,163,175,0.15)',
-      fontSize: '10px', fontWeight: 700,
+      background: c.bg, fontSize: '10px', fontWeight: 700,
       letterSpacing: '0.1em', textTransform: 'uppercase',
-      color: '#6B7280', whiteSpace: 'nowrap',
-      flexShrink: 0,
+      color: c.color, whiteSpace: 'nowrap', flexShrink: 0,
     }}>
-      🔒 Accès restreint
+      {access !== 'open' && '🔒 '}{c.label}
     </span>
   )
 }
 
 // ── Carte document ───────────────────────────────────────────────────────────
-function DocCard({ doc, isAuthenticated, isApproved, onPreviewClick, onRestrictedClick }) {
-  const meta          = CATEGORY_META[doc.category] || CATEGORY_META['Général']
-  const isPreviewOnly = doc.preview_only
-  // Docs preview_only : accessibles sans inscription
-  // Docs restreints : nécessitent inscription + approbation
-  const isFreeAccess  = isPreviewOnly
-  const canOpenFull   = isAuthenticated && (isApproved || isPreviewOnly)
+function DocCard({ doc, access, onOpenClick, onNdaRequired, onRestrictedClick }) {
+  const meta = CATEGORY_META[doc.category] || CATEGORY_META['Général']
 
   function handleClick() {
-    if (isFreeAccess) {
-      // Aperçu libre — pas besoin d'auth
-      onPreviewClick(doc)
-    } else if (!isAuthenticated) {
-      // Doc restreint + non connecté → onboarding
-      onRestrictedClick()
-    } else if (isApproved) {
-      // Connecté + approuvé → viewer
-      onPreviewClick(doc)
+    if (access === 'open') {
+      onOpenClick(doc)
+    } else if (access === 'nda_required') {
+      onNdaRequired()
     } else {
-      // Connecté mais pas encore approuvé
       onRestrictedClick()
     }
   }
 
+  const iconName = access === 'open' ? meta.icon : 'lock'
+  const iconColor = access === 'open' ? meta.color : (
+    access === 'pending_approval' ? '#B45309' :
+    access === 'investor_only'    ? '#1A3A6B' :
+    '#9CA3AF'
+  )
+  const iconBg = access === 'open' ? meta.bg : (
+    access === 'pending_approval' ? 'rgba(245,158,11,0.08)' :
+    access === 'investor_only'    ? 'rgba(26,58,107,0.08)' :
+    'rgba(156,163,175,0.1)'
+  )
+
+  const tooltipText = access === 'nda_required'
+    ? 'Signez le NDA pour accéder'
+    : access === 'pending_approval'
+    ? "En attente d'approbation"
+    : access === 'investor_only'
+    ? 'Réservé aux investisseurs'
+    : null
+
   return (
     <div
       onClick={handleClick}
+      title={tooltipText || undefined}
       style={{
         background: '#fff',
         border: '1px solid rgba(26,58,107,0.08)',
@@ -208,15 +217,12 @@ function DocCard({ doc, isAuthenticated, isApproved, onPreviewClick, onRestricte
       {/* Icône catégorie */}
       <div style={{
         width: '44px', height: '44px', borderRadius: '8px',
-        background: isPreviewOnly ? meta.bg : 'rgba(156,163,175,0.1)',
+        background: iconBg,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         flexShrink: 0,
       }}>
-        <span className="material-symbols-outlined" style={{
-          fontSize: '22px',
-          color: isPreviewOnly ? meta.color : '#9CA3AF',
-        }}>
-          {isPreviewOnly ? meta.icon : 'lock'}
+        <span className="material-symbols-outlined" style={{ fontSize: '22px', color: iconColor }}>
+          {iconName}
         </span>
       </div>
 
@@ -233,7 +239,7 @@ function DocCard({ doc, isAuthenticated, isApproved, onPreviewClick, onRestricte
           }}>
             {doc.title}
           </div>
-          <Badge type={isPreviewOnly ? 'preview' : 'restricted'} />
+          <TierBadge access={access} />
         </div>
         {(doc.summary || doc.description) && (
           <div style={{
@@ -255,14 +261,11 @@ function DocCard({ doc, isAuthenticated, isApproved, onPreviewClick, onRestricte
         display: 'flex', alignItems: 'center', gap: '4px',
         fontSize: '11px', letterSpacing: '0.1em',
         textTransform: 'uppercase',
-        color: isPreviewOnly ? meta.color : '#9CA3AF',
+        color: iconColor,
         fontWeight: 700,
       }}>
         <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
-          {isPreviewOnly ? 'visibility' : 'lock_open'}
-        </span>
-        <span style={{ display: 'none' }}>
-          {isPreviewOnly ? 'Aperçu' : 'Accéder'}
+          {access === 'open' ? 'visibility' : 'lock'}
         </span>
       </div>
     </div>
@@ -270,7 +273,7 @@ function DocCard({ doc, isAuthenticated, isApproved, onPreviewClick, onRestricte
 }
 
 // ── Section catégorie ────────────────────────────────────────────────────────
-function CategorySection({ category, docs, isAuthenticated, isApproved, onPreviewClick, onRestrictedClick }) {
+function CategorySection({ category, docs, ndaSigned, isApproved, isInvestor, onOpenClick, onNdaRequired, onRestrictedClick }) {
   const meta = CATEGORY_META[category] || CATEGORY_META['Général']
   return (
     <div style={{ marginBottom: '40px' }}>
@@ -298,9 +301,9 @@ function CategorySection({ category, docs, isAuthenticated, isApproved, onPrevie
           <DocCard
             key={doc.id}
             doc={doc}
-            isAuthenticated={isAuthenticated}
-            isApproved={isApproved}
-            onPreviewClick={onPreviewClick}
+            access={getDocAccess(doc, ndaSigned, isApproved, isInvestor)}
+            onOpenClick={onOpenClick}
+            onNdaRequired={onNdaRequired}
             onRestrictedClick={onRestrictedClick}
           />
         ))}
@@ -316,7 +319,7 @@ const VEHICLES = {
   'Retbaa Manufacture': { subtitle: 'Filière industrielle · Horizon 7–10 ans', icon: 'factory',         color: '#7C3AED' },
 }
 
-function InvestissementSection({ docs, isAuthenticated, isApproved, onPreviewClick, onRestrictedClick }) {
+function InvestissementSection({ docs, ndaSigned, isApproved, isInvestor, onOpenClick, onNdaRequired, onRestrictedClick }) {
   return (
     <div style={{ marginBottom: '40px' }}>
       <div style={{
@@ -386,17 +389,21 @@ function InvestissementSection({ docs, isAuthenticated, isApproved, onPreviewCli
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {vehicleDocs.map(doc => {
-                    const isPreviewOnly = doc.preview_only
+                    const access = getDocAccess(doc, ndaSigned, isApproved, isInvestor)
+
+                    const iconColor = access === 'open' ? meta.color : (
+                      access === 'pending_approval' ? '#B45309' :
+                      access === 'investor_only'    ? '#1A3A6B' :
+                      '#9CA3AF'
+                    )
 
                     function handleClick() {
-                      if (!isAuthenticated) {
-                        onRestrictedClick()
-                      } else if (isAuthenticated && isApproved) {
-                        onPreviewClick(doc)
-                      } else if (!isPreviewOnly) {
-                        onRestrictedClick()
+                      if (access === 'open') {
+                        onOpenClick(doc)
+                      } else if (access === 'nda_required') {
+                        onNdaRequired()
                       } else {
-                        onPreviewClick(doc)
+                        onRestrictedClick()
                       }
                     }
 
@@ -404,31 +411,37 @@ function InvestissementSection({ docs, isAuthenticated, isApproved, onPreviewCli
                       <div
                         key={doc.id}
                         onClick={handleClick}
+                        title={
+                          access === 'nda_required'     ? 'Signez le NDA pour accéder' :
+                          access === 'pending_approval' ? "En attente d'approbation" :
+                          access === 'investor_only'    ? 'Réservé aux investisseurs' :
+                          undefined
+                        }
                         style={{
                           padding: '14px 16px',
-                          background: isPreviewOnly ? `${meta.color}08` : 'rgba(156,163,175,0.06)',
+                          background: access === 'open' ? `${meta.color}08` : 'rgba(156,163,175,0.06)',
                           borderRadius: '8px',
                           cursor: 'pointer',
                           transition: 'background 0.15s',
-                          border: `1px solid ${isPreviewOnly ? `${meta.color}20` : 'rgba(156,163,175,0.15)'}`,
+                          border: `1px solid ${access === 'open' ? `${meta.color}20` : 'rgba(156,163,175,0.15)'}`,
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.background = isPreviewOnly ? `${meta.color}15` : 'rgba(156,163,175,0.12)' }}
-                        onMouseLeave={e => { e.currentTarget.style.background = isPreviewOnly ? `${meta.color}08` : 'rgba(156,163,175,0.06)' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = access === 'open' ? `${meta.color}15` : 'rgba(156,163,175,0.12)' }}
+                        onMouseLeave={e => { e.currentTarget.style.background = access === 'open' ? `${meta.color}08` : 'rgba(156,163,175,0.06)' }}
                       >
                         {/* Titre + icône action */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: doc.summary ? '8px' : 0 }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: '15px', color: isPreviewOnly ? meta.color : '#9CA3AF', flexShrink: 0 }}>
-                            {isPreviewOnly ? 'description' : 'lock'}
+                          <span className="material-symbols-outlined" style={{ fontSize: '15px', color: iconColor, flexShrink: 0 }}>
+                            {access === 'open' ? 'description' : 'lock'}
                           </span>
                           <span style={{
                             flex: 1, fontSize: '13px', fontWeight: 600,
-                            color: isPreviewOnly ? '#1A3A6B' : '#9CA3AF',
+                            color: access === 'open' ? '#1A3A6B' : '#9CA3AF',
                             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                           }}>
                             {doc.title.replace(/^[^—]+—\s*/, '')}
                           </span>
-                          <span className="material-symbols-outlined" style={{ fontSize: '14px', color: isPreviewOnly ? meta.color : '#9CA3AF', flexShrink: 0 }}>
-                            {isPreviewOnly ? 'visibility' : 'lock'}
+                          <span className="material-symbols-outlined" style={{ fontSize: '14px', color: iconColor, flexShrink: 0 }}>
+                            {access === 'open' ? 'visibility' : 'lock'}
                           </span>
                         </div>
                         {/* Résumé */}
@@ -482,10 +495,14 @@ export default function DataroomDocsPage({ isProspect = false, isApproved: isApp
   // TEST MODE : tout utilisateur connecté ou preview = approuvé
   const isApproved = isApprovedProp || isAuthenticated || prospectStatus === 'approved'
 
+  // Accès tier — NDA et investisseur
+  const ndaSigned = !!localStorage.getItem('retbaa_nda_signed')
+  const isInvestor = isSignedIn && !isProspect
+
   // ── TanStack Query — fetch docs dataroom ──────────────────────────────────
   const { data: docs = [], isLoading: loading } = useDataroomDocs()
 
-useEffect(() => {
+  useEffect(() => {
     if (!isProspect || !user?.email) return
     supabase
       .from('dataroom_prospects')
@@ -494,16 +511,6 @@ useEffect(() => {
       .maybeSingle()
       .then(({ data }) => setProspectStatus(data?.status ?? null))
   }, [isProspect, user?.email])
-
-  const handlePreview = async (doc) => {
-    setViewerDoc(doc)
-    await trackDocView({
-      docId: doc.id,
-      docTitle: doc.title,
-      viewerEmail: user?.email || null,
-      isProspect: isProspect || false,
-    })
-  }
 
   // Grouper par catégorie (hors Investissement, traité séparément)
   const grouped = CATEGORY_ORDER.reduce((acc, cat) => {
@@ -517,12 +524,11 @@ useEffect(() => {
       grouped[cat] = docs.filter(x => (x.category || 'Général') === cat)
   })
 
-  const totalPreview    = docs.filter(d => d.preview_only).length
-  const totalRestricted = docs.length - totalPreview
+  const totalAccessible = docs.filter(d => getDocAccess(d, ndaSigned, isApproved, isInvestor) === 'open').length
+  const totalRestricted = docs.length - totalAccessible
 
   function handleDocClick(doc) {
     setViewerDoc(doc)
-    // tracking async — non bloquant
     trackDocView({
       docId: doc.id,
       docTitle: doc.title,
@@ -531,13 +537,82 @@ useEffect(() => {
     }).catch(() => {})
   }
 
+  function handleNdaRequired() {
+    // Scrolle vers le haut pour signer le NDA ou ouvre l'onboarding
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    setShowOnboarding(true)
+  }
+
   function handleRestrictedClick() {
     setShowOnboarding(true)
   }
 
+  // ── Bannière contextuelle ────────────────────────────────────────────────
+  function ContextualBanner() {
+    if (isInvestor) {
+      return (
+        <div style={{
+          marginTop: '16px', padding: '14px 18px',
+          background: 'rgba(26,58,107,0.06)',
+          borderLeft: '3px solid #1A3A6B',
+          borderRadius: '0 6px 6px 0',
+          fontFamily: 'system-ui', fontSize: '13px', color: '#1A3A6B',
+          lineHeight: 1.6, display: 'flex', alignItems: 'center', gap: '8px',
+        }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>verified</span>
+          Accès complet — bienvenue dans l'espace investisseur.
+        </div>
+      )
+    }
+    if (isApproved && ndaSigned) {
+      return (
+        <div style={{
+          marginTop: '16px', padding: '14px 18px',
+          background: 'rgba(6,95,70,0.06)',
+          borderLeft: '3px solid #065F46',
+          borderRadius: '0 6px 6px 0',
+          fontFamily: 'system-ui', fontSize: '13px', color: '#065F46',
+          lineHeight: 1.6, display: 'flex', alignItems: 'center', gap: '8px',
+        }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check_circle</span>
+          Votre accès a été validé — documents financiers disponibles.
+        </div>
+      )
+    }
+    if (ndaSigned && !isApproved) {
+      return (
+        <div style={{
+          marginTop: '16px', padding: '14px 18px',
+          background: 'rgba(239,192,212,0.2)',
+          borderLeft: '3px solid #EFC0D4',
+          borderRadius: '0 6px 6px 0',
+          fontFamily: 'system-ui', fontSize: '13px', color: '#704C5D',
+          lineHeight: 1.6, display: 'flex', alignItems: 'center', gap: '8px',
+        }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>hourglass_empty</span>
+          Dossier en cours d'examen — les documents financiers seront disponibles après approbation.
+        </div>
+      )
+    }
+    // Pas de NDA signé
+    return (
+      <div style={{
+        marginTop: '16px', padding: '14px 18px',
+        background: 'rgba(26,58,107,0.06)',
+        borderLeft: '3px solid #1A3A6B',
+        borderRadius: '0 6px 6px 0',
+        fontFamily: 'system-ui', fontSize: '13px', color: '#374151',
+        lineHeight: 1.6, display: 'flex', alignItems: 'center', gap: '8px',
+      }}>
+        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>info</span>
+        Signez le NDA pour accéder aux documents Tier 1. Cliquez sur un document pour commencer.
+      </div>
+    )
+  }
+
   return (
     <>
-{viewerDoc && <PdfViewer doc={viewerDoc} onClose={() => setViewerDoc(null)} viewerEmail={user?.email ?? null} />}
+      {viewerDoc && <PdfViewer doc={viewerDoc} onClose={() => setViewerDoc(null)} viewerEmail={user?.email ?? null} />}
       {showOnboarding && <OnboardingModal onClose={() => setShowOnboarding(false)} />}
 
       <div style={{ minHeight: '100vh', backgroundColor: '#FAF7F2', padding: '48px 32px' }}>
@@ -558,35 +633,11 @@ useEffect(() => {
               Dataroom
             </h1>
             <p style={{ fontFamily: 'system-ui', fontSize: '14px', color: '#6B7280', margin: '0 0 4px' }}>
-              {docs.length} document{docs.length > 1 ? 's' : ''} · {totalPreview} en aperçu libre · {totalRestricted} en accès restreint
+              {docs.length} document{docs.length > 1 ? 's' : ''} · {totalAccessible} accessible{totalAccessible > 1 ? 's' : ''} · {totalRestricted} restreint{totalRestricted > 1 ? 's' : ''}
             </p>
 
-            {/* Bannière info pour visiteurs non connectés */}
-            {!isAuthenticated && (
-              <div style={{
-                marginTop: '16px', padding: '14px 18px',
-                background: 'rgba(26,58,107,0.06)',
-                borderLeft: '3px solid #1A3A6B',
-                borderRadius: '0 6px 6px 0',
-                fontFamily: 'system-ui', fontSize: '13px', color: '#374151',
-                lineHeight: 1.6,
-              }}>
-                Parcourez librement les titres et descriptions. Cliquez sur un document pour créer votre accès.
-              </div>
-            )}
-
-            {/* Info prospect en attente */}
-            {isAuthenticated && isProspect && !isApproved && prospectStatus !== null && (
-              <div style={{
-                marginTop: '16px', padding: '12px 16px',
-                background: 'rgba(239,192,212,0.2)',
-                borderLeft: '3px solid #EFC0D4',
-                borderRadius: '0 4px 4px 0',
-                fontFamily: 'system-ui', fontSize: '13px', color: '#704C5D',
-              }}>
-                Les documents en accès restreint seront disponibles après validation de votre dossier par l'équipe Retbaa.
-              </div>
-            )}
+            {/* Bannière contextuelle */}
+            <ContextualBanner />
           </div>
 
           {/* Contenu */}
@@ -611,9 +662,11 @@ useEffect(() => {
               <ErrorBoundary>
                 <InvestissementSection
                   docs={docs.filter(d => d.category === 'Investissement')}
-                  isAuthenticated={isAuthenticated}
+                  ndaSigned={ndaSigned}
                   isApproved={isApproved}
-                  onPreviewClick={handleDocClick}
+                  isInvestor={isInvestor}
+                  onOpenClick={handleDocClick}
+                  onNdaRequired={handleNdaRequired}
                   onRestrictedClick={handleRestrictedClick}
                 />
               </ErrorBoundary>
@@ -624,9 +677,11 @@ useEffect(() => {
                   <CategorySection
                     category={cat}
                     docs={items}
-                    isAuthenticated={isAuthenticated}
+                    ndaSigned={ndaSigned}
                     isApproved={isApproved}
-                    onPreviewClick={handleDocClick}
+                    isInvestor={isInvestor}
+                    onOpenClick={handleDocClick}
+                    onNdaRequired={handleNdaRequired}
                     onRestrictedClick={handleRestrictedClick}
                   />
                 </ErrorBoundary>
