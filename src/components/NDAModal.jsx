@@ -1,6 +1,8 @@
 // components/NDAModal.jsx — Retbaa Circle
 // Modal NDA pleine page — s'affiche dès le choix de profil sur HomePage
 import { useState } from 'react'
+import { sendEmail } from '../lib/brevo'
+import { ndaSignedConfirmation, notifyAdminInstitutional } from '../lib/emailTemplates'
 
 const SUPABASE_URL = 'https://lufozqtrwrmowzojxcoi.supabase.co'
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1Zm96cXRyd3Jtb3d6b2p4Y29pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyOTcwNjMsImV4cCI6MjA5Mjg3MzA2M30._-jdklZKN7xAc4M9A55A5qqyVml5gkXU3URe_EyM9k4'
@@ -96,6 +98,31 @@ export default function NDAModal({ isOpen, profileType, userEmail, onSigned, onC
       try {
         localStorage.setItem('retbaa_nda_signed', JSON.stringify(ndaData))
       } catch {}
+
+      // ── Emails automatiques Brevo (best-effort) ───────────────────────────
+      if (!import.meta.env.VITE_BREVO_API_KEY) {
+        console.warn('[Brevo] VITE_BREVO_API_KEY absent — emails NDA non envoyés')
+      } else {
+        const emailPromises = [
+          sendEmail({
+            to:      ndaData.email,
+            subject: ndaSignedConfirmation({ name: ndaData.full_name, profileType, institutionName: ndaData.institution_name }).subject,
+            html:    ndaSignedConfirmation({ name: ndaData.full_name, profileType, institutionName: ndaData.institution_name }).html,
+          }),
+        ]
+        if (isInstitutional) {
+          const tpl = notifyAdminInstitutional({
+            name:            ndaData.full_name,
+            email:           ndaData.email,
+            institutionName: ndaData.institution_name,
+            institutionType: ndaData.institution_type,
+          })
+          emailPromises.push(
+            sendEmail({ to: 'massata@retbaa.com', subject: tpl.subject, html: tpl.html })
+          )
+        }
+        await Promise.allSettled(emailPromises)
+      }
 
       onSigned(ndaData)
     } catch (err) {

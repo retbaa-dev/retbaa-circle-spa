@@ -213,6 +213,107 @@ export function notifyAdmin({ firstName, lastName, email, canal, montant }) {
   return wrap(header + body + footer)
 }
 
+// ── Template C — Confirmation NDA signé ──────────────────────────────────────
+
+/**
+ * Email de confirmation envoyé au signataire après enregistrement du NDA.
+ * @param {Object} params
+ * @param {string} params.name
+ * @param {string} params.profileType
+ * @param {string} [params.institutionName]
+ * @returns {{ subject: string, html: string }}
+ */
+export function ndaSignedConfirmation({ name, profileType, institutionName }) {
+  const isInstitutional = profileType === 'prospect_institutional'
+  return {
+    subject: 'Votre accord de confidentialité Retbaa a été enregistré',
+    html: `
+      <div style="font-family: Georgia, serif; max-width: 560px; margin: 0 auto; padding: 40px 32px; background: #FAF7F2;">
+        <div style="font-family: Georgia, serif; font-style: italic; font-size: 24px; color: #1A3A6B; margin-bottom: 4px;">Retbaa Circle</div>
+        <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.35em; text-transform: uppercase; color: #C4A96A; margin-bottom: 32px;">PORTAIL INVESTISSEURS</div>
+        <p style="color: #1A3A6B; font-size: 16px; line-height: 1.7;">Bonjour ${escapeHtml(name)},</p>
+        <p style="color: #374151; font-size: 14px; line-height: 1.8;">
+          Votre accord de non-divulgation a été enregistré avec succès.
+          ${isInstitutional ? `<br>Institution : <strong>${escapeHtml(institutionName || '')}</strong>` : ''}
+        </p>
+        <p style="color: #374151; font-size: 14px; line-height: 1.8;">
+          Vous pouvez maintenant accéder aux documents de présentation Retbaa (Tier 1).
+          Les documents financiers seront disponibles après validation de votre dossier par notre équipe.
+        </p>
+        <div style="margin: 32px 0;">
+          <a href="https://circle.retbaa.com/dataroom" style="background: #1A3A6B; color: #fff; padding: 14px 28px; text-decoration: none; font-size: 12px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;">
+            Accéder à la Dataroom →
+          </a>
+        </div>
+        <p style="color: #9CA3AF; font-size: 12px; line-height: 1.6;">
+          Retbaa SAS · Paris · Dakar<br>
+          <a href="https://circle.retbaa.com" style="color: #C4A96A;">circle.retbaa.com</a>
+        </p>
+      </div>
+    `
+  }
+}
+
+// ── Template D — Notification admin prospect institutionnel ───────────────────
+
+/**
+ * Email de notification envoyé à Massata pour un nouveau prospect institutionnel.
+ * @param {Object} params
+ * @param {string} params.name
+ * @param {string} params.email
+ * @param {string} params.institutionName
+ * @param {string} params.institutionType
+ * @returns {{ subject: string, html: string }}
+ */
+export function notifyAdminInstitutional({ name, email, institutionName, institutionType }) {
+  const now = new Date()
+  const dateStr = now.toLocaleDateString('fr-FR', {
+    day: '2-digit', month: 'long', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  })
+
+  return {
+    subject: `🏛️ Nouveau prospect institutionnel — ${escapeHtml(institutionName)}`,
+    html: `
+      <div style="font-family: Georgia, serif; max-width: 560px; margin: 0 auto; padding: 40px 32px; background: #FAF7F2;">
+        <div style="font-family: Georgia, serif; font-style: italic; font-size: 24px; color: #1A3A6B; margin-bottom: 4px;">Retbaa Circle</div>
+        <div style="font-size: 9px; font-weight: 700; letter-spacing: 0.35em; text-transform: uppercase; color: #C4A96A; margin-bottom: 32px;">NOTIFICATION ADMIN · PROSPECT INSTITUTIONNEL</div>
+        <p style="color: #1A3A6B; font-size: 16px; line-height: 1.7;">Nouveau prospect institutionnel</p>
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top: 1px solid #eee; margin-bottom: 32px;">
+          <tr style="border-bottom: 1px solid #eee;">
+            <th style="font-size: 13px; color: #888; font-weight: normal; text-align: left; padding: 10px 16px 10px 0; white-space: nowrap; width: 35%;">Nom</th>
+            <td style="font-size: 14px; color: #1A3A6B; font-weight: bold; padding: 10px 0;">${escapeHtml(name)}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <th style="font-size: 13px; color: #888; font-weight: normal; text-align: left; padding: 10px 16px 10px 0; white-space: nowrap; width: 35%;">Email</th>
+            <td style="font-size: 14px; color: #1A3A6B; font-weight: bold; padding: 10px 0;">${escapeHtml(email)}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <th style="font-size: 13px; color: #888; font-weight: normal; text-align: left; padding: 10px 16px 10px 0; white-space: nowrap; width: 35%;">Institution</th>
+            <td style="font-size: 14px; color: #1A3A6B; font-weight: bold; padding: 10px 0;">${escapeHtml(institutionName)}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <th style="font-size: 13px; color: #888; font-weight: normal; text-align: left; padding: 10px 16px 10px 0; white-space: nowrap; width: 35%;">Type</th>
+            <td style="font-size: 14px; color: #1A3A6B; font-weight: bold; padding: 10px 0;">${escapeHtml(institutionType)}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <th style="font-size: 13px; color: #888; font-weight: normal; text-align: left; padding: 10px 16px 10px 0; white-space: nowrap; width: 35%;">Date</th>
+            <td style="font-size: 14px; color: #1A3A6B; font-weight: bold; padding: 10px 0;">${escapeHtml(dateStr)}</td>
+          </tr>
+        </table>
+        <div style="text-align: center; margin-bottom: 32px;">
+          <a href="https://circle.retbaa.com/admin" style="background: #1A3A6B; color: #fff; padding: 14px 28px; text-decoration: none; font-size: 12px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;">
+            Voir le dossier →
+          </a>
+        </div>
+        <p style="color: #9CA3AF; font-size: 12px; line-height: 1.6;">
+          Retbaa Circle — Notification interne automatique
+        </p>
+      </div>
+    `
+  }
+}
+
 // ── Utilitaire ────────────────────────────────────────────────────────────────
 
 function escapeHtml(str) {
