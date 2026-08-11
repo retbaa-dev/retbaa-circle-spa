@@ -2,8 +2,6 @@
 import { Fragment, useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useProspects } from '../hooks/queries/useProspects'
 
 // ── Helpers NDA meta ──────────────────────────────────────────────────────────
 const JURISDICTION_LABEL = {
@@ -67,54 +65,6 @@ function NdaDetail({ ndaMeta }) {
         </div>
       )}
     </div>
-  )
-}
-
-// ── Onglet Vues docs ──────────────────────────────────────────────────────────
-function DocViewsTab() {
-  const { data: views = [], isLoading: loading } = useQuery({
-    queryKey: ['dataroom_doc_views'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('dataroom_doc_views')
-        .select('*')
-        .order('viewed_at', { ascending: false })
-        .limit(50)
-      if (error) throw new Error(error.message)
-      return data || []
-    },
-    staleTime: 2 * 60 * 1000,
-  })
-
-  if (loading) return <p style={{ color: '#9CA3AF', fontSize: '13px' }}>Chargement…</p>
-  if (views.length === 0) return <p style={{ color: '#9CA3AF', fontSize: '13px' }}>Aucune vue enregistrée.</p>
-
-  return (
-    <section>
-      <h2 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1A3A6B', marginBottom: '16px' }}>
-        Vues documents ({views.length})
-      </h2>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', fontFamily: 'system-ui, sans-serif' }}>
-        <thead>
-          <tr style={{ borderBottom: '2px solid rgba(26,58,107,0.12)' }}>
-            <th style={{ textAlign: 'left', padding: '8px 12px', color: '#6B7280', fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Email</th>
-            <th style={{ textAlign: 'left', padding: '8px 12px', color: '#6B7280', fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Document</th>
-            <th style={{ textAlign: 'left', padding: '8px 12px', color: '#6B7280', fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Date</th>
-            <th style={{ textAlign: 'right', padding: '8px 12px', color: '#6B7280', fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Durée (s)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {views.map((v) => (
-            <tr key={v.id} style={{ borderBottom: '1px solid rgba(26,58,107,0.06)' }}>
-              <td style={{ padding: '10px 12px', color: '#374151' }}>{v.viewer_email || <span style={{ color: '#9CA3AF', fontStyle: 'italic' }}>Anonyme</span>}</td>
-              <td style={{ padding: '10px 12px', color: '#1A3A6B' }}>{v.doc_title || `#${v.doc_id}`}</td>
-              <td style={{ padding: '10px 12px', color: '#6B7280' }}>{v.viewed_at ? new Date(v.viewed_at).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : '—'}</td>
-              <td style={{ padding: '10px 12px', color: '#374151', textAlign: 'right' }}>{v.duration_seconds != null ? v.duration_seconds : '—'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </section>
   )
 }
 
@@ -248,7 +198,17 @@ function ProspectsTab({ docViewsMap }) {
   const [expandedId, setExpandedId] = useState(null)
   const [subTab, setSubTab] = useState('list') // 'list' | 'ndas'
 
-  const { data: prospects = [], isLoading: loading } = useProspects()
+  const fetchProspects = async () => {
+    setLoading(true)
+    const { data, error } = await supabase
+      .from('dataroom_prospects')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (!error) setProspects(data || [])
+    setLoading(false)
+  }
+
+  useEffect(() => { fetchProspects() }, [])
 
   // Enrichir avec doc_views_count depuis la map
   const prospectsEnriched = prospects.map(p => ({
@@ -769,9 +729,6 @@ export default function AdminPage() {
 
       {/* ── Tab: Prospects ── */}
       {activeTab === 'prospects' && <ProspectsTab docViewsMap={docViewsMap} />}
-
-      {/* ── Tab: Vues docs ── */}
-      {activeTab === 'doc_views' && <DocViewsTab />}
 
       {/* ── Tab: Invitations ── */}
       {activeTab === 'invites' && (

@@ -1,7 +1,7 @@
 // pages/AnalyticsPage.jsx — Dashboard admin Retbaa Circle
-// Analytics via Supabase + TanStack Query
-import { useState, useMemo } from 'react'
-import { usePageViews } from '../hooks/queries/usePageViews'
+// Analytics via Supabase (remplace fetch /api/stats)
+import { useState, useEffect, Fragment } from 'react'
+import { supabase } from '../lib/supabase'
 
 const INVESTOR_LABELS = {
   massata: 'Massata NIANG',
@@ -95,13 +95,32 @@ function computeStats(rows) {
 }
 
 export default function AnalyticsPage() {
+  const [stats, setStats] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [activeInv, setActiveInv] = useState(null)
 
-  // ── TanStack Query ────────────────────────────────────────────────────────
-  const { data: pageViewsData, isLoading: loading, isError, error: queryError, refetch } = usePageViews()
+  const fetchStats = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const { data, error: err } = await supabase
+        .from('page_views')
+        .select('investor, page, type, created_at')
+        .order('created_at', { ascending: false })
 
-  const stats = useMemo(() => computeStats(pageViewsData || []), [pageViewsData])
-  const error = isError ? (queryError?.message || 'Erreur Supabase') : null
+      if (err) throw err
+      setStats(computeStats(data || []))
+    } catch (e) {
+      setError(e.message || 'Erreur Supabase')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchStats()
+  }, [])
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
@@ -137,7 +156,7 @@ export default function AnalyticsPage() {
               Analytics
             </h1>
           </div>
-          <button onClick={refetch} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 20px', background: 'none', border: '1px solid #EFC0D4', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Manrope, sans-serif', fontSize: '10px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#795465' }}>
+          <button onClick={fetchStats} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 20px', background: 'none', border: '1px solid #EFC0D4', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Manrope, sans-serif', fontSize: '10px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#795465' }}>
             <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>refresh</span>
             Actualiser
           </button>
