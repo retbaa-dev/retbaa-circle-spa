@@ -4,6 +4,7 @@
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import NDAModal from '../components/NDAModal'
 
 // ── Manifesto data ──────────────────────────────────────────────────────────
 const MANIFESTO = [
@@ -64,9 +65,27 @@ const REFUS = [
 export default function HomePage() {
   const navigate = useNavigate()
   const [hoveredCta, setHoveredCta] = useState(null)
+  const [ndaModal, setNdaModal] = useState(null) // { profileType, destination }
+
+  const handleNdaSigned = (ndaData) => {
+    const dest = ndaModal?.destination
+    setNdaModal(null)
+    if (dest) navigate(dest)
+  }
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#0D1F3C', fontFamily: 'Manrope, sans-serif', overflowX: 'hidden' }}>
+
+      {/* NDA Modal */}
+      {ndaModal && (
+        <NDAModal
+          isOpen={true}
+          profileType={ndaModal.profileType}
+          userEmail=""
+          onSigned={handleNdaSigned}
+          onClose={() => setNdaModal(null)}
+        />
+      )}
 
       {/* Header minimal */}
       <header style={{
@@ -204,7 +223,7 @@ export default function HomePage() {
         <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
           {/* CTA Prospect */}
           <button
-            onClick={() => navigate('/dataroom')}
+            onClick={() => setNdaModal({ profileType: 'prospect_standard', destination: '/dataroom' })}
             onMouseEnter={() => setHoveredCta('prospect')}
             onMouseLeave={() => setHoveredCta(null)}
             style={{
@@ -223,7 +242,7 @@ export default function HomePage() {
 
           {/* CTA Investisseur */}
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => setNdaModal({ profileType: 'investor', destination: '/login' })}
             onMouseEnter={() => setHoveredCta('inv')}
             onMouseLeave={() => setHoveredCta(null)}
             style={{

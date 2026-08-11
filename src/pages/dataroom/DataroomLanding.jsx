@@ -1,5 +1,6 @@
 // pages/dataroom/DataroomLanding.jsx — Retbaa Circle
-// Portail public prospects — Stepper 3 étapes : Présentation → NDA (pleine page) → Qualification
+// Portail public prospects — Stepper 2 étapes : Présentation → Qualification
+// NDA géré en amont sur HomePage via NDAModal
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
 import { sendEmail } from '../../lib/brevo'
@@ -248,17 +249,17 @@ const s = {
   },
 }
 
-const STEP_LABELS = ['Présentation', 'Confidentialité', 'Qualification']
+const STEP_LABELS = ['Présentation', 'Qualification']
 
 function StepIndicator({ step }) {
   return (
     <div style={s.stepIndicator}>
       {STEP_LABELS.map((label, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: i < 2 ? 1 : 'none' }}>
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: i < 1 ? 1 : 'none' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
             <div style={s.dot(i === step, i < step)} />
           </div>
-          {i < 2 && <div style={s.dotLine} />}
+          {i < 1 && <div style={s.dotLine} />}
         </div>
       ))}
     </div>
@@ -1244,8 +1245,14 @@ function StepNDA({ onNext, onBack, ndaMeta, setNdaMeta, ndaAccepted, setNdaAccep
   )
 }
 
-// ── Étape 3 — Qualification ───────────────────────────────────────────────────
+// ── Étape 2 — Qualification ───────────────────────────────────────────────────
 function StepQualification({ ndaMeta, ndaDate, onSuccess }) {
+  // Détection NDA institutionnel depuis localStorage
+  const ndaSigned = (() => {
+    try { return JSON.parse(localStorage.getItem('retbaa_nda_signed') || 'null') } catch { return null }
+  })()
+  const isInstitutional = ndaSigned?.profile_type === 'prospect_institutional'
+
   const initFirstName = () => ndaMeta.counterparty_type === 'personal' ? (ndaMeta.cp_first_name || '') : ''
   const initLastName  = () => ndaMeta.counterparty_type === 'personal' ? (ndaMeta.cp_last_name  || '') : ''
   const initEntityName= () => ndaMeta.counterparty_type === 'entity'   ? (ndaMeta.counterparty_name || '') : ''
@@ -1329,6 +1336,9 @@ function StepQualification({ ndaMeta, ndaDate, onSuccess }) {
           nda_signer_name: ndaMeta.counterparty_name || '',
           nda_meta:        ndaMeta,
           status:          'pending',
+          prospect_tier:   isInstitutional ? 'institutional' : 'standard',
+          institution_name: isInstitutional ? (ndaSigned?.institution_name || null) : null,
+          institution_type: isInstitutional ? (ndaSigned?.institution_type || null) : null,
         })
 
       if (insertErr) throw insertErr
@@ -1370,7 +1380,7 @@ function StepQualification({ ndaMeta, ndaDate, onSuccess }) {
 
   return (
     <form onSubmit={handleSubmit}>
-      <div style={s.stepLabel(true)}>Étape 3 — Qualification</div>
+      <div style={s.stepLabel(true)}>Étape 2 — Qualification</div>
       <div style={s.title}>Votre profil</div>
 
       <div style={s.grid2}>
@@ -1386,6 +1396,30 @@ function StepQualification({ ndaMeta, ndaDate, onSuccess }) {
 
       <label style={s.label}>Adresse e-mail *</label>
       <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="vous@exemple.com" required style={s.input} />
+
+      {/* Infos institutionnelles en lecture seule */}
+      {isInstitutional && ndaSigned?.institution_name && (
+        <div style={{
+          marginTop: '20px', padding: '14px 16px',
+          background: 'rgba(196,169,106,0.08)',
+          border: '1px solid rgba(196,169,106,0.3)',
+          borderRadius: '3px',
+        }}>
+          <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.25em', textTransform: 'uppercase', color: '#C4A96A', marginBottom: '10px' }}>
+            PROFIL INSTITUTIONNEL · NDA SIGNÉ
+          </div>
+          <div style={s.grid2}>
+            <div>
+              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#1A3A6B', marginBottom: '4px' }}>Institution</div>
+              <input type="text" value={ndaSigned.institution_name} readOnly style={s.inputReadonly} />
+            </div>
+            <div>
+              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#1A3A6B', marginBottom: '4px' }}>Type</div>
+              <input type="text" value={ndaSigned.institution_type || ''} readOnly style={s.inputReadonly} />
+            </div>
+          </div>
+        </div>
+      )}
 
       <label style={s.label}>Vous investissez *</label>
       <div style={s.radioGroup}>
@@ -1581,28 +1615,13 @@ export default function DataroomLanding() {
   const draft = loadDraft()
 
   const [step, setStep]               = useState(draft?.step ?? 0)
-  const [ndaMeta, setNdaMeta]         = useState(draft?.ndaMeta ?? {})
-  const [ndaAccepted, setNdaAccepted] = useState(draft?.ndaAccepted ?? false)
+  const [ndaMeta]                     = useState(draft?.ndaMeta ?? {})
   const [ndaDate]                     = useState(draft?.ndaDate ?? new Date().toISOString())
   const [sentTo, setSentTo]           = useState(null)
 
   // Sauvegarde auto à chaque changement d'état
   const saveProgress = (patch) => {
-    saveDraft({ step, ndaMeta, ndaAccepted, ndaDate, ...patch })
-  }
-
-  // L'étape NDA prend toute la page — on sort du layout card
-  if (step === 1) {
-    return (
-      <StepNDA
-        onNext={() => { saveProgress({ step: 2 }); setStep(2) }}
-        onBack={() => { saveProgress({ step: 0 }); setStep(0) }}
-        ndaMeta={ndaMeta}
-        setNdaMeta={(meta) => { setNdaMeta(meta); saveProgress({ ndaMeta: meta }) }}
-        ndaAccepted={ndaAccepted}
-        setNdaAccepted={(v) => { setNdaAccepted(v); saveProgress({ ndaAccepted: v }) }}
-      />
-    )
+    saveDraft({ step, ndaMeta, ndaDate, ...patch })
   }
 
   return (
@@ -1624,7 +1643,7 @@ export default function DataroomLanding() {
         </div>
       ) : step === 0 ? (
         <StepPresentation onNext={() => { saveProgress({ step: 1 }); setStep(1) }} />
-      ) : step === 2 ? (
+      ) : step === 1 ? (
         <div style={s.page}>
           <div style={s.card}>
             <div style={s.logo}>Retbaa Circle</div>
