@@ -18,7 +18,7 @@ export default function Footer() {
         </div>
 
         <div className="flex items-center gap-6">
-          {['legal', 'privacy', 'contact'].map(item => (
+          {['legal', 'contact'].map(item => (
             <a
               key={item}
               href="#"
@@ -28,6 +28,20 @@ export default function Footer() {
               {t(`footer.${item}`)}
             </a>
           ))}
+          <a
+            href="/privacy"
+            style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px', letterSpacing: '1px', fontFamily: 'DM Sans, sans-serif' }}
+            className="uppercase hover:text-white transition-colors"
+          >
+            {t('footer.privacy', 'Confidentialité')}
+          </a>
+          <a
+            href="/terms"
+            style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px', letterSpacing: '1px', fontFamily: 'DM Sans, sans-serif' }}
+            className="uppercase hover:text-white transition-colors"
+          >
+            {t('footer.terms', 'CGU')}
+          </a>
         </div>
 
         <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', fontFamily: 'DM Sans, sans-serif' }}>
