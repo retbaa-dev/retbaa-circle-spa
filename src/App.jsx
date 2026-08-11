@@ -16,6 +16,7 @@ import AppShell             from './components/AppShell'
 
 // ── Dataroom prospects (public) — lazy ─────────────────────────────────────
 const DataroomLanding       = lazy(() => import('./pages/dataroom/DataroomLanding'))
+const AboutPage             = lazy(() => import('./pages/AboutPage'))
 
 // ── Pages lourdes — lazy ────────────────────────────────────────────────────
 const Dashboard             = lazy(() => import('./pages/Dashboard'))
@@ -185,6 +186,11 @@ export default function App() {
         {/* Dataroom landing — public */}
         <Route path="/dataroom" element={
           <Suspense fallback={<PageLoader />}><DataroomLanding /></Suspense>
+        } />
+
+        {/* About — public */}
+        <Route path="/about" element={
+          <Suspense fallback={<PageLoader />}><AboutPage /></Suspense>
         } />
 
         {/* Dataroom access — redirige vers / (prospect géré par AuthGate) */}
