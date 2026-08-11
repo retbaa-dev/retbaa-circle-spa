@@ -58,11 +58,14 @@ export default function AboutPage() {
           </p>
 
           <p style={{ lineHeight: 1.9, fontSize: '16px', color: '#3D3D3D', marginBottom: '28px' }}>
-            Notre ambition n'est pas de reproduire les codes d'un luxe importé, mais d'inventer un langage propre — celui d'une Afrique contemporaine qui n'a pas à s'excuser de sa beauté. Chaque gamme Retbaa est pensée pour les femmes et les hommes qui habitent pleinement leur identité, entre Dakar et Paris, entre tradition et modernité.
+            Notre ambition n'est pas de reproduire les codes d'un luxe importé, mais d'inventer un langage propre — celui d'un Cultural Luxury qui n'a pas à s'excuser de sa profondeur. Chaque gamme Retbaa est pensée pour les femmes et les hommes qui habitent pleinement leur sensorialité, entre Dakar et Paris, entre rituel et modernité.
           </p>
 
           <p style={{ lineHeight: 1.9, fontSize: '16px', color: '#3D3D3D', marginBottom: 0 }}>
-            Retbaa Circle est le cercle intime de cette aventure : les investisseurs, partenaires et amis qui croient, avant l'heure, qu'une nouvelle maison de luxe africaine peut rayonner sur la scène mondiale. Ensemble, nous construisons quelque chose qui durera.
+            Retbaa Circle est le cercle intime de cette aventure : les investisseurs, partenaires et amis qui croient, avant l'heure, qu'une nouvelle maison de Cultural Luxury peut rayonner sur la scène mondiale. Ensemble, nous construisons quelque chose qui durera.
+          </p>
+          <p style={{ lineHeight: 1.9, fontSize: '15px', color: '#3D3D3D', marginBottom: 0, fontStyle: 'italic' }}>
+            Crafted in Paris. Rooted in cultural sensory heritage.
           </p>
         </div>
       </section>
@@ -136,11 +139,11 @@ export default function AboutPage() {
               </div>
 
               <p style={{ lineHeight: 1.9, fontSize: '15px', color: '#4A4A4A', marginBottom: '20px' }}>
-                Entrepreneur franco-sénégalais, Massata Niang a forgé sa vision du luxe entre Dakar et Paris — deux villes qui ont nourri son goût pour l'excellence artisanale et son attachement profond aux identités culturelles africaines. C'est au contact du Lac Rose, symbole fort de l'imaginaire sénégalais, qu'est née l'idée de Retbaa.
+                Entrepreneur franco-sénégalais, Massata Niang a forgé sa vision du luxe entre Dakar et Paris — deux villes qui ont nourri son goût pour l'excellence artisanale et son attachement profond aux héritages sensoriels. C'est au contact du Lac Rose, symbole fort de l'imaginaire sénégalais, qu'est née l'idée de Retbaa.
               </p>
 
               <p style={{ lineHeight: 1.9, fontSize: '15px', color: '#4A4A4A', marginBottom: 0 }}>
-                Convaincu que le prochain grand nom du luxe mondial émergera du continent africain, il a rassemblé autour de Retbaa une équipe et un cercle d'investisseurs partageant cette ambition. Son engagement : bâtir une maison authentique, durable, dont chaque produit raconte une histoire vraie.
+                Convaincu que le prochain grand nom du Cultural Luxury mondial émergera de la profondeur des héritages sensoriels, il a rassemblé autour de Retbaa une équipe et un cercle d'investisseurs partageant cette ambition. Son engagement : bâtir une maison authentique, durable, dont chaque produit raconte une histoire vraie.
               </p>
             </div>
           </div>

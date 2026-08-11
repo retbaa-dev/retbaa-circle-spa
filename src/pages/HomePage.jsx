@@ -48,7 +48,7 @@ const MANIFESTO = [
     num: 'VII',
     title: "Notre ambition n'est pas régionale.",
     subtitle: "Elle est fondatrice.",
-    body: `Retbaa n'est pas une maison africaine qui cherche à devenir internationale. Retbaa est une maison de luxe internationale dont l'Afrique constitue l'origine de vérité — comme la Provence pour un parfumeur, Kyoto pour un maître artisan ou Murano pour un verrier. Née au bord du Lac Rose, façonnée entre Dakar et Paris.`,
+    body: `Retbaa n'est pas une maison qui cherche à devenir internationale. Retbaa est une maison de Cultural Luxury internationale dont la profondeur sensorielle constitue l'origine de vérité — comme la Provence pour un parfumeur, Kyoto pour un maître artisan ou Murano pour un verrier. Née au bord du Lac Rose, façonnée entre Dakar et Paris.`,
   },
 ]
 
@@ -128,8 +128,11 @@ export default function HomePage() {
           Une maison de luxe<br />née au bord du Lac Rose.
         </h1>
         <p style={{ fontSize: '15px', lineHeight: 1.8, color: 'rgba(245,239,230,0.65)', maxWidth: '560px', margin: 0 }}>
-          Retbaa construit depuis Dakar et Paris une nouvelle grammaire du luxe culturel — 
-          ancrée dans les héritages africains, exigeante dans ses standards, fondatrice dans son ambition.
+          Retbaa construit depuis Dakar et Paris une nouvelle grammaire du Cultural Luxury — 
+          ancrée dans les héritages sensoriels, exigeante dans ses standards, fondatrice dans son ambition.
+        </p>
+        <p style={{ fontSize: '13px', lineHeight: 1.8, color: 'rgba(245,239,230,0.45)', maxWidth: '560px', margin: '16px 0 0', fontStyle: 'italic' }}>
+          Crafted in Paris. Rooted in cultural sensory heritage.
         </p>
       </div>
 

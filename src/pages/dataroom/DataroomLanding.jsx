@@ -289,13 +289,13 @@ function StepPresentation({ onNext }) {
       num: 'IV',
       title: "Nos objets ne représentent pas une culture.",
       subtitle: "Ils permettent de la vivre.",
-      body: `Nous croyons qu'un objet peut être beau et avoir quelque chose à dire. Qu'un parfum peut réveiller une mémoire. Qu'une saveur peut révéler un territoire. Chaque création Retbaa est un fragment de culture mis en mouvement : une rencontre entre héritage et création, artisanat et innovation, ancrage africain et exigence internationale.`,
+      body: `Nous croyons qu'un objet peut être beau et avoir quelque chose à dire. Qu'un parfum peut réveiller une mémoire. Qu'une saveur peut révéler un territoire. Chaque création Retbaa est un fragment de culture mis en mouvement : une rencontre entre héritage et création, artisanat et innovation, profondeur sensorielle et exigence internationale.`,
     },
     {
       num: 'V',
       title: "Notre ambition n'est pas régionale.",
       subtitle: "Elle est fondatrice.",
-      body: `Retbaa n'est pas une maison africaine qui cherche à devenir internationale. Retbaa est une maison de luxe internationale dont l'Afrique constitue l'origine de vérité — comme la Provence pour un parfumeur, Kyoto pour un maître artisan ou Murano pour un verrier. Née au bord du Lac Rose, façonnée entre Dakar et Paris.`,
+      body: `Retbaa n'est pas une maison qui cherche à devenir internationale. Retbaa est une maison de Cultural Luxury internationale dont la profondeur sensorielle constitue l'origine de vérité — comme la Provence pour un parfumeur, Kyoto pour un maître artisan ou Murano pour un verrier. Née au bord du Lac Rose, façonnée entre Dakar et Paris.`,
     },
   ]
 
@@ -380,7 +380,7 @@ function StepPresentation({ onNext }) {
           maxWidth: '520px', margin: '0 0 56px',
         }}>
           Retbaa ouvre son cercle à des partenaires qui partagent sa conviction :
-          les cultures africaines sont des forces contemporaines capables d'inventer
+          les héritages sensoriels sont des forces contemporaines capables d'inventer
           de nouvelles expressions du beau, du rare et du durable.
         </p>
 
@@ -558,7 +558,7 @@ function StepPresentation({ onNext }) {
             {[
               { label: 'Retbaa Holding', desc: 'Equity direct · 30 000 € = 1 %', detail: 'Entrer au capital de la Maison.' },
               { label: 'SPV Les Adresses', desc: 'Rendement patrimonial · TRI 13–15 %', detail: 'Co-investir dans les premières adresses physiques.' },
-              { label: 'Retbaa Manufacture', desc: 'Institutionnel · Horizon 7–10 ans', detail: 'Financer la filière industrielle africaine.' },
+              { label: 'Retbaa Manufacture', desc: 'Institutionnel · Horizon 7–10 ans', detail: 'Financer la filière industrielle du craft.' },
             ].map(c => (
               <div key={c.label} style={{
                 padding: '28px 24px',
@@ -1421,7 +1421,7 @@ function StepQualification({ ndaMeta, ndaDate, onSuccess }) {
             <span style={s.badge}>Institutionnel</span>
           </div>
           <p style={{ margin: 0, fontSize: '12px', color: '#6B7280', lineHeight: '1.5', paddingLeft: '22px' }}>
-            Financement de la filière industrielle Retbaa : production intégrée, sourcing des matières premières africaines, académie des métiers du luxe. Horizon 7–10 ans. Réservé aux investisseurs institutionnels (DFI, family offices, fonds de développement). Un accès preview est disponible — l'accès complet est soumis à validation.
+            Financement de la filière industrielle Retbaa : production intégrée, sourcing des matières premières de craft, académie des métiers du luxe. Horizon 7–10 ans. Réservé aux investisseurs institutionnels (DFI, family offices, fonds de développement). Un accès preview est disponible — l'accès complet est soumis à validation.
           </p>
         </label>
       </div>
