@@ -6,6 +6,8 @@ import './i18n/index.js'
 import './index.css'
 
 // ── Pages légères — import direct ───────────────────────────────────────────
+import PrivacyPage          from './pages/PrivacyPage'
+import TermsPage            from './pages/TermsPage'
 import InvitePage           from './pages/InvitePage'
 import PendingPage          from './pages/PendingPage'
 import AdminPage            from './pages/AdminPage'
@@ -189,6 +191,10 @@ export default function App() {
 
         {/* Dataroom access — redirige vers / (prospect géré par AuthGate) */}
         <Route path="/dataroom/access" element={<Navigate to="/" replace />} />
+
+        {/* Pages légales — publiques, avant AuthGate */}
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms"   element={<TermsPage />} />
 
         {/* Invitation investisseur */}
         <Route path="/invite/:token" element={<InvitePage />} />
