@@ -2,6 +2,7 @@
 // Portail public prospects — Stepper 3 étapes : Présentation → NDA (pleine page) → Qualification
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
+import RendementCalculator from '../../components/RendementCalculator'
 
 // ── Styles partagés ───────────────────────────────────────────────────────────
 const s = {
@@ -604,6 +605,41 @@ function StepPresentation({ onNext }) {
           <div style={{ fontSize: '11px', color: '#9CA3AF', letterSpacing: '0.05em' }}>
             Signature NDA · Qualification · Accès personnalisé
           </div>
+        </div>
+      </div>
+
+      {/* ── Calculateur de rendement (section prospect) ── */}
+      <div style={{
+        background: '#FAF7F2',
+        padding: '100px 24px',
+        borderTop: '1px solid rgba(239,192,212,0.2)',
+      }}>
+        <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+            <div style={{
+              fontSize: '9px', letterSpacing: '0.4em', textTransform: 'uppercase',
+              color: '#EFC0D4', fontWeight: 700, marginBottom: '20px',
+              fontFamily: 'system-ui, sans-serif',
+            }}>
+              SIMULATEUR
+            </div>
+            <h2 style={{
+              fontFamily: 'Georgia, serif', fontSize: 'clamp(28px, 4vw, 40px)',
+              fontWeight: 300, fontStyle: 'italic',
+              color: '#1A3A6B', margin: '0 0 16px', lineHeight: 1.2,
+            }}>
+              Estimez votre rendement potentiel
+            </h2>
+            <p style={{
+              fontFamily: 'system-ui, sans-serif', fontSize: '14px',
+              lineHeight: 1.8, color: '#6B7280',
+              maxWidth: '480px', margin: '0 auto',
+            }}>
+              Retbaa Holding (equity) ou SPV Les Adresses (rendement patrimonial) —
+              simulez votre investissement avant d'accéder à la dataroom.
+            </p>
+          </div>
+          <RendementCalculator />
         </div>
       </div>
 
