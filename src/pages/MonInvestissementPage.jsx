@@ -1,5 +1,8 @@
 // MonInvestissementPage.jsx — Retbaa Circle — Design Stitch fidèle
 import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import SPVDashboard from '../components/SPVDashboard'
+import HoldingDashboard from '../components/HoldingDashboard'
 const INVESTOR_DATA = {
   'Massata':     { amount: 1000,   pct: 86.96, shares: 100000, sharesRange: '1 à 100 000',         entry: 'Fév. 2026', id: 'RC-0001', role: 'founder',  label: 'Apport fondateur' },
   'Barthélemy':  { amount: 150000, pct: 5.43,  shares: 6250,   sharesRange: '100 001 à 106 250',   entry: 'Fév. 2026', id: 'RC-9921', role: 'investor', label: 'Tranche 1' },
@@ -51,8 +54,16 @@ function DonutChart({ pct, color }) {
   )
 }
 
-export default function MonInvestissementPage({ userName, isAssistant = false }) {
+export default function MonInvestissementPage({ userName, isAssistant = false, profile = null }) {
   const navigate = useNavigate()
+  const [activeTab, setActiveTab] = useState('holding')
+
+  // Logique investment_type
+  const investmentType = profile?.investment_type ?? null // 'spv' | 'holding' | 'both' | null
+  const showSPV     = investmentType === 'spv' || investmentType === 'both' || investmentType === null
+  const showHolding = investmentType === 'holding' || investmentType === 'both' || investmentType === null
+  const showTabs    = investmentType === 'both' || investmentType === null
+
   // Match par prénom ou nom complet (ex: "Massata Niang" → "Massata")
   const shortName = userName ? Object.keys(INVESTOR_DATA).find(k => userName.startsWith(k) || userName.includes(k)) : null
   const data = INVESTOR_DATA[shortName] || INVESTOR_DATA[userName] || (isAssistant ? null : Object.values(INVESTOR_DATA)[0])
@@ -119,6 +130,58 @@ export default function MonInvestissementPage({ userName, isAssistant = false })
             </div>
           )}
         </div>
+
+        {/* ── Dashboards différenciés SPV / Holding ── */}
+        {showTabs ? (
+          <div style={{ marginBottom: '48px' }}>
+            {/* Tabs */}
+            <div style={{
+              display: 'flex', gap: '0', marginBottom: '32px',
+              borderBottom: '2px solid rgba(239,192,212,0.2)',
+            }}>
+              {showHolding && (
+                <button
+                  onClick={() => setActiveTab('holding')}
+                  style={{
+                    padding: '12px 28px',
+                    fontFamily: 'Manrope, sans-serif', fontSize: '10px',
+                    fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase',
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: activeTab === 'holding' ? '#1A3A6B' : '#9CA3AF',
+                    borderBottom: activeTab === 'holding' ? '2px solid #1A3A6B' : '2px solid transparent',
+                    marginBottom: '-2px', transition: 'color 0.2s',
+                  }}
+                >
+                  Retbaa Holding
+                </button>
+              )}
+              {showSPV && (
+                <button
+                  onClick={() => setActiveTab('spv')}
+                  style={{
+                    padding: '12px 28px',
+                    fontFamily: 'Manrope, sans-serif', fontSize: '10px',
+                    fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase',
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: activeTab === 'spv' ? '#065F46' : '#9CA3AF',
+                    borderBottom: activeTab === 'spv' ? '2px solid #065F46' : '2px solid transparent',
+                    marginBottom: '-2px', transition: 'color 0.2s',
+                  }}
+                >
+                  SPV Les Adresses
+                </button>
+              )}
+            </div>
+            {/* Contenu tab actif */}
+            {activeTab === 'holding' && showHolding && <HoldingDashboard />}
+            {activeTab === 'spv' && showSPV && <SPVDashboard />}
+          </div>
+        ) : (
+          <div style={{ marginBottom: '48px' }}>
+            {showHolding && !showSPV && <HoldingDashboard />}
+            {showSPV && !showHolding && <SPVDashboard />}
+          </div>
+        )}
 
         {/* ── KPI cards — montant et % masqués pour les assistants ── */}
         <div style={{ display: 'grid', gridTemplateColumns: `repeat(${isAssistant ? 2 : 4}, 1fr)`, gap: '16px', marginBottom: '40px' }}>
