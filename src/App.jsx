@@ -289,6 +289,10 @@ function AuthGate() {
   const isAssistant = role === 'assistant'
   const isObservateur = !!sessionStorage.getItem('retbaa_prospect')
 
+  // Fondateur : massata@retbaa.com a toujours accès complet (TEST MODE permanent pour ce compte)
+  const isFounderEmail = user?.email === 'massata@retbaa.com'
+  const isFullAccess = isFounderEmail || isAdmin || !!previewUser
+
   const userName = previewUser
     || profile?.full_name
     || user?.email?.split('@')[0]
@@ -328,7 +332,13 @@ function AuthGate() {
           <Route path="/investissement"      element={<MonInvestissementPage userName={effectiveName} isAssistant={isAssistant} />} />
           <Route path="/tranche2"            element={<Tranche2Page userName={effectiveName} />} />
           <Route path="/podcast"             element={<PodcastPage userName={effectiveName} />} />
-          <Route path="/dataroom-docs"       element={<DataroomDocsPage isProspect={isProspect} />} />
+          <Route path="/dataroom-docs" element={
+            <DataroomDocsPage
+              isProspect={isProspect}
+              isApproved={isFullAccess || prospectStatus === 'approved'}
+              isAuthenticated={isSignedIn || !!previewUser}
+            />
+          } />
           <Route path="/mon-espace"          element={<ProspectDashboard />} />
           <Route path="/inner-circle"        element={
             isAssistant
