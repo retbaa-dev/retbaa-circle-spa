@@ -2,9 +2,11 @@
 // Page d'accueil publique — manifesto + deux chemins (prospect / investisseur)
 // Réutilise StepPresentation depuis DataroomLanding sans le stepper
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import NDAModal from '../components/NDAModal'
+import { useAuth } from '../hooks/useAuth'
+import { supabase } from '../lib/supabase'
 
 // ── Manifesto data ──────────────────────────────────────────────────────────
 const MANIFESTO = [
@@ -64,8 +66,28 @@ const REFUS = [
 // ── Composant principal ─────────────────────────────────────────────────────
 export default function HomePage() {
   const navigate = useNavigate()
+  const { user, isLoaded, isSignedIn } = useAuth()
   const [hoveredCta, setHoveredCta] = useState(null)
   const [ndaModal, setNdaModal] = useState(null) // { profileType, destination }
+
+  // Redirection si déjà connecté
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn || !user?.email) return
+    // Vérifier si prospect
+    supabase
+      .from('dataroom_prospects')
+      .select('id')
+      .eq('email', user.email)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          navigate('/mon-espace', { replace: true })
+        } else {
+          // Investisseur → AuthGate gère le dashboard via /*
+          navigate('/investissement', { replace: true })
+        }
+      })
+  }, [isLoaded, isSignedIn, user?.email])
 
   const handleNdaSigned = (ndaData) => {
     const dest = ndaModal?.destination
