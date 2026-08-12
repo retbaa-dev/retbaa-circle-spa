@@ -2,6 +2,7 @@
 import { Fragment, useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
+import AdminPartnersView from '../components/AdminPartnersView'
 
 // ── Helpers NDA meta ──────────────────────────────────────────────────────────
 const JURISDICTION_LABEL = {
@@ -1013,6 +1014,7 @@ export default function AdminPage() {
         <button style={tabStyle('prospects')} onClick={() => setActiveTab('prospects')}>Prospects</button>
         <button style={tabStyle('invites')}   onClick={() => setActiveTab('invites')}>Invitations</button>
         <button style={tabStyle('doc_views')} onClick={() => setActiveTab('doc_views')}>Vues docs</button>
+        <button style={tabStyle('partners')}  onClick={() => setActiveTab('partners')}>Pipeline Partenaires</button>
       </div>
 
       {actionMsg && (
@@ -1058,6 +1060,9 @@ export default function AdminPage() {
 
       {/* ── Tab: Vues docs ── */}
       {activeTab === 'doc_views' && <DocViewsTab />}
+
+      {/* ── Tab: Pipeline Partenaires ── */}
+      {activeTab === 'partners' && <AdminPartnersView />}
 
       {/* ── Tab: Invitations ── */}
       {activeTab === 'invites' && (
