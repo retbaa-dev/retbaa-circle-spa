@@ -67,6 +67,19 @@ const PROFILES = {
     featuredDocs: ["Pitch Deck", "Étude de marché", "Retbaa Manufacture"],
     cta: "Accéder au dossier ICC",
   },
+  export_agency: {
+    headline: "Retbaa — Ambassadeur de l'excellence française à l'international",
+    pitch: "Business France accompagne les PME françaises dans leur développement export. Retbaa incarne parfaitement cette mission : une maison fondée à Paris, primée aux Pentawards, qui construit simultanément une filière industrielle en Afrique et un pipeline commercial au Sénégal, en Europe et dans le Golfe.",
+    angle: "Export · Labellisation · Réseau international",
+    metrics: [
+      { label: "Marchés actifs", value: "3", sub: "France · Sénégal · Golfe" },
+      { label: "Pentawards 2024", value: "2 Gold", sub: "Seule entreprise africaine" },
+      { label: "Pipeline export", value: "€300K", sub: "CA 2026 cible" },
+      { label: "Partenaire actif", value: "Business France", sub: "Référence existante" },
+    ],
+    featuredDocs: ["Pitch Deck", "Note stratégique", "Étude de marché"],
+    cta: "Voir le dossier export",
+  },
   bank: {
     headline: "Retbaa — Partenaire distribution clientèle premium",
     pitch: "Retbaa est présent dans les meilleurs hôtels et lounges d'Afrique de l'Ouest (Terrou-Bi, Sokhamoné, Ecobank). Notre réseau B2B est un canal de distribution naturel pour une offre bancaire premium.",
