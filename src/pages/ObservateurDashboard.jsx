@@ -329,7 +329,7 @@ export default function ObservateurDashboard() {
             {[
               { icon: 'diamond', title: 'Luxe sensoriel', body: 'Olfaction, céramique, expérience multisensorielle. Un territoire que les grandes maisons n\'ont pas encore colonisé.' },
               { icon: 'public', title: 'Positionnement global', body: 'Paris pour l\'excellence. L\'Afrique pour l\'authenticité. Le monde entier comme terrain de jeu.' },
-              { icon: 'trending_up', title: 'Momentum', body: 'CA €191K en 2025. Target €500K 2026 → €1M 2027. Pipeline B2B de €800K déjà identifié.' },
+              { icon: 'trending_up', title: 'Momentum', body: 'CA €191K en 2025. Target €300K 2026 → €1M 2027. Pipeline B2B de €800K déjà identifié.' },
             ].map((item, i) => (
               <div key={i} style={{
                 borderTop: '1px solid rgba(239,192,212,0.15)',
