@@ -15,7 +15,15 @@ const CATEGORY_META = {
 }
 
 function PdfViewer({ doc, onClose }) {
-  const url = doc.file_url || doc.url
+  // pdf_path peut être : URL absolue, chemin /docs/dataroom/... (public), ou null
+  const resolveUrl = (doc) => {
+    const raw = doc.pdf_path || doc.file_url || doc.url
+    if (!raw) return null
+    if (raw.startsWith('http')) return raw
+    // Chemin relatif → fichier dans /public du repo (servi par Vercel)
+    return raw.startsWith('/') ? raw : `/${raw}`
+  }
+  const url = resolveUrl(doc)
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 1000,
@@ -334,7 +342,7 @@ export default function DataroomDocsPage({ isProspect }) {
       .select('*')
       .order('sort_order', { ascending: true })
       .then(({ data, error }) => {
-        if (!error && data) setDocs(data)
+        if (!error && data) setDocs(sanitizeDocs(data))
         setLoading(false)
       })
   }, [])
@@ -350,6 +358,15 @@ export default function DataroomDocsPage({ isProspect }) {
   }, [isProspect, user?.email])
 
   const isApproved = prospectStatus === 'approved'
+
+  // Fuite métadonnées : masquer titres/résumés Tier 3 si non-investisseur confirmé
+  const isFounder = user?.email === 'massata@retbaa.com'
+  const sanitizeDocs = (rawDocs) => rawDocs.map(d => {
+    if (d.doc_tier === 3 && !isFounder && isProspect) {
+      return { ...d, title: '— Document confidentiel —', summary: 'Accessible aux investisseurs confirmés uniquement.' }
+    }
+    return d
+  })
 
   // Grouper par catégorie (hors Investissement, traité séparément)
   const grouped = CATEGORY_ORDER.reduce((acc, cat) => {
