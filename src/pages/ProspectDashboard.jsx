@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import ProspectTimeline from '../components/ProspectTimeline'
 import ProspectFAQ from '../components/ProspectFAQ'
+import InstitutionalDashboard from '../components/InstitutionalDashboard'
 
 // CSS keyframes pour le pulse rose
 const pulseStyle = `
@@ -141,6 +142,13 @@ export default function ProspectDashboard() {
 
   const isApproved = prospectStatus === 'approved'
 
+  // Récupérer institution_type depuis sessionStorage
+  const prospectSession = (() => {
+    try { return JSON.parse(sessionStorage.getItem('retbaa_prospect') || 'null') } catch { return null }
+  })()
+  const institutionType = prospectSession?.institution_type ?? null
+  const isInstitutional = prospectSession?.prospect_tier === 'institutional' && !!institutionType
+
   const steps = [
     {
       icon: '✅',
@@ -205,6 +213,11 @@ export default function ProspectDashboard() {
             {/* Badge statut */}
             {statusLoaded && <StatusBadge status={prospectStatus} />}
           </div>
+
+          {/* Dashboard institutionnel personnalisé */}
+          {isInstitutional && (
+            <InstitutionalDashboard institutionType={institutionType} />
+          )}
 
           {/* Message félicitations si approved */}
           {isApproved && (
