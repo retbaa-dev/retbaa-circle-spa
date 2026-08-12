@@ -20,6 +20,7 @@ import AppShell             from './components/AppShell'
 const DataroomLanding       = lazy(() => import('./pages/dataroom/DataroomLanding'))
 const ContactPage           = lazy(() => import('./pages/ContactPage'))
 const AboutPage             = lazy(() => import('./pages/AboutPage'))
+const HomePage              = lazy(() => import('./pages/HomePage'))
 
 // ── Pages lourdes — lazy ────────────────────────────────────────────────────
 const Dashboard             = lazy(() => import('./pages/Dashboard'))
@@ -192,6 +193,11 @@ export default function App() {
         {/* Dataroom landing — public */}
         <Route path="/dataroom" element={
           <Suspense fallback={<PageLoader />}><DataroomLanding /></Suspense>
+        } />
+
+        {/* Home — public (manifesto + choix Prospect/Investisseur) */}
+        <Route path="/" element={
+          <Suspense fallback={<PageLoader />}><HomePage /></Suspense>
         } />
 
         {/* Contact — public */}
