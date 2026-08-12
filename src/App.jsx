@@ -37,6 +37,7 @@ const ArticlePage           = lazy(() => import('./pages/ArticlePage'))
 const DataroomDocsPage          = lazy(() => import('./pages/DataroomDocsPage'))
 const ProspectDashboard         = lazy(() => import('./pages/ProspectDashboard'))
 const FinancialProjectionsPage  = lazy(() => import('./pages/FinancialProjectionsPage'))
+const PartnerSpacePage          = lazy(() => import('./pages/PartnerSpacePage'))
 
 // ── Splash screen animé ─────────────────────────────────────────────────────
 function SplashScreen({ message = 'Retbaa Circle' }) {
@@ -359,6 +360,7 @@ function AuthGate() {
           } />
           <Route path="/mon-espace"          element={<ProspectDashboard />} />
           <Route path="/projections"         element={<FinancialProjectionsPage />} />
+          <Route path="/partner"             element={<PartnerSpacePage />} />
           <Route path="/inner-circle"        element={
             isAssistant
               ? <RestrictedPage />

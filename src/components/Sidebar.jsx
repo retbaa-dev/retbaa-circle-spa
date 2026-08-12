@@ -161,6 +161,7 @@ export default function Sidebar({ activePath, onNavigate, userName, onLogout, ob
         { path: '/inner-circle', icon: 'diamond', label: 'Inner Circle' },
         ...baseItems.slice(5),
         ...(isAdmin ? [{ path: '/analytics', icon: 'bar_chart', label: 'Analytics' }] : []),
+        ...(isAdmin ? [{ path: '/partner',   icon: 'handshake', label: 'Partenaires' }] : []),
       ]
 
   // Un item est actif si le path correspond exactement, ou commence par le path (pour sous-routes /insights/:slug)
