@@ -139,6 +139,7 @@ export default function Sidebar({ activePath, onNavigate, userName, onLogout, ob
     { path: '/produits',       icon: 'category',        label: 'Produits'           },
     { path: '/documents',      icon: 'description',     label: 'Documents'          },
     { path: '/dataroom-docs',  icon: 'folder_open',     label: 'Dataroom'           },
+    { path: '/manufacture',    icon: 'factory',         label: 'Manufacture'        },
     { path: '/tranche2',       icon: 'trending_up',     label: 'Tranche 2'          },
     { path: '/podcast',        icon: 'mic',             label: 'Podcast'            },
     { path: '/investissement', icon: 'person',          label: 'Mon Investissement' },
@@ -151,6 +152,7 @@ export default function Sidebar({ activePath, onNavigate, userName, onLogout, ob
         { path: '/podcast',       icon: 'mic',             label: 'Podcast'   },
         { path: '/produits',      icon: 'category',        label: 'Produits'  },
         { path: '/dataroom-docs', icon: 'folder_open',     label: 'Dataroom'  },
+        { path: '/manufacture',   icon: 'factory',         label: 'Manufacture' },
       ]
     : observateur
     ? baseItems.filter(i => i.path !== '/investissement')

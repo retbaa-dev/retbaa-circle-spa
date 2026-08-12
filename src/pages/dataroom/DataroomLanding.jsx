@@ -558,7 +558,7 @@ function StepPresentation({ onNext }) {
             {[
               { label: 'Retbaa Holding', desc: 'Equity direct · 30 000 € = 1 %', detail: 'Entrer au capital de la Maison.' },
               { label: 'SPV Les Adresses', desc: 'Rendement patrimonial · TRI 13–15 %', detail: 'Co-investir dans les premières adresses physiques.' },
-              { label: 'Retbaa Manufacture', desc: 'Institutionnel · Horizon 7–10 ans', detail: 'Financer la filière industrielle du craft.' },
+              { label: 'Retbaa Manufacture', desc: 'Filière industrielle · Phase 1 €880K', detail: 'Financer l\'infrastructure de production du Cultural Luxury sénégalais. Double marché : production propre Retbaa + marque blanche pour maisons européennes. Demande captive garantie dès le premier jour.', link: '/manufacture' },
             ].map(c => (
               <div key={c.label} style={{
                 padding: '28px 24px',
@@ -580,6 +580,14 @@ function StepPresentation({ onNext }) {
                 <div style={{ fontSize: '13px', color: '#6B7280', lineHeight: 1.6 }}>
                   {c.detail}
                 </div>
+                {c.link && (
+                  <div
+                    onClick={() => window.location.href = c.link}
+                    style={{ marginTop: '12px', fontSize: '12px', color: '#1A3A6B', cursor: 'pointer', fontWeight: 600, letterSpacing: '0.03em' }}
+                  >
+                    En savoir plus →
+                  </div>
+                )}
               </div>
             ))}
           </div>
