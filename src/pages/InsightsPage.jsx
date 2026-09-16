@@ -159,6 +159,83 @@ const normalizeInsightCategory = (value) => {
   return raw
 }
 
+
+const CATEGORY_COVER = {
+  'Signal Marché': { bg: '#0D1F3C', accent: '#EFC0D4', label: 'SIGNAL' },
+  'Veille Marché': { bg: '#102B52', accent: '#C8A46A', label: 'VEILLE' },
+  'Marché Luxe': { bg: '#F4EFE7', accent: '#1A3A6B', label: 'LUXE' },
+  'Stratégie': { bg: '#1A3A6B', accent: '#EFC0D4', label: 'STRATÉGIE' },
+  'Géopolitique': { bg: '#27364A', accent: '#D8B66A', label: 'GÉO' },
+  'Tech & IA': { bg: '#111827', accent: '#9BC7D4', label: 'TECH' },
+  'Distribution': { bg: '#795465', accent: '#F4EFE7', label: 'RETAIL' },
+  'Afrique': { bg: '#5A3825', accent: '#EFC0D4', label: 'AFRIQUE' },
+  'Vision': { bg: '#FAF7F2', accent: '#1A3A6B', label: 'VISION' },
+}
+
+function EditorialCover({ article, variant = 'card', hovered = false }) {
+  const img = editorialImage(article.img)
+  const meta = CATEGORY_COVER[article.category] || CATEGORY_COVER[article.tag] || { bg: '#FAF7F2', accent: '#1A3A6B', label: 'RETBAA' }
+  const isFeatured = variant === 'featured'
+
+  if (img) {
+    return (
+      <>
+        <img
+          src={img}
+          alt={article.title}
+          style={{
+            width: '100%', height: '100%', objectFit: 'cover',
+            transition: 'transform 1.2s ease',
+            transform: hovered ? 'scale(1.04)' : 'scale(1)',
+            position: 'absolute', inset: 0,
+          }}
+        />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(26,58,107,0.18) 0%, transparent 65%)' }} />
+      </>
+    )
+  }
+
+  return (
+    <div style={{
+      position: 'absolute', inset: 0,
+      background: `
+        radial-gradient(circle at 18% 18%, ${meta.accent}24 0, transparent 28%),
+        linear-gradient(135deg, ${meta.bg} 0%, ${meta.bg} 56%, #FAF7F2 180%)
+      `,
+      overflow: 'hidden',
+    }}>
+      <div style={{ position: 'absolute', inset: '18px', border: `1px solid ${meta.accent}55` }} />
+      <div style={{ position: 'absolute', top: '26px', left: '28px', right: '28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontFamily: 'Manrope, sans-serif', fontSize: isFeatured ? '10px' : '8px', letterSpacing: '0.28em', color: meta.accent, fontWeight: 800 }}>
+          RETBAA CIRCLE
+        </span>
+        <span style={{ width: '32px', height: '1px', background: meta.accent, opacity: 0.8 }} />
+      </div>
+      <div style={{
+        position: 'absolute', left: '28px', right: '28px', bottom: isFeatured ? '34px' : '26px',
+        fontFamily: 'Newsreader, serif', fontStyle: 'italic', fontWeight: 300,
+        color: meta.accent, fontSize: isFeatured ? '48px' : '30px', lineHeight: 0.95,
+        opacity: 0.95,
+      }}>
+        {meta.label}
+      </div>
+      <div style={{
+        position: 'absolute', right: isFeatured ? '-28px' : '-18px', bottom: isFeatured ? '-54px' : '-34px',
+        fontFamily: 'Newsreader, serif', fontSize: isFeatured ? '190px' : '116px',
+        color: meta.accent, opacity: 0.08, fontStyle: 'italic', lineHeight: 1,
+      }}>
+        R
+      </div>
+      <div style={{
+        position: 'absolute', inset: 0,
+        backgroundImage: 'linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px)',
+        backgroundSize: '18px 18px',
+        mixBlendMode: 'screen', opacity: 0.45,
+      }} />
+    </div>
+  )
+}
+
 // ─── ARTICLE FEATURED (pleine largeur) ───────────────────────
 function FeaturedArticle({ article, onOpen }) {
   const [hovered, setHovered] = useState(false)
@@ -179,20 +256,7 @@ function FeaturedArticle({ article, onOpen }) {
     >
       {/* Image gauche */}
       <div className="featured-article-image" style={{ overflow: 'hidden', position: 'relative', minHeight: '420px' }}>
-        <img
-          src={article.img}
-          alt={article.title}
-          style={{
-            width: '100%', height: '100%', objectFit: 'cover',
-            transition: 'transform 1.2s ease',
-            transform: hovered ? 'scale(1.04)' : 'scale(1)',
-            position: 'absolute', inset: 0,
-          }}
-        />
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(to right, rgba(26,58,107,0.15) 0%, transparent 60%)',
-        }} />
+        <EditorialCover article={article} variant="featured" hovered={hovered} />
         {/* Tag sur l'image */}
         <div style={{
           position: 'absolute', top: '24px', left: '24px',
@@ -335,15 +399,7 @@ function ArticleCard({ article, onOpen }) {
     >
       {/* Image */}
       <div style={{ overflow: 'hidden', height: '200px', position: 'relative', flexShrink: 0 }}>
-        <img
-          src={article.img}
-          alt={article.title}
-          style={{
-            width: '100%', height: '100%', objectFit: 'cover',
-            transition: 'transform 1s ease',
-            transform: hovered ? 'scale(1.06)' : 'scale(1)',
-          }}
-        />
+        <EditorialCover article={article} hovered={hovered} />
         <div style={{
           position: 'absolute', bottom: 0, left: 0, right: 0,
           height: '4px', background: '#EFC0D4',
