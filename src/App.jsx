@@ -209,6 +209,17 @@ export default function App() {
           <Suspense fallback={<PageLoader />}><AboutPage /></Suspense>
         } />
 
+        {/* Insights & podcast — publics */}
+        <Route path="/insights" element={
+          <Suspense fallback={<PageLoader />}><InsightsPage /></Suspense>
+        } />
+        <Route path="/insights/:slug" element={
+          <Suspense fallback={<PageLoader />}><ArticlePage /></Suspense>
+        } />
+        <Route path="/podcast" element={
+          <Suspense fallback={<PageLoader />}><PodcastPage /></Suspense>
+        } />
+
         {/* Dataroom access — redirige vers / (prospect géré par AuthGate) */}
         <Route path="/dataroom/access" element={<Navigate to="/" replace />} />
 
@@ -351,13 +362,10 @@ function AuthGate() {
               ? <ObservateurDashboard />
               : <Dashboard userName={effectiveName} isAssistant={isAssistant} />
           } />
-          <Route path="/insights"            element={<InsightsPage />} />
-          <Route path="/insights/:slug"      element={<ArticlePage />} />
           <Route path="/produits"            element={<CataloguePage userName={userName} />} />
           <Route path="/documents"           element={<DocumentsPage userName={effectiveName} isAssistant={isAssistant} />} />
           <Route path="/investissement"      element={<MonInvestissementPage userName={effectiveName} isAssistant={isAssistant} />} />
           <Route path="/tranche2"            element={<Tranche2Page userName={effectiveName} />} />
-          <Route path="/podcast"             element={<PodcastPage userName={effectiveName} />} />
           <Route path="/dataroom-docs" element={
             <DataroomDocsPage
               isProspect={isProspect}
