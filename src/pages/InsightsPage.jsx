@@ -2,6 +2,7 @@
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import InvestorActions from '../components/InvestorActions'
 
 
 const isLikelyGeneratedImage = (src) => {
@@ -732,6 +733,8 @@ export default function InsightsPage() {
         {!loading && featuredArticle && filteredArticles.length > 0 && (
           <FeaturedArticle article={featuredArticle} onOpen={() => setSelectedArticle(featuredArticle)} />
         )}
+
+        {!loading && <InvestorActions />}
 
         {/* Titre section grille */}
         {gridArticles.length > 0 && (

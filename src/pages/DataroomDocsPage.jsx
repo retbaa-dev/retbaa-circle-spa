@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import DataroomFAQ from '../components/DataroomFAQ'
+import InvestorActions from '../components/InvestorActions'
+import KemiaAdvisorPanel from '../components/KemiaAdvisorPanel'
 
 // Icônes et couleurs par catégorie
 const CATEGORY_META = {
@@ -498,6 +500,8 @@ export default function DataroomDocsPage({ isProspect }) {
           ) : (
             <>
               <DecisionJourney />
+              <KemiaAdvisorPanel access={user?.email === 'massata@retbaa.com' ? 'Fondateur' : isApproved ? 'Approuvé' : isProspect ? 'NDA signé' : 'Public'} />
+              <InvestorActions compact />
 
               {/* Section Investissement — 3 véhicules en cards */}
               <InvestissementSection
