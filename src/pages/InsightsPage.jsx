@@ -120,7 +120,26 @@ const FALLBACK_ARTICLES = [
 ]
 
 
-const FILTERS = ['Tout', 'Vision', 'Veille Marché', 'Afrique', 'Marché Luxe', 'Stratégie', 'Géopolitique', 'Tech & IA', 'Distribution']
+const FILTERS = ['Tout', 'Vision', 'Signal Marché', 'Veille Marché', 'Afrique', 'Marché Luxe', 'Stratégie', 'Géopolitique', 'Tech & IA', 'Distribution']
+
+
+const normalizeInsightCategory = (value) => {
+  const raw = String(value || '').trim()
+  if (!raw || raw === 'Article') return 'Veille Marché'
+
+  const lower = raw.toLowerCase()
+  if (lower.includes('signal')) return 'Signal Marché'
+  if (lower.includes('veille')) return 'Veille Marché'
+  if (lower.includes('afrique')) return 'Afrique'
+  if (lower.includes('luxe') || lower.includes('marché')) return 'Marché Luxe'
+  if (lower.includes('stratég') || lower.includes('strateg')) return 'Stratégie'
+  if (lower.includes('géopolit') || lower.includes('geopolit') || lower.includes('gcc')) return 'Géopolitique'
+  if (lower.includes('tech') || lower.includes('ia')) return 'Tech & IA'
+  if (lower.includes('distribution') || lower.includes('retail')) return 'Distribution'
+  if (lower.includes('vision')) return 'Vision'
+
+  return raw
+}
 
 // ─── ARTICLE FEATURED (pleine largeur) ───────────────────────
 function FeaturedArticle({ article, onOpen }) {
@@ -427,7 +446,7 @@ export default function InsightsPage() {
               summary: a.content_short || '',
               img: a.img || null,
               content_md: a.content_long || '',
-              category: (Array.isArray(a.tags) && a.tags[0]) || a.content_type || 'Veille Marché',
+              category: normalizeInsightCategory((Array.isArray(a.tags) && a.tags[0]) || a.content_type),
               featured: !!a.featured,
             }))
             setArticles(mapped)
