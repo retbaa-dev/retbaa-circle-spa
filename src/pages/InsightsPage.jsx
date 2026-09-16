@@ -64,6 +64,9 @@ function renderMarkdown(text) {
 
 // Modal article complet
 function ArticleModal({ article, onClose }) {
+  const [imageFailed, setImageFailed] = useState(false)
+  const modalImage = imageFailed ? null : editorialImage(article.img)
+
   useEffect(() => {
     document.body.style.overflow = 'hidden'
     const handler = (e) => { if (e.key === 'Escape') onClose() }
@@ -75,9 +78,9 @@ function ArticleModal({ article, onClose }) {
     <div className="article-modal-wrapper" onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,40,0.7)', zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '40px 16px', overflowY: 'auto' }}>
       <div className="article-modal-inner" onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: '6px', maxWidth: '720px', width: '100%', overflow: 'hidden', boxShadow: '0 40px 80px rgba(0,0,0,0.3)' }}>
         {/* Image header */}
-        {editorialImage(article.img) && (
+        {modalImage && (
           <div style={{ position: 'relative', height: '240px', overflow: 'hidden' }}>
-            <img src={editorialImage(article.img)} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={modalImage} alt={article.title} onError={() => setImageFailed(true)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(26,58,107,0.85))' }} />
             <button onClick={onClose} style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%', width: '36px', height: '36px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', backdropFilter: 'blur(4px)' }}>
               <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
@@ -90,7 +93,7 @@ function ArticleModal({ article, onClose }) {
         )}
         {/* Contenu */}
         <div style={{ padding: '28px 32px 40px' }}>
-          {!editorialImage(article.img) && (
+          {!modalImage && (
             <button onClick={onClose} style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}>
               <span className="material-symbols-outlined">close</span>
             </button>
@@ -173,7 +176,8 @@ const CATEGORY_COVER = {
 }
 
 function EditorialCover({ article, variant = 'card', hovered = false }) {
-  const img = editorialImage(article.img)
+  const [imageFailed, setImageFailed] = useState(false)
+  const img = imageFailed ? null : editorialImage(article.img)
   const meta = CATEGORY_COVER[article.category] || CATEGORY_COVER[article.tag] || { bg: '#FAF7F2', accent: '#1A3A6B', label: 'RETBAA' }
   const isFeatured = variant === 'featured'
 
@@ -189,6 +193,7 @@ function EditorialCover({ article, variant = 'card', hovered = false }) {
             transform: hovered ? 'scale(1.04)' : 'scale(1)',
             position: 'absolute', inset: 0,
           }}
+          onError={() => setImageFailed(true)}
         />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(26,58,107,0.18) 0%, transparent 65%)' }} />
       </>
