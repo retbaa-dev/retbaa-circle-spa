@@ -141,7 +141,7 @@ const FALLBACK_ARTICLES = [
 ]
 
 
-const FILTERS = ['Tout', 'Vision', 'Signal Marché', 'Veille Marché', 'Afrique', 'Marché Luxe', 'Stratégie', 'Géopolitique', 'Tech & IA', 'Distribution']
+const FILTERS = ['Tout', 'Marché', 'Maisons', 'Afrique & GCC', 'Stratégie', 'Tech & Tendances']
 
 
 const normalizeInsightCategory = (value) => {
@@ -160,6 +160,28 @@ const normalizeInsightCategory = (value) => {
   if (lower.includes('vision')) return 'Vision'
 
   return raw
+}
+
+const insightFamily = (article) => {
+  const haystack = [article.category, article.tag, article.title, article.summary].filter(Boolean).join(' ').toLowerCase()
+
+  if (/(maison|hermès|hermes|lvmh|kering|richemont|bulgari|burberry|saint laurent|lacroix|maxhosa|kenneth|magugu|adama|osei-duro|mode africaine|histoire)/i.test(haystack)) return 'Maisons'
+  if (/(afrique|africain|gcc|riyad|riyadh|dubai|dubaï|saudi|abidjan|dakar|tourisme|hôtellerie|hotellerie)/i.test(haystack)) return 'Afrique & GCC'
+  if (/(stratég|strateg|distribution|retail|cultural luxury|retbaa insights|go|b2b|funnel|vision)/i.test(haystack)) return 'Stratégie'
+  if (/(tech|ia|ai|phygital|gen z|tendance|consommateur)/i.test(haystack)) return 'Tech & Tendances'
+  if (/(marché|market|signal|veille|résultat|resultat|financier|m&a|luxe|croissance|ebitda)/i.test(haystack)) return 'Marché'
+
+  return 'Marché'
+}
+
+const matchesSearch = (article, query) => {
+  const q = query.trim().toLowerCase()
+  if (!q) return true
+  return [article.title, article.subtitle, article.summary, article.tag, article.category, article.author]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+    .includes(q)
 }
 
 
@@ -491,7 +513,7 @@ export default function InsightsPage() {
   const [selectedArticle, setSelectedArticle] = useState(null)
   const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
-  const [availableFilters, setAvailableFilters] = useState(FILTERS)
+  const [searchQuery, setSearchQuery] = useState('')
 
   // Charger les articles depuis Supabase via supabase-js (clé depuis env vars)
   useEffect(() => {
@@ -530,13 +552,6 @@ export default function InsightsPage() {
             }))
             setArticles(mapped)
 
-            // Filtres dynamiques depuis les catégories réelles
-            const uniqueCategories = new Set(['Tout'])
-            mapped.forEach(a => { if (a.category && a.category !== 'Article') uniqueCategories.add(a.category) })
-            const mergedFilters = ['Tout']
-            FILTERS.slice(1).forEach(f => { if (uniqueCategories.has(f)) mergedFilters.push(f) })
-            uniqueCategories.forEach(cat => { if (!mergedFilters.includes(cat)) mergedFilters.push(cat) })
-            setAvailableFilters(mergedFilters.length > 1 ? mergedFilters : FILTERS)
             setLoading(false)
           } else {
             // Retry une fois si vide (cold start Supabase)
@@ -545,7 +560,6 @@ export default function InsightsPage() {
               retryTimer = setTimeout(loadArticles, 2000)
             } else {
               setArticles(FALLBACK_ARTICLES)
-              setAvailableFilters(FILTERS)
               setLoading(false)
             }
           }
@@ -553,7 +567,6 @@ export default function InsightsPage() {
       } catch {
         if (mounted) {
           setArticles(FALLBACK_ARTICLES)
-          setAvailableFilters(FILTERS)
           setLoading(false)
         }
       }
@@ -565,9 +578,10 @@ export default function InsightsPage() {
       if (retryTimer) clearTimeout(retryTimer)
     }
   }, [])
-  const filteredArticles = activeFilter === 'Tout'
-    ? articles
-    : articles.filter(a => (a.category || 'Article') === activeFilter)
+  const filteredArticles = articles.filter(article => {
+    const familyMatch = activeFilter === 'Tout' || insightFamily(article) === activeFilter
+    return familyMatch && matchesSearch(article, searchQuery)
+  })
 
   const featuredArticle = filteredArticles.find(a => a.featured) || filteredArticles[0]
   const gridArticles = filteredArticles.filter(a => a.id !== featuredArticle?.id)
@@ -635,7 +649,7 @@ export default function InsightsPage() {
         </div>
       </section>
 
-      {/* ─── BARRE DE FILTRES ──────────────────────────────── */}
+      {/* ─── BARRE DE FILTRES + RECHERCHE ─────────────────── */}
       <section style={{
         background: '#ffffff',
         boxShadow: '0px 4px 20px rgba(0,27,63,0.04)',
@@ -647,7 +661,7 @@ export default function InsightsPage() {
           display: 'flex', gap: '8px', alignItems: 'center',
           overflowX: 'auto',
         }} className="no-scrollbar insights-filters">
-          {availableFilters.map(filter => (
+          {FILTERS.map(filter => (
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
@@ -675,6 +689,23 @@ export default function InsightsPage() {
               {filter}
             </button>
           ))}
+        </div>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 48px 18px' }}>
+          <div style={{ position: 'relative', maxWidth: '520px' }}>
+            <span className="material-symbols-outlined" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: '#9CA3AF' }}>search</span>
+            <input
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Rechercher une analyse, une maison, un marché…"
+              style={{
+                width: '100%', boxSizing: 'border-box',
+                padding: '12px 14px 12px 42px',
+                border: '1px solid rgba(26,58,107,0.12)', borderRadius: '4px',
+                fontFamily: 'Manrope, sans-serif', fontSize: '13px',
+                color: '#1A3A6B', outline: 'none', background: '#FAF7F2',
+              }}
+            />
+          </div>
         </div>
       </section>
 
@@ -714,7 +745,7 @@ export default function InsightsPage() {
               letterSpacing: '0.2em', textTransform: 'uppercase',
               color: '#1A3A6B', fontWeight: 700,
             }}>
-              {activeFilter === 'Tout' ? 'Toutes les études' : `Études · ${activeFilter}`}
+              {activeFilter === 'Tout' ? 'Toutes les études' : `Dossier · ${activeFilter}`}
             </span>
           </div>
         )}

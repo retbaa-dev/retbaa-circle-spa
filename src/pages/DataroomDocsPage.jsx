@@ -215,6 +215,49 @@ function CategorySection({ category, docs, isProspect, isApproved, onPreview }) 
   )
 }
 
+
+const DECISION_JOURNEY = [
+  { step: '01', title: 'Comprendre la maison', desc: 'Pitch deck, vision, positionnement et architecture de marque.' },
+  { step: '02', title: 'Lire le marché', desc: 'Études luxe, signaux Afrique/GCC et opportunités sectorielles.' },
+  { step: '03', title: 'Vérifier la traction', desc: 'Bilans, états financiers, performance et cohérence opérationnelle.' },
+  { step: '04', title: 'Choisir le véhicule', desc: 'Holding, SPV Les Adresses ou Manufacture selon horizon et profil.' },
+  { step: '05', title: 'Valider juridiquement', desc: 'Statuts, cap table, closing binder et documents confidentiels.' },
+]
+
+function DecisionJourney() {
+  return (
+    <div style={{
+      background: '#fff', border: '1px solid rgba(26,58,107,0.08)', borderRadius: '10px',
+      padding: '22px 24px', marginBottom: '34px', boxShadow: '0 18px 36px rgba(0,27,63,0.04)',
+    }}>
+      <div style={{
+        fontFamily: 'system-ui', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase',
+        color: '#795465', fontWeight: 800, marginBottom: '16px',
+      }}>
+        Parcours de décision
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
+        {DECISION_JOURNEY.map(item => (
+          <div key={item.step} style={{
+            padding: '14px', borderRadius: '8px', background: '#FAF7F2',
+            border: '1px solid rgba(239,192,212,0.18)', minHeight: '118px',
+          }}>
+            <div style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '22px', color: '#EFC0D4', marginBottom: '8px' }}>
+              {item.step}
+            </div>
+            <div style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '15px', color: '#1A3A6B', marginBottom: '6px', lineHeight: 1.2 }}>
+              {item.title}
+            </div>
+            <div style={{ fontFamily: 'system-ui', fontSize: '11px', color: '#6B7280', lineHeight: 1.45 }}>
+              {item.desc}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // Véhicules d'investissement avec leur sous-titre
 const VEHICLES = {
   'Retbaa Holding':    { subtitle: 'Equity direct · 30 000 € = 1 %',          icon: 'account_balance', color: '#1A3A6B' },
@@ -417,7 +460,8 @@ export default function DataroomDocsPage({ isProspect }) {
             }}>
               Dataroom
             </h1>
-            <p style={{ fontFamily: 'system-ui', fontSize: '14px', color: '#6B7280', margin: 0 }}>
+            <p style={{ fontFamily: 'system-ui', fontSize: '14px', color: '#6B7280', margin: 0, lineHeight: 1.7 }}>
+              Un parcours documentaire pour comprendre Retbaa, évaluer la traction, choisir le bon véhicule et décider avec les pièces clés sous les yeux.<br />
               {totalAccessible} document{totalAccessible > 1 ? 's' : ''} disponible{totalAccessible > 1 ? 's' : ''}
               {totalLocked > 0 && ` · ${totalLocked} en accès restreint`}
             </p>
@@ -453,6 +497,8 @@ export default function DataroomDocsPage({ isProspect }) {
             </div>
           ) : (
             <>
+              <DecisionJourney />
+
               {/* Section Investissement — 3 véhicules en cards */}
               <InvestissementSection
                 docs={docs.filter(d => d.category === 'Investissement')}

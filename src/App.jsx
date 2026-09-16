@@ -369,7 +369,7 @@ function AuthGate() {
           <Route path="/dataroom-docs" element={
             <DataroomDocsPage
               isProspect={isProspect}
-              isApproved={isFullAccess || prospectStatus === 'approved'}
+              isApproved={isFullAccess}
               isAuthenticated={isSignedIn || !!previewUser}
             />
           } />
