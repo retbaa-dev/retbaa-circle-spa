@@ -3,6 +3,24 @@ import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
+
+const isLikelyGeneratedImage = (src) => {
+  if (!src) return false
+  const value = String(src).toLowerCase()
+  return [
+    'genspark.ai',
+    'sspark',
+    'cfimages',
+    'oaidalleapiprodscus',
+    'dall-e',
+    'midjourney',
+    'replicate.delivery',
+    'fal.media',
+  ].some(marker => value.includes(marker))
+}
+
+const editorialImage = (src) => isLikelyGeneratedImage(src) ? null : src
+
 // Rendu markdown simple (gras, italique, titres, listes, images [[IMG:url|caption]])
 function renderMarkdown(text) {
   if (!text) return []
@@ -57,9 +75,9 @@ function ArticleModal({ article, onClose }) {
     <div className="article-modal-wrapper" onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,40,0.7)', zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '40px 16px', overflowY: 'auto' }}>
       <div className="article-modal-inner" onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: '6px', maxWidth: '720px', width: '100%', overflow: 'hidden', boxShadow: '0 40px 80px rgba(0,0,0,0.3)' }}>
         {/* Image header */}
-        {article.img && (
+        {editorialImage(article.img) && (
           <div style={{ position: 'relative', height: '240px', overflow: 'hidden' }}>
-            <img src={article.img} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={editorialImage(article.img)} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(26,58,107,0.85))' }} />
             <button onClick={onClose} style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%', width: '36px', height: '36px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', backdropFilter: 'blur(4px)' }}>
               <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
@@ -72,7 +90,7 @@ function ArticleModal({ article, onClose }) {
         )}
         {/* Contenu */}
         <div style={{ padding: '28px 32px 40px' }}>
-          {!article.img && (
+          {!editorialImage(article.img) && (
             <button onClick={onClose} style={{ float: 'right', background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}>
               <span className="material-symbols-outlined">close</span>
             </button>
@@ -444,7 +462,7 @@ export default function InsightsPage() {
               source: '',
               sourceUrl: a.source_url || null,
               summary: a.content_short || '',
-              img: a.img || null,
+              img: editorialImage(a.img),
               content_md: a.content_long || '',
               category: normalizeInsightCategory((Array.isArray(a.tags) && a.tags[0]) || a.content_type),
               featured: !!a.featured,

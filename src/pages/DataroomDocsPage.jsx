@@ -60,14 +60,27 @@ function PdfViewer({ doc, onClose }) {
         </button>
       </div>
 
-      {/* PDF iframe — sans toolbar pour éviter le téléchargement */}
-      <div style={{ flex: 1, overflow: 'hidden', backgroundColor: '#1A1A2E' }}>
-        <iframe
-          src={`${url}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
-          title={doc.title}
-          style={{ width: '100%', height: '100%', border: 'none' }}
-          sandbox="allow-same-origin allow-scripts"
-        />
+      {/* PDF preview — pas de sandbox : certains navigateurs bloquent le rendu PDF sandboxé */}
+      <div style={{ flex: 1, overflow: 'hidden', backgroundColor: '#F9FAFB' }}>
+        {url ? (
+          <object
+            data={`${url}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
+            type="application/pdf"
+            title={doc.title}
+            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+          >
+            <div style={{ padding: '40px', fontFamily: 'system-ui', color: '#1A3A6B' }}>
+              <p style={{ marginBottom: '16px' }}>La prévisualisation PDF n'a pas pu être chargée dans ce navigateur.</p>
+              <a href={url} target="_blank" rel="noopener noreferrer" style={{ color: '#1A3A6B', fontWeight: 700 }}>
+                Ouvrir le document dans un nouvel onglet
+              </a>
+            </div>
+          </object>
+        ) : (
+          <div style={{ padding: '40px', fontFamily: 'system-ui', color: '#1A3A6B' }}>
+            Document en préparation — aucun fichier PDF n'est encore associé.
+          </div>
+        )}
       </div>
     </div>
   )
